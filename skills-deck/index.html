@@ -1,0 +1,2385 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>스킬 카드 덱 — Matt Pocock · Superpowers</title>
+<style>
+  :root {
+    --bg-deep:   #0b0f1c;
+    --bg-mid:    #131a2c;
+    --bg-soft:   #1c2440;
+    --line:      #2a3556;
+    --text:      #eef1fa;
+    --text-dim:  #a3acc6;
+    --text-mute: #6e7796;
+
+    --eng:       #5cd0ff;
+    --eng-deep:  #15436b;
+    --eng-glow:  rgba(92, 208, 255, 0.35);
+
+    --prod:      #ff8fd4;
+    --prod-deep: #5b1f4a;
+    --prod-glow: rgba(255, 143, 212, 0.4);
+
+    --gold:      #ffd96b;
+    --gold-deep: #6b4f10;
+    --gold-glow: rgba(255, 217, 107, 0.4);
+
+    --radius-card: 22px;
+    --radius-block: 12px;
+
+    --ease-pop:  cubic-bezier(0.22, 0.9, 0.3, 1.06);
+    --ease-out:  cubic-bezier(0.4, 0, 0.6, 1);
+  }
+
+  * { box-sizing: border-box; }
+
+  /* 모든 스크롤바 숨김 — 스크롤은 그대로 작동 */
+  * {
+    scrollbar-width: none;        /* Firefox */
+    -ms-overflow-style: none;     /* IE / Edge legacy */
+  }
+  *::-webkit-scrollbar { display: none; }   /* WebKit (Chrome / Safari) */
+
+  html, body { margin: 0; padding: 0; }
+  body {
+    background:
+      radial-gradient(1200px 800px at 10% -10%, #1c2756 0%, transparent 60%),
+      radial-gradient(1000px 700px at 90% 10%, #3a1d4a 0%, transparent 60%),
+      radial-gradient(900px 600px at 50% 110%, #143049 0%, transparent 65%),
+      var(--bg-deep);
+    color: var(--text);
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+                 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    min-height: 100vh;
+  }
+  body.modal-open { overflow: hidden; }
+  ::selection { background: var(--gold); color: #1a1300; }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+
+  /* ───── Tab Bar ───── */
+  .tab-bar {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 28px 16px 0;
+    flex-wrap: wrap;
+  }
+  .tab {
+    padding: 10px 26px;
+    border-radius: 999px;
+    border: 1.5px solid var(--line);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-mute);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    transition: all 0.2s var(--ease-pop);
+    white-space: nowrap;
+  }
+  .tab:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--text);
+    border-color: var(--text-mute);
+    transform: translateY(-1px);
+  }
+  .tab.active {
+    background: linear-gradient(90deg, #ffe9a8 0%, #ffd96b 50%, #ff8fd4 100%);
+    color: #1a1300;
+    border-color: var(--gold);
+    box-shadow: 0 0 30px -8px var(--gold-glow);
+  }
+
+  /* ───── Top Header (사이트 타이틀, 항상 보임) ───── */
+  .top-header {
+    text-align: center;
+    padding: 56px 24px 8px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .top-header h1 {
+    font-size: clamp(34px, 5vw, 56px);
+    margin: 0 0 18px;
+    background: linear-gradient(90deg, #ffe9a8 0%, #ffd96b 50%, #ff8fd4 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: -0.02em;
+    font-weight: 800;
+  }
+  .top-header .top-intro {
+    color: var(--text-dim);
+    margin: 0 auto;
+    max-width: 700px;
+    font-size: 15px;
+    line-height: 1.65;
+  }
+  .top-header .top-intro strong { color: var(--text); }
+  .top-header .top-intro em { color: var(--gold); font-style: normal; }
+
+  /* ───── Dataset Hero (탭별로 바뀜) ───── */
+  .hero {
+    text-align: center;
+    padding: 28px 24px 16px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .hero p.lead {
+    color: var(--text-dim);
+    margin: 8px auto 18px;
+    max-width: 660px;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .hero p.lead strong { color: var(--text); }
+  .hero p.lead em { color: var(--gold); font-style: normal; }
+  .hero p.lead code {
+    background: rgba(0,0,0,.3); padding: 2px 6px; border-radius: 4px;
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    color: var(--gold); font-size: 14px;
+  }
+  /* ───── Section heading ───── */
+  .section-h {
+    font-size: 14px;
+    letter-spacing: 0.3em;
+    color: var(--text-mute);
+    text-transform: uppercase;
+    margin: 56px 0 16px;
+    padding: 0 clamp(20px, 6vw, 60px);
+    display: flex; align-items: center; gap: 14px;
+    font-weight: 700;
+    max-width: 1280px;
+    margin-left: auto; margin-right: auto;
+  }
+  .section-h::before {
+    content: '';
+    display: inline-block;
+    width: 28px; height: 2px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+  }
+  .section-h small {
+    margin-left: auto;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--text-mute);
+    font-weight: 500;
+  }
+
+  /* ───── Tile grid ───── */
+  .skill-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+    padding: 24px clamp(20px, 6vw, 60px) 56px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  .skill-tile {
+    background: linear-gradient(160deg, #1d2541 0%, #141a30 100%);
+    border: 1.5px solid var(--line);
+    border-radius: 16px;
+    padding: 18px 14px 16px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.18s var(--ease-pop), border-color 0.18s, box-shadow 0.18s;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    width: 100%;
+    color: inherit;
+    will-change: transform;
+  }
+  .skill-tile { border-color: rgba(92, 208, 255, 0.3); }
+  .skill-tile::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--eng), transparent);
+    opacity: 0.5;
+  }
+  .skill-tile:hover { transform: translateY(-4px) rotate(-0.4deg); border-color: var(--eng); box-shadow: 0 12px 30px -6px var(--eng-glow); }
+  .skill-tile:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+
+  .tile-emoji {
+    font-size: 40px;
+    line-height: 1;
+    margin: 6px 0 2px;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+  }
+  .tile-cmd {
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 13px;
+    font-weight: 700;
+    word-break: break-all;
+    line-height: 1.2;
+  }
+  .skill-tile .tile-cmd { color: var(--eng); }
+  .tile-role {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--text-mute);
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .tile-summary {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.45;
+    border-top: 1px solid var(--line);
+    padding-top: 10px;
+    margin-top: 6px;
+    width: 100%;
+  }
+
+  /* ───── Detail card ───── */
+  .card {
+    background: linear-gradient(160deg, #1d2541 0%, #141a30 100%);
+    border-radius: var(--radius-card);
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+    border: 2px solid var(--line);
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04) inset;
+    isolation: isolate;
+    width: 100%;
+  }
+  .card { border-color: rgba(92, 208, 255, 0.4); box-shadow: 0 30px 60px -20px rgba(0,0,0,0.7), 0 0 50px -8px var(--eng-glow); }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 60px 18px 22px;  /* 우측 60px: X 버튼(34px) + 마진 확보 */
+    border-bottom: 1px solid var(--line);
+    background: rgba(0, 0, 0, 0.2);
+  }
+  .card-head .cmd {
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 18px; font-weight: 700; letter-spacing: -0.01em;
+  }
+  .card .card-head .cmd { color: var(--eng); }
+
+  .card-hero {
+    text-align: center;
+    padding: 28px 24px 22px;
+    position: relative;
+  }
+  .card .card-hero { background: radial-gradient(closest-side at 50% 0%, rgba(92,208,255,0.10), transparent 75%); }
+  .card-hero .emoji {
+    font-size: 64px; line-height: 1;
+    filter: drop-shadow(0 8px 20px rgba(0,0,0,0.5));
+    margin-bottom: 8px;
+  }
+  .card-hero .role {
+    font-size: 14px; letter-spacing: 0.3em;
+    color: var(--text-mute); text-transform: uppercase;
+    font-weight: 700; margin-bottom: 12px;
+  }
+  .card-hero .summary {
+    font-size: 15px; color: var(--text-dim);
+    max-width: 480px; margin: 0 auto;
+    line-height: 1.5;
+  }
+
+  .stats {
+    padding: 14px 18px 18px;
+    display: flex; flex-direction: column;
+    gap: 12px;
+  }
+  .stat-block {
+    background: rgba(8, 12, 24, 0.55);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-block);
+    padding: 14px 16px;
+  }
+  .stat-block h4 {
+    font-size: 12px; letter-spacing: 0.18em;
+    text-transform: uppercase; margin: 0 0 8px;
+    color: var(--text-dim);
+    display: flex; align-items: center; gap: 6px;
+    font-weight: 700;
+  }
+  .stat-block ul, .stat-block ol {
+    margin: 0; padding-left: 20px;
+    color: var(--text-dim); font-size: 14px;
+  }
+  .stat-block li { margin-bottom: 3px; }
+  .stat-block p { margin: 0 0 6px; color: var(--text-dim); font-size: 14px; }
+  .stat-block p:last-child { margin-bottom: 0; }
+  .stat-block code:not(.inline) {
+    display: block;
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+    background: rgba(0,0,0,0.45);
+    padding: 8px 10px; border-radius: 6px;
+    font-size: 12.5px; color: var(--text);
+    border: 1px solid var(--line);
+    margin-bottom: 8px;
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .stat-block code.inline {
+    background: rgba(0,0,0,.3); padding: 1px 6px; border-radius: 3px;
+    font-family: ui-monospace, monospace; font-size: 0.9em;
+  }
+  .stat-block em { color: var(--text); font-style: normal; font-weight: 600; }
+  .stat-block .pop { color: var(--gold); font-weight: 600; }
+  .stat-block blockquote {
+    margin: 6px 0;
+    padding: 6px 0 6px 12px;
+    border-left: 2px solid var(--gold);
+    color: var(--text);
+    font-size: 13.5px;
+  }
+
+  .card-foot {
+    padding: 14px 18px 18px;
+    border-top: 1px solid var(--line);
+    background: rgba(0,0,0,0.25);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .combo {
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 13px;
+  }
+  .combo-label {
+    font-size: 11px; letter-spacing: 0.18em; color: var(--text-mute);
+    margin-right: 4px; text-transform: uppercase; font-weight: 700;
+  }
+  .combo .chip {
+    font-family: ui-monospace, monospace; font-size: 12px;
+    padding: 3px 8px; border-radius: 4px;
+    border: 1px solid var(--line); background: rgba(0,0,0,0.3);
+  }
+  .card .combo .chip { color: var(--eng); border-color: var(--eng-deep); }
+  .meta {
+    font-size: 11px; letter-spacing: 0.05em;
+    color: var(--text-mute);
+    font-family: ui-monospace, monospace;
+  }
+
+  /* ───── Modal ───── */
+  .modal {
+    position: fixed; inset: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+    padding: clamp(16px, 4vh, 40px);
+    background: rgba(5, 8, 18, 0);
+    backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px);
+    opacity: 0; visibility: hidden;
+    transition: background 0.3s ease, backdrop-filter 0.3s ease,
+                opacity 0.3s ease, visibility 0s linear 0.3s;
+  }
+  .modal.open {
+    background: rgba(5, 8, 18, 0.72);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    opacity: 1; visibility: visible;
+    transition: background 0.3s ease, backdrop-filter 0.3s ease, opacity 0.3s ease;
+  }
+  .modal-stage {
+    position: relative;
+    width: min(620px, 100%);
+    max-height: 92vh;
+    overflow-y: auto; overflow-x: hidden;
+    border-radius: var(--radius-card);
+    will-change: transform, opacity;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+  }
+  .modal-stage::-webkit-scrollbar { width: 6px; }
+  .modal-stage::-webkit-scrollbar-track { background: transparent; }
+  .modal-stage::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+  .modal-close {
+    position: absolute;
+    top: 19px;
+    right: 16px;
+    z-index: 5;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-mute);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+    padding: 0;
+  }
+  .modal-close svg { width: 12px; height: 12px; }
+  .modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--gold);
+    color: var(--gold);
+    transform: scale(1.08);
+  }
+
+  /* ───── Combos ───── */
+  .combos {
+    padding: 0 clamp(20px, 6vw, 60px) 80px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  .combo-card {
+    background: linear-gradient(180deg, #1a2138 0%, #131a2c 100%);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 24px 22px;
+    margin: 0 0 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .combo-card::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+  }
+  .combo-card header {
+    display: flex; align-items: baseline;
+    gap: 14px; flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .combo-num { font-size: 24px; color: var(--gold); font-weight: 700; }
+  .combo-card h3 { margin: 0; font-size: 20px; letter-spacing: -0.01em; }
+  .combo-card .scenario {
+    color: var(--text-dim); font-size: 14px;
+    width: 100%; margin-top: 6px; font-style: italic;
+  }
+  .combo-flow { display: flex; flex-wrap: wrap; align-items: stretch; gap: 10px; }
+  .combo-flow .arrow {
+    color: var(--gold); font-size: 22px;
+    align-self: center; padding: 0 4px;
+    text-shadow: 0 0 8px var(--gold-glow);
+    flex-shrink: 0;
+  }
+
+  .mini {
+    flex: 0 0 180px; width: 180px;
+    background: linear-gradient(160deg, #1f2740 0%, #161c30 100%);
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 12px;
+    display: flex; flex-direction: column; gap: 6px;
+    position: relative;
+    transition: transform 0.15s var(--ease-pop), border-color 0.15s, box-shadow 0.15s;
+    cursor: pointer;
+    text-align: left;
+    color: inherit; font: inherit;
+  }
+  .mini { border-color: rgba(92,208,255,0.3); }
+  .mini.cli  { border-color: rgba(255,217,107,0.3); cursor: default; }
+  .mini:hover { transform: translateY(-3px); box-shadow: 0 8px 24px -4px var(--eng-glow); border-color: var(--eng); }
+  .mini.cli:hover  { transform: none; box-shadow: none; border-color: rgba(255,217,107,0.3); }
+  .mini-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+  .mini .mini-emoji { font-size: 24px; line-height: 1; }
+  .mini .mini-cmd {
+    font-family: ui-monospace, monospace;
+    font-size: 12px; font-weight: 600;
+    word-break: break-all;
+  }
+  .mini .mini-cmd { color: var(--eng); }
+  .mini.cli .mini-cmd { color: var(--gold); }
+  .mini-role {
+    font-size: 10px; letter-spacing: 0.18em;
+    color: var(--text-mute); text-transform: uppercase; font-weight: 700;
+  }
+  .mini-why {
+    font-size: 12px; line-height: 1.45; color: var(--text-dim);
+    border-top: 1px solid var(--line);
+    padding-top: 6px; margin-top: 2px;
+  }
+  .mini-why strong { color: var(--gold); font-weight: 600; }
+
+  /* ───── Footer ───── */
+  .footer-note {
+    max-width: 720px; margin: 24px auto 60px;
+    padding: 0 24px;
+    color: var(--text-mute);
+    font-size: 13px;
+    text-align: center;
+  }
+  .footer-note a { color: var(--gold); border-bottom: 1px dotted var(--gold-deep); }
+  .footer-note code {
+    font-family: ui-monospace, monospace;
+    background: rgba(0,0,0,.3);
+    padding: 2px 8px; border-radius: 4px;
+    color: var(--gold);
+  }
+
+  /* ───── MD Export 아이콘 버튼 + 모달 ───── */
+  .md-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.03);
+    color: var(--text-mute);
+    cursor: pointer;
+    transition: all 0.18s var(--ease-pop);
+    flex-shrink: 0;
+    padding: 0;
+  }
+  .md-button svg { width: 16px; height: 16px; }
+  .md-button:hover {
+    background: rgba(255,217,107,0.1);
+    border-color: var(--gold);
+    color: var(--gold);
+    transform: translateY(-1px);
+  }
+  .md-modal {
+    position: fixed; inset: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    padding: clamp(16px, 4vh, 40px);
+    background: rgba(5, 8, 18, 0);
+    backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px);
+    opacity: 0; visibility: hidden;
+    transition: background 0.25s ease, backdrop-filter 0.25s ease,
+                opacity 0.25s ease, visibility 0s linear 0.25s;
+  }
+  .md-modal.open {
+    background: rgba(5, 8, 18, 0.82);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    opacity: 1; visibility: visible;
+    transition: background 0.25s ease, backdrop-filter 0.25s ease, opacity 0.25s ease;
+  }
+  .md-modal-stage {
+    width: min(960px, 100%);
+    max-height: 92vh;
+    background: var(--bg-mid);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 30px 80px -20px rgba(0,0,0,0.7);
+  }
+  .md-modal-head {
+    padding: 12px 14px;
+    display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--line);
+    background: rgba(0,0,0,0.3);
+  }
+  .md-modal-head h3 {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+  .md-modal-head .spacer { flex: 1; }
+  .md-modal-head button {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.05);
+    color: var(--text);
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .md-modal-head button:hover {
+    background: rgba(255,217,107,0.15);
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+  .md-modal-head button.copied {
+    background: rgba(92,208,255,0.15);
+    border-color: var(--eng);
+    color: var(--eng);
+  }
+  .md-modal-body {
+    flex: 1;
+    overflow: auto;
+    padding: 16px 18px;
+    background: rgba(0,0,0,0.45);
+  }
+  .md-modal-body pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--text-dim);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+  @media (max-width: 540px) {
+    .mini { flex-basis: 150px; width: 150px; }
+    .skill-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─────── Top Header (정적) ─────── -->
+<header class="top-header">
+  <h1>스킬 카드 덱</h1>
+  <p class="top-intro">
+    코딩 에이전트의 <strong>스킬 시스템 세 가지</strong>(Matt Pocock · Superpowers · GStack)를 한국어 카드 덱으로 비교 — 각자의 철학·핵심 스킬·콤보 시나리오까지.
+    아래 탭에서 시스템을 고르고, 카드를 <em>클릭</em>하면 상세가 펼쳐집니다.
+  </p>
+</header>
+
+<!-- ─────── Tab Bar ─────── -->
+<div class="tab-bar" id="tab-bar">
+  <button class="tab active" data-dataset="matt" type="button">Matt Pocock</button>
+  <button class="tab" data-dataset="superpowers" type="button">Superpowers</button>
+  <button class="tab" data-dataset="gstack" type="button">GStack</button>
+</div>
+
+<!-- ─────── Dataset Hero (탭별로 바뀜) ─────── -->
+<section class="hero">
+  <p class="lead" id="lead"></p>
+</section>
+
+<h2 class="section-h">▸ 덱 둘러보기 <small>카드 클릭 → 펼쳐보기</small><button class="md-button" id="md-button" type="button" aria-label="현재 덱을 Markdown으로 다운로드" title="현재 덱을 Markdown으로 보기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></h2>
+<section class="skill-grid" id="skill-grid"></section>
+
+<h2 class="section-h">▸ 콤보 시나리오</h2>
+<section class="combos" id="combos"></section>
+
+<p class="footer-note" id="footer-note"></p>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal-stage" id="modal-stage">
+    <button class="modal-close" id="modal-close" type="button" aria-label="닫기 (Esc)"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3.5" y1="3.5" x2="10.5" y2="10.5"/><line x1="10.5" y1="3.5" x2="3.5" y2="10.5"/></svg></button>
+  </div>
+</div>
+
+<!-- ─────── MD Export Modal ─────── -->
+<div class="md-modal" id="md-modal" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="md-modal-stage">
+    <div class="md-modal-head">
+      <h3 id="md-modal-title">Markdown</h3>
+      <span class="spacer"></span>
+      <button id="md-copy" type="button">복사</button>
+      <button id="md-close" type="button">닫기 (Esc)</button>
+    </div>
+    <div class="md-modal-body">
+      <pre id="md-content"></pre>
+    </div>
+  </div>
+</div>
+
+
+<script>
+//
+// ════════════════════════════════════════════════════════════════
+//   DATA — 두 데이터셋 (Matt Pocock / Superpowers)
+//   여기만 수정하면 모든 뷰가 자동 갱신됩니다.
+// ════════════════════════════════════════════════════════════════
+//
+
+const DATASETS = {
+
+// ────────────────────────────────────────────────────────────────
+// ❶ Matt Pocock
+// ────────────────────────────────────────────────────────────────
+matt: {
+  preTitle: "MATT POCOCK · AI SKILLS",
+  lead: "Matt Pocock(Total TypeScript 창립자)이 매일 쓰는 <strong>13개 스킬</strong>. AI 코딩의 4가지 실패 모드 — <em>의도 어긋남 · 장황함 · 깨진 코드 · 아키텍처 부패</em> — 에 각각 대응하는 작고 조합 가능한 도구들.",
+  footer: '원문 저장소: <a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener">github.com/mattpocock/skills</a><br>설치: <code>npx skills@latest add mattpocock/skills</code>',
+
+  skills: {
+
+    "setup": {
+      cmd: "/setup-matt-pocock-skills",
+      emoji: "🧩", role: "기반 설정사", roleEn: "FOUNDATION",
+      tileSummary: "스킬마다 트래커·라벨이 흩어질 때, 위치를 한 번에 정리해 모두가 같은 곳을 일관되게 읽도록 맞춰 줍니다",
+      heroSummary: "스킬마다 이슈 트래커와 라벨, 문서 위치를 따로 알아서 결과가 어긋날 때, 이 세 가지를 한 번에 정리해 다른 모든 스킬이 같은 곳을 일관되게 읽도록 맞춰 줍니다",
+      when: [
+        "패키지 설치 직후, <span class='pop'>저장소당 단 1회</span>",
+        "팀 컨벤션이 바뀌었을 때",
+        "다른 스킬들이 \"라벨이 뭔지 모르겠다\"고 할 때"
+      ],
+      howCode: ["/setup-matt-pocock-skills"],
+      howNote: "세 가지 결정을 차례로 안내합니다. 답을 몰라도 추천값으로 진행 가능.",
+      what: [
+        { type: "p", html: "다른 스킬들(<code class='inline'>/triage</code>, <code class='inline'>/to-issues</code>, …)은 다음 세 질문에 답이 있어야 합니다:" },
+        { type: "ol", items: [
+          "이슈를 어디에 적나? (GitHub / GitLab / 로컬 마크다운 / 기타: Jira·Linear 등)",
+          "라벨 이름이 뭔가? (표준 5개 / 커스텀 매핑)",
+          "도메인 문서가 어디 있나? (단일 / 멀티 컨텍스트)"
+        ]},
+        { type: "p", html: "탐색 → 결정 3개 → 확인 → <code class='inline'>CLAUDE.md</code> 또는 <code class='inline'>AGENTS.md</code>에 기록. <span class='pop'>자동 트리거 안 됨</span>, 명시적으로 호출해야 동작합니다." }
+      ],
+      output: ["한 번 정리되면 다른 스킬이 그대로 읽는 설정", "<code class='inline'>## Agent skills</code> 블록 + <code class='inline'>docs/agents/</code> 3개 파일"],
+      combos: ["triage", "to-issues", "write-a-skill"],
+      meta: "📜 SKILL.md 121줄 · 트래커별 시드 템플릿 5개 동봉"
+    },
+
+    "grill-me": {
+      cmd: "/grill-me",
+      emoji: "❓", role: "질문자", roleEn: "INQUIRER",
+      tileSummary: "계획 어디가 빈틈인지 모르겠어 막막할 때, 한 질문씩 인터뷰하며 결정 트리의 빈 가지를 함께 채워 갑니다",
+      heroSummary: "내 계획 어디가 빈틈인지 모르겠어 막막할 때, 한 질문씩 추천 답과 함께 던지며 결정 트리의 모든 가지를 함께 채워 갑니다 (본문이 단 3줄인 미니멀 코어)",
+      when: ["\"내 계획을 깨봐 줘\" 라고 말하고 싶을 때", "디자인/전략에 비판적 피드백 필요", "코드는 안 짜는 결정 (가격/메시지 톤 등)"],
+      howCode: ["/grill-me 신규 회원에게 첫 결제 50% 할인"],
+      howNote: "한 번에 하나씩 질문이 옵니다. 추천 답이 같이 와서 막히지 않음.",
+      what: [
+        { type: "p", html: "<em>SKILL.md 단 10줄</em>, 본문 사실상 3문장:" },
+        { type: "blockquote", html: "\"이 계획을 가차 없이 인터뷰하라. 결정 트리의 각 가지를 따라가며 의존성을 하나씩 해소하라. 모든 질문마다 추천 답을 함께. 한 번에 하나씩. 코드로 답할 수 있으면 코드를 본다.\"" },
+        { type: "p", html: "<code class='inline'>/grill-with-docs</code>는 정확히 이 코어에 <em>CONTEXT.md / ADR 갱신 디시플린</em>을 얹은 확장판." }
+      ],
+      output: ["검증된 계획 / 해소된 결정 가지", "사용자-에이전트 간 공유 이해"],
+      combos: ["prototype", "grill-with-docs", "to-prd"],
+      meta: "📜 SKILL.md 단 10줄 · 13개 중 두 번째로 짧음"
+    },
+
+    "grill-with-docs": {
+      cmd: "/grill-with-docs",
+      emoji: "🎙️", role: "심문관", roleEn: "INQUISITOR",
+      tileSummary: "팀마다 용어가 다르고 결정 이유가 금방 잊힐 때, 인터뷰와 동시에 CONTEXT.md와 ADR에 합의를 기록해 둡니다",
+      heroSummary: "팀마다 용어가 다르고 결정 이유는 회의가 끝나면 곧 사라질 때, 한 질문씩 인터뷰하며 그 자리에서 <code class='inline'>CONTEXT.md</code>와 ADR에 합의를 기록해 도메인 모델을 함께 맞춰 갑니다",
+      when: ["새 기능을 짜기 전, 요구사항이 모호할 때", "같은 단어가 사람마다 다른 뜻으로 쓰일 때", "나중에 잊을까 봐 걱정되는 트레이드오프"],
+      howCode: ["/grill-with-docs 쿠폰 시스템을 결제에 추가…"],
+      howNote: "한 번에 <em>하나의 질문</em>만 옵니다. 그 페이스 따라가기.",
+      what: [
+        { type: "p", html: "두 가지 핵심 도구를 다룹니다:" },
+        { type: "ul", items: ["<em>CONTEXT.md</em>: 팀의 도메인 용어집", "<em>ADR</em>: \"왜 이렇게 결정했나\"를 남겨 두는 기록"] },
+        { type: "p", html: "한 질문씩 추천 답과 함께 → 용어 충돌 즉시 짚기 → 모호함 정밀화 → 엣지 케이스를 구체 시나리오로. 결정 시 즉시 갱신. ADR은 <span class='pop'>3조건 모두 만족</span>(되돌리기 어려움 + 비자명 + 진짜 트레이드오프)할 때만." }
+      ],
+      output: ["업데이트된 <code class='inline'>CONTEXT.md</code>", "필요시 새 ADR 1~2개", "합의 끝난 계획 (다음 <code class='inline'>/to-prd</code> 입력)"],
+      combos: ["to-prd", "tdd", "improve"],
+      meta: "📜 SKILL.md 88줄 · CONTEXT-FORMAT.md, ADR-FORMAT.md 동봉"
+    },
+
+    "to-prd": {
+      cmd: "/to-prd",
+      emoji: "📜", role: "기록자", roleEn: "SCRIBE",
+      tileSummary: "회의는 끝났는데 PRD로 옮겨 적기 귀찮을 때, 대화 내용을 그대로 7섹션 PRD로 정리해 트래커에 곧장 올려 줍니다",
+      heroSummary: "회의는 끝났는데 PRD로 옮겨 적기 귀찮을 때, 대화 컨텍스트를 그대로 7섹션 PRD로 합성해 <code class='inline'>ready-for-agent</code> 라벨과 함께 트래커에 즉시 올려 줍니다 (<em>인터뷰는 따로 하지 않습니다</em>)",
+      when: ["<code class='inline'>/grill-me</code> / <code class='inline'>/grill-with-docs</code>로 합의가 끝났을 때", "회의 결과를 트래커에 정리해 옮기기 귀찮을 때"],
+      howCode: ["/to-prd"],
+      howNote: "대화에 충분한 정보가 쌓여 있을 때만. 정보 부족이면 먼저 <code class='inline'>/grill-with-docs</code>로.",
+      what: [
+        { type: "p", html: "<em>PRD</em>(Product Requirements Document) = 만들 기능을 정의하는 한 장의 문서. 미래 구현자(사람/에이전트)에게 넘기는 패스." },
+        { type: "p", html: "가장 중요한 약속: <span class='pop'>사용자에게 질문하지 않는다</span>. 인터뷰는 앞 단계에서 끝났다고 가정, 여기선 *기록자* 역할만." },
+        { type: "p", html: "7개 섹션: Problem / Solution / <em>User Stories</em> (엄청 길게) / Implementation / Testing / Out of Scope / Notes. <code class='inline'>ready-for-agent</code> 라벨 자동 부착." }
+      ],
+      output: ["<code class='inline'>ready-for-agent</code> 라벨이 붙은 PRD 이슈", "<code class='inline'>/to-issues</code>의 입력으로 그대로 사용 가능"],
+      combos: ["grill-with-docs", "to-issues", "prototype"],
+      meta: "📜 SKILL.md 76줄 · 보조 파일 없음"
+    },
+
+    "to-issues": {
+      cmd: "/to-issues",
+      emoji: "✂️", role: "분할자", roleEn: "CLEAVER",
+      tileSummary: "큰 계획에서 작업 단위가 안 잡혀 누가 뭘 할지 막막할 때, vertical slice로 잘게 쪼개 의존성 순으로 이슈를 만들어 줍니다",
+      heroSummary: "큰 계획에서 작업 단위가 잡히지 않아 누가 뭘 먼저 할지 막막할 때, PRD를 얇은 vertical slice로 잘게 쪼개 의존성 순서대로 머지 가능한 이슈로 만들어 줍니다",
+      when: ["<code class='inline'>/to-prd</code> 직후", "큰 계획을 작업 단위로 깰 때", "\"누가 뭘 먼저 할지\" 안 보일 때"],
+      howCode: ["/to-issues #142 PRD를 작업 단위로"],
+      howNote: "대화에 PRD 컨텍스트가 있으면 그대로, 없으면 이슈 번호/링크 함께.",
+      what: [
+        { type: "p", html: "핵심 개념은 <em>vertical slice</em>입니다. 가로(스키마/API/UI)로 자르면 셋 다 끝나야 데모가 가능해서, 중간에 멈추면 보여 줄 게 없습니다. 반면 세로로 자르면 한 슬라이스가 *끝에서 끝까지* 닿아, 좁지만 *완결된* 단위가 됩니다." },
+        { type: "p", html: "각 슬라이스에 타입:" },
+        { type: "ul", items: ["<span class='pop'>HITL</span>: 사람 결정 필요", "<span class='pop'>AFK</span>: 에이전트가 끝까지 머지 가능. 가급적 이쪽을 <em>선호</em>"] },
+        { type: "p", html: "의존성 순서로 발행. <em>부모 이슈는 안 건드림</em>." }
+      ],
+      output: ["의존성 순서로 발행된 이슈들", "표준 템플릿 (What to build / Acceptance criteria / Blocked by)"],
+      combos: ["to-prd", "tdd", "triage"],
+      meta: "📜 SKILL.md 83줄 · 보조 파일 없음"
+    },
+
+    "tdd": {
+      cmd: "/tdd",
+      emoji: "🎯", role: "트레이서 사수", roleEn: "TRACER",
+      tileSummary: "리팩터마다 테스트는 깨지는데 버그는 새는 모순이 반복될 때, 한 행동씩 RED→GREEN으로 짜며 행동 자체를 검증해 풉니다",
+      heroSummary: "리팩터할 때마다 테스트는 깨지는데 버그는 또 새는 모순이 반복될 때, 한 행동씩 RED→GREEN으로 짜며 <em>행동</em> 자체를 검증해 리팩터에서도 살아남는 안전망을 만듭니다",
+      when: ["새 행동을 코드로 옮길 때", "<code class='inline'>/diagnose</code>의 5단계 회귀 테스트", "리팩터 직후 안전망"],
+      howCode: ["/tdd 쿠폰 적용 함수. 만료 거절, 1회 사용 후 비활성"],
+      howNote: "계획 단계에서 <em>명시적 사용자 승인</em> 없이는 진행하지 않습니다.",
+      what: [
+        { type: "p", html: "<em>트레이서 불릿</em>은 군에서 야간 사격 시 인광 발사체로 *어디로 날아가는지 보이게* 한 한 발. 마찬가지로 한 *얇은* 길이 시스템 끝에서 끝까지 통하는지 한 발 쏴보는 비유." },
+        { type: "p", html: "<span class='pop'>금지: 가로 슬라이싱</span> (테스트 5개 먼저 → 코드 5개) → 상상 속 명세를 박제." },
+        { type: "p", html: "<span class='pop'>권장: 세로 슬라이싱</span> → test1→impl1→test2→impl2…" },
+        { type: "p", html: "GREEN 상태에서만 리팩터 (RED 중에는 어디서 깨졌는지 알 수 없음)." }
+      ],
+      output: ["행동 단위 테스트 (각 테스트가 명세)", "최소 구현", "리팩터 후에도 살아남는 안전망"],
+      combos: ["diagnose", "to-issues", "grill-with-docs"],
+      meta: "📜 SKILL.md 109줄 · 보조 파일 5개"
+    },
+
+    "prototype": {
+      cmd: "/prototype",
+      emoji: "🧪", role: "시제품 장인", roleEn: "TINKERER",
+      tileSummary: "본 코드에 곧장 짜긴 위험한 가설일 때, 일회용 코드로 먼저 두드려 본 뒤 답만 흡수하고 나머지는 버립니다",
+      heroSummary: "본 코드에 곧장 짜기엔 위험한 설계 가설이 있을 때, <em>일회용</em> LOGIC 또는 UI 코드로 먼저 두드려 본 뒤 답만 본 코드에 흡수하고 나머지는 모두 버립니다",
+      when: ["답이 안 나오는 설계/UI 가설", "본 코드에 곧장 짜기엔 위험할 때", "PRD 쓰기 전 손으로 만져 봐야 할 때"],
+      howCode: ["/prototype 마지막 동기화 시점에서 충돌이 어떻게 나는지"],
+      howNote: "추상 말고 <em>구체적인 질문</em> 하나로. 스킬이 LOGIC/UI 분기를 묻습니다.",
+      what: [
+        { type: "p", html: "<em>PoC</em>(Proof of Concept) = *증명을 위한 시연*. 본 코드를 더럽히지 않으면서 빠르게 학습." },
+        { type: "p", html: "두 분기:" },
+        { type: "ul", items: ["<em>LOGIC</em>: 터미널 인터랙티브 앱 (상태 모델/충돌)", "<em>UI</em>: 한 라우트에 변형 여러 개 (URL 토글)"] },
+        { type: "p", html: "6 규칙: throwaway 표기 / 단일 명령 실행 / 메모리 보관 / 폴리시 생략 / 상태 노출 / <span class='pop'>끝나면 반드시 처분</span>. 저장소에 썩히면 부채." }
+      ],
+      output: ["질문에 대한 답 (커밋 메시지, ADR, 이슈 어딘가에 기록됨)", "그리고 텅 빈 자리. 프로토타입은 사라집니다"],
+      combos: ["grill-me", "to-prd", "improve"],
+      meta: "📜 SKILL.md 30줄 · LOGIC.md, UI.md 두 분기 파일 동봉"
+    },
+
+    "diagnose": {
+      cmd: "/diagnose",
+      emoji: "🔍", role: "탐정", roleEn: "DETECTIVE",
+      tileSummary: "코드를 아무리 노려봐도 원인이 안 잡히는 버그가 있을 때, 피드백 루프부터 만들고 가설을 좁혀 회귀 테스트로 확정합니다",
+      heroSummary: "코드를 아무리 노려봐도 원인이 안 잡히는 버그가 있을 때, 결정론적 피드백 루프부터 만들고 가설 3~5개를 좁혀 가며 마지막에는 회귀 테스트 한 개로 확정해 주는 6단계 프레임워크입니다",
+      when: ["버그 리포트가 들어왔을 때", "성능이 갑자기 느려졌을 때", "\"왜 이게 안 되지?\"라는 질문 앞에서 막막할 때"],
+      howCode: ["/diagnose 결제 금액이 가끔 0원으로 찍힙니다…"],
+      howNote: "증상을 같이 던지면 됩니다. 6단계 중 추가 정보를 물을 단계마다 멈춥니다.",
+      what: [
+        { type: "p", html: "핵심 통찰: <em>피드백 루프 없이는 코드를 노려봐도 답이 안 나온다</em>. 그래서 1단계에 노력의 절반을 쏟습니다." },
+        { type: "ol", items: [
+          "<span class='pop'>피드백 루프</span> (10가지 옵션 우선순위 순)",
+          "재현: 진짜 그 버그인지 확인",
+          "가설 3~5개: 반증 가능하게",
+          "계측: 가설을 가르는 지점에만",
+          "수정 + 회귀 테스트 (수정 전에 테스트 먼저)",
+          "정리 + 포스트모템"
+        ]}
+      ],
+      output: ["빨강 → 초록으로 바뀐 회귀 테스트 1개", "정리된 코드 (계측 흔적 X)", "\"구조가 어떻게 막을 수 있었나\" 한 줄"],
+      combos: ["tdd", "zoom-out", "improve"],
+      meta: "📜 SKILL.md 117줄 · scripts/hitl-loop.template.sh 동봉"
+    },
+
+    "zoom-out": {
+      cmd: "/zoom-out",
+      emoji: "🔭", role: "탐사대장", roleEn: "CARTOGRAPHER",
+      tileSummary: "낯선 코드의 역할과 영향 범위가 보이지 않을 때, 한 단계 위 추상으로 올라가 우리 팀 도메인 언어로 지도를 그려 줍니다",
+      heroSummary: "낯선 코드의 역할과 영향 범위가 보이지 않아 막막할 때, 한 단계 위 추상으로 올라가 우리 팀 도메인 언어로 모듈과 호출자 지도를 그려 줍니다 (본문이 <em>단 7줄</em>인 미니멀 스킬)",
+      when: ["낯선 영역에 진입했을 때", "작업의 경계가 어디까지인지 모를 때", "변경의 파급 범위를 가늠해야 할 때"],
+      howCode: ["/zoom-out src/checkout/discount.ts"],
+      howNote: "관심 있는 파일/모듈을 지목하면서 호출.",
+      what: [
+        { type: "p", html: "이 스킬은 <em>행동 한 줄짜리 명령</em>입니다. SKILL.md가 단 7줄이고 그중 본문은 한 문장뿐이라, 13개 중 가장 짧습니다." },
+        { type: "p", html: "대략 이런 뜻: <em>\"이 영역을 잘 모릅니다. 추상 한 단계 올려서 관련 모듈/호출자 지도를 그려 주세요. 단, 이 프로젝트의 도메인 언어로.\"</em>" },
+        { type: "p", html: "마지막 한 줄(<span class='pop'>\"이 프로젝트의 도메인 언어로\"</span>)이 결과의 질을 결정합니다. *서비스 클래스 / 리포지토리 패턴* 같은 일반론이 아니라 *이 팀의 언어*로 답이 돌아옵니다." },
+        { type: "p", html: "자동 트리거되지 않으며, 명시적으로 호출해야 동작합니다." }
+      ],
+      output: ["한 페이지 시스템 조망", "도메인 어휘로 표현되어 PRD/ADR에 인용 가능"],
+      combos: ["improve", "diagnose", "grill-with-docs"],
+      meta: "📜 SKILL.md 단 7줄 · 13개 중 가장 짧음"
+    },
+
+    "improve": {
+      cmd: "/improve-codebase-architecture",
+      emoji: "🏗️", role: "건축가", roleEn: "ARCHITECT",
+      tileSummary: "같은 영역에 손이 자꾸 가고 코드가 점점 무너지는 느낌이 들 때, deep module 후보를 찾아 인터페이스 뒤로 복잡도를 모아 줍니다",
+      heroSummary: "같은 영역에 손이 자꾸 가고 코드가 점점 무너지는 느낌이 들 때, deep module 후보를 찾아 작은 인터페이스 뒤로 복잡도를 모아 주는 정기 점검 도구입니다",
+      when: ["며칠에 한 번씩 정기 점검", "\"여러 작은 모듈을 자꾸 튕겨다닌다\"는 느낌", "큰 기능 추가 직전, 코드 준비 상태 확인"],
+      howCode: ["/improve-codebase-architecture", "/improve-codebase-architecture src/checkout"],
+      howNote: "전체 또는 특정 영역. 후보 목록을 보여주면 하나를 골라 깊이 들어갑니다.",
+      what: [
+        { type: "p", html: "<em>deep module</em>은 작은 인터페이스 뒤에 큰 동작이 숨은 모듈입니다 (예: <code class='inline'>db.query()</code>). 반대로 <em>shallow</em>는 인터페이스가 내부 코드만큼 복잡한 모듈이고, 코드베이스가 부패하는 큰 원인이 됩니다." },
+        { type: "p", html: "판정 질문: <span class='pop'>\"이 모듈을 지우면 복잡도가 사라지나, 호출자들로 흩어지나?\"</span>" },
+        { type: "ol", items: ["탐색: 서브에이전트에 위임해 코드베이스를 훑게 합니다", "후보 번호 매겨 제시", "그릴링 루프: 사용자가 하나 고르면 같이 설계해 갑니다"] }
+      ],
+      output: ["우선순위 매겨진 리팩터 후보", "새 도메인 개념이 추가된 <code class='inline'>CONTEXT.md</code>", "거절된 옵션의 ADR (재거론 방지)"],
+      combos: ["zoom-out", "grill-with-docs", "prototype"],
+      meta: "📜 SKILL.md 71줄 · LANGUAGE/DEEPENING/INTERFACE-DESIGN 동봉"
+    },
+
+    "triage": {
+      cmd: "/triage",
+      emoji: "🗂️", role: "분류관", roleEn: "SORTER",
+      tileSummary: "이슈는 쌓이는데 라벨은 들쭉날쭉해 우선순위가 안 보일 때, 카테고리와 상태 라벨로 흘려 보내 다음 행동을 분명히 만듭니다",
+      heroSummary: "이슈는 쌓이는데 라벨은 들쭉날쭉해서 우선순위가 보이지 않을 때, <em>카테고리 1개와 상태 1개</em>만 붙는 라벨 머신으로 흘려 보내 백로그의 다음 행동을 분명하게 만듭니다",
+      when: ["한 주 동안 쌓인 이슈 더미가 있을 때", "라벨이 들쭉날쭉해서 \"지금 봐야 할 것\"이 안 보일 때", "정기 백로그 정리"],
+      howCode: ["/triage", "/triage #123"],
+      howNote: "전체 보기, 또는 특정 이슈만. <em>\"#123을 wontfix로 옮겨\"</em> 같은 자연어 지시도 OK.",
+      what: [
+        { type: "p", html: "\"트리아지\"는 응급실 환자 분류와 같은 어원입니다. 들어오는 것을 *누구를 먼저 볼지* 정해 흐름을 만듭니다." },
+        { type: "ul", items: ["카테고리: <code class='inline'>bug</code> / <code class='inline'>enhancement</code>", "상태 5개: <em>needs-triage / needs-info / ready-for-agent / ready-for-human / wontfix</em>"] },
+        { type: "p", html: "이슈마다: 컨텍스트 수집 → 추천 → 버그면 재현 시도 → 모호하면 인터뷰 → 적용. 자동 코멘트는 <span class='pop'>\"AI가 만든 알림\"</span>으로 시작." }
+      ],
+      output: ["일관된 라벨이 붙은 이슈 트래커", "다음 행동이 명시된 코멘트"],
+      combos: ["diagnose", "to-prd", "grill-with-docs"],
+      meta: "📜 SKILL.md 103줄 · AGENT-BRIEF.md, OUT-OF-SCOPE.md 동봉"
+    },
+
+    "write-a-skill": {
+      cmd: "/write-a-skill",
+      emoji: "🛠️", role: "메타 장인", roleEn: "SMITH",
+      tileSummary: "같은 작업이 반복되고 팀 노하우가 사람에게만 묶여 있을 때, SKILL.md 구조와 description으로 누구나 호출 가능한 스킬로 묶어 줍니다",
+      heroSummary: "같은 작업이 반복되고 팀 노하우가 사람에게만 묶여 있을 때, SKILL.md 구조와 정확한 <em>description</em>으로 누구나 호출할 수 있는 스킬로 묶어 줍니다",
+      when: ["팀 고유 워크플로우(자체 배포 등)를 패키징", "같은 작업을 여러 번 반복하다가 자동화 욕구", "기존 스킬을 우리 팀에 맞게 변형"],
+      howCode: ["/write-a-skill 우리 팀 배포 체크리스트 자동화. /deploy로 트리거."],
+      howNote: "만들 스킬의 트리거와 작업 도메인을 짧게 설명.",
+      what: [
+        { type: "p", html: "가장 중요한 가르침은 <span class='pop'>description 필드의 무게</span>입니다. 에이전트는 사용자 요청을 받으면 모든 스킬의 *description만* 훑어보고 어느 걸 부를지 결정하며, 본문은 보지 않습니다. 그래서 모호한 description은 영원히 호출되지 않습니다." },
+        { type: "p", html: "규칙: 1024자 이내, 3인칭, 첫 문장에 \"무엇\" + 둘째 문장에 <code class='inline'>Use when [트리거]</code>." },
+        { type: "p", html: "<em>Progressive disclosure</em>: SKILL.md 100줄 이내 / 디테일은 별도 파일 / 본문은 링크만." }
+      ],
+      output: ["새 스킬 폴더 (SKILL.md + 보조 파일)", "다른 사람도 트리거만 보고 호출 가능한 description"],
+      combos: ["setup"],
+      meta: "📜 SKILL.md 117줄 · 자기 자신의 형식을 시범 보임"
+    },
+
+    "caveman": {
+      cmd: "/caveman",
+      emoji: "🦴", role: "압축기", roleEn: "COMPRESSOR",
+      tileSummary: "에이전트 응답이 장황해 토큰과 시간이 낭비될 때, 관사·필러·인사말을 잘라내 응답 토큰을 75%까지 줄여 줍니다",
+      heroSummary: "에이전트 응답이 장황해 토큰과 시간이 낭비될 때, 관사·필러·인사말을 잘라내고 화살표와 약어를 적극 써서 응답 토큰을 75% 가까이 줄여 줍니다",
+      when: ["긴 디버깅 루프, 토큰이 빨리 차고 있을 때", "화면을 빠르게 스캔하고 싶을 때", "에이전트의 장황함이 거슬릴 때"],
+      howCode: ["/caveman", "\"be brief\"  /  \"less tokens\""],
+      howNote: "한 번 켜지면 모든 응답에 적용. 끄려면 <em>\"stop caveman\"</em> 또는 <em>\"normal mode\"</em>.",
+      what: [
+        { type: "p", html: "제거: 관사 / 필러(just, really) / 인사말 / 헷지 / 가능한 한 접속사. 화살표(X→Y), 약어(DB, fn)." },
+        { type: "p", html: "예시 변환:" },
+        { type: "ul", items: ["일반: \"Sure! I'd be happy to help with that…\"", "caveman: \"Bug in auth middleware. Token check use &lt; not &lt;=. Fix:\""], style: "font-family:monospace;font-size:12px" },
+        { type: "p", html: "<span class='pop'>자동 해제 예외</span>: 보안 경고 / 되돌릴 수 없는 작업 / 다단계 시퀀스 / 사용자 명료화 요청. <em>코드/에러 메시지/기술 용어는 변형 X</em>." },
+        { type: "p", html: "흥미로운 디테일: <em>SKILL.md 본문 자체가 caveman 톤</em>으로 쓰여 있음." }
+      ],
+      output: ["토큰 ~75% 절감", "빠른 스캔이 가능한 응답"],
+      combos: ["diagnose"], comboNote: "긴 루프와 결합 시 효과 큼",
+      meta: "📜 SKILL.md 49줄 · 보조 파일 없음"
+    }
+  },
+
+  combos: [
+    {
+      n: "①",
+      title: "저장소 첫 셋업: 스킬 도입 첫날",
+      scenario: "스킬셋을 처음 들이는 날 다른 스킬들이 같은 곳을 보지 않게 하려고, 트래커·라벨·문서 위치부터 한 번에 정리하고 우리 팀 고유 스킬을 더해 갑니다.",
+      flow: [
+        { type: "cli", emoji: "📦", cmd: "npx skills add", role: "패키지 설치", why: "<strong>왜?</strong> 스킬셋이 저장소에 없는 상태를, 셸 명령 한 번으로 들여놓으려고" },
+        { skill: "setup", why: "<strong>왜?</strong> 다른 스킬들이 트래커·라벨·문서 위치를 몰라 결과가 흩어지는 위험을, 한 번에 정리해 막으려고" },
+        { skill: "write-a-skill", why: "<strong>왜? <em>(필요시)</em></strong> 팀 고유 워크플로우가 사람에게만 묶이는 비효율을, 추가 스킬로 패키징해 풀려고" }
+      ]
+    },
+    {
+      n: "②",
+      title: "신규 기능 개발: 백지에서 머지까지",
+      scenario: "쿠폰 같은 새 기능을 백지에서 시작할 때, 코드보다 먼저 용어와 트레이드오프부터 합의하고 PRD → 작업 분할 → 행동별 TDD로 의도를 잃지 않고 끝까지 끌고 갑니다.",
+      flow: [
+        { skill: "grill-with-docs", why: "<strong>왜?</strong> 용어가 흔들리고 결정 이유가 휘발될 위험을, 인터뷰하며 그 자리에서 <em>CONTEXT.md·ADR</em>에 기록해 막으려고" },
+        { skill: "to-prd", why: "<strong>왜?</strong> 합의는 끝났는데 PRD 옮겨 적기 귀찮은 단계를, 대화를 그대로 7섹션 PRD로 합성해 풀려고" },
+        { skill: "to-issues", why: "<strong>왜?</strong> PRD가 통째라 작업 분배가 막막한 문제를, vertical slice로 쪼개 의존성 순으로 풀려고" },
+        { skill: "tdd", why: "<strong>왜?</strong> 구현 중 의도가 흐려질 위험을, 각 슬라이스를 한 행동씩 RED→GREEN으로 검증하며 막으려고" }
+      ]
+    },
+    {
+      n: "③",
+      title: "불확실한 설계 탐색: PoC",
+      scenario: "동기화 같은 답을 모르는 설계 가설을 풀려고, 가장 싼 매체(종이)에서 결정 트리부터 좁히고 일회용 코드로 두드린 뒤 답만 본 코드에 흡수합니다.",
+      flow: [
+        { skill: "grill-me", why: "<strong>왜?</strong> 답을 모르는 가설을 본 코드에 곧장 짜는 위험을, 가장 싼 매체(종이)에서 결정 트리부터 좁혀 막으려고" },
+        { skill: "prototype", why: "<strong>왜?</strong> 종이로도 안 풀리는 가설을, 일회용 코드로 두드려 본 뒤 답만 흡수해 풀려고" },
+        { skill: "to-prd", why: "<strong>왜?</strong> 학습 결과가 세션과 함께 사라지는 위험을, 본 트래커에 PRD로 정리해 막으려고 (새 용어가 생겼다면 /grill-with-docs)" }
+      ]
+    },
+    {
+      n: "④",
+      title: "재현 가능한 버그 수정",
+      scenario: "0원 결제처럼 노려봐도 안 잡히는 버그를 풀려고, 피드백 루프부터 만들어 가설로 좁히고 회귀 테스트로 확정한 뒤 같은 류 재발까지 막습니다.",
+      flow: [
+        { skill: "diagnose", why: "<strong>왜?</strong> 노려봐도 원인이 안 잡히는 버그를, 피드백 루프부터 만들고 가설로 좁혀 회귀 테스트로 확정해 풀려고" },
+        { skill: "tdd", why: "<strong>왜?</strong> /diagnose Phase 5의 회귀 테스트가 사실상 TDD 한 사이클이라, 그 흐름을 그대로 이어 가려고" },
+        { skill: "improve", why: "<strong>왜? <em>(선택)</em></strong> 같은 류 버그가 또 나올 구조 위험을, deep module 후보 점검으로 재발 자체를 막으려고" }
+      ]
+    },
+    {
+      n: "⑤",
+      title: "레거시 코드 온보딩: 낯선 영역 진입",
+      scenario: "낯선 레거시 영역에 손대야 하는 막막함을, 손대기 전에 시스템 지도부터 그리고 모르는 용어를 CONTEXT.md에 정착시킨 뒤 deepening 후보까지 함께 발굴해 풉니다.",
+      flow: [
+        { skill: "zoom-out", why: "<strong>왜?</strong> 낯선 코드의 역할·영향이 안 보이는 막막함을, 한 추상 위에서 도메인 어휘로 지도를 그려 풀려고" },
+        { skill: "grill-with-docs", why: "<strong>왜?</strong> 마주친 모르는 용어가 다음 사람도 같은 질문을 하게 만드는 위험을, CONTEXT.md에 정착시켜 막으려고" },
+        { skill: "improve", why: "<strong>왜?</strong> 손대는 김에 같이 깊이 만들기 좋은 모듈을 놓치지 않으려고, deep module 후보까지 함께 발굴" }
+      ]
+    },
+    {
+      n: "⑥",
+      title: "이슈 백로그 정리: Triage 데이",
+      scenario: "라벨이 들쭉날쭉한 이슈 30개를 흐름에 태우려고, 라벨 머신으로 흘려보내 시급한 버그는 곧장 디버깅으로, 모호한 enhancement는 인터뷰 → PRD → 작업 분할로 보냅니다.",
+      flow: [
+        { skill: "triage", why: "<strong>왜?</strong> 라벨 없이 쌓여 우선순위가 안 보이는 카오스를, 카테고리·상태 라벨로 흘려 보내 풀려고" },
+        { skill: "diagnose", why: "<strong>왜? <em>(시급한 버그)</em></strong> 라벨링만으로 끝날 일이 아니라, 그 자리에서 곧장 디버깅으로 들어가려고" },
+        { skill: "grill-with-docs", why: "<strong>왜? <em>(모호한 enhancement)</em></strong> 모호한 채로 PRD화하면 부실하니까, 살을 붙이는 인터뷰부터 (/triage SKILL.md 명시)" },
+        { skill: "to-prd", why: "<strong>왜?</strong> 인터뷰로 합의된 내용이 트래커에 안 남으면 다시 휘발되니까, PRD로 승급해 작업 흐름에 태우려고" },
+        { skill: "to-issues", why: "<strong>왜?</strong> PRD가 통째라 머지 단위로 자르려고, vertical slice로 분할" }
+      ],
+      arrows: [null, "또는"]  // 기본 "→"는 생략 (렌더러가 fallback)
+    }
+  ]
+},
+
+// ────────────────────────────────────────────────────────────────
+// ❷ Superpowers (obra/superpowers · Jesse Vincent)
+//   MIT License. 콘텐츠는 한국어 요약/해석.
+// ────────────────────────────────────────────────────────────────
+superpowers: {
+  preTitle: "SUPERPOWERS · CODING AGENT METHODOLOGY",
+  lead: "Jesse Vincent의 <strong>14개 스킬</strong>로 짜인 풀 워크플로우 시스템. 모든 세션에 <em>자동 트리거</em>되어, 코드를 짜기 전 항상 brainstorming → 격리 worktree → planning → subagent-driven TDD → 리뷰 → 머지 단계를 거치도록 강제합니다.",
+  footer: '원문 저장소: <a href="https://github.com/obra/superpowers" target="_blank" rel="noopener">github.com/obra/superpowers</a> (MIT)<br>설치(Claude Code): <code>/plugin install superpowers@claude-plugins-official</code>',
+
+  skills: {
+
+    "using-superpowers": {
+      cmd: "using-superpowers",
+      emoji: "🚀", role: "부트로더", roleEn: "BOOTLOADER",
+      tileSummary: "에이전트가 적용 가능한 스킬을 놓치고 그냥 답변할 위험을 막기 위해, 어떤 응답이든 보내기 전 스킬 도구를 먼저 invoke하도록 강제합니다",
+      heroSummary: "에이전트가 적용 가능한 스킬을 놓치고 그냥 답변하는 사고를 막기 위해, 모든 세션 시작 시 자동 로드되어 <em>어떤 응답·명료화 질문보다 먼저</em> Skill 도구를 invoke하도록 강제하는 부트스트랩입니다",
+      when: ["모든 세션 시작 시 (자동)", "사용자 메시지를 받자마자", "심지어 명료화 질문에 답하기 전"],
+      howCode: ["(자동 트리거 — 직접 호출 불필요)"],
+      howNote: "Claude Code의 <code class='inline'>Skill</code> 도구, Copilot CLI의 skill 도구, Gemini CLI의 activate_skill로 작동.",
+      what: [
+        { type: "p", html: "<span class='pop'>1% 룰</span>: 적용 가능성이 *1%라도 있으면* 무조건 invoke. 협상 불가." },
+        { type: "p", html: "스킬 우선순위: <em>프로세스 스킬 먼저</em>(brainstorming, debugging) → 구현 스킬 다음. \"X를 만들자\" → brainstorming부터." },
+        { type: "p", html: "지시 우선순위: <strong>사용자 명시 지시</strong>(CLAUDE.md/AGENTS.md) > Superpowers 스킬 > 기본 시스템 프롬프트." },
+        { type: "p", html: "Red Flags 자기 점검표 — 합리화 신호:" },
+        { type: "ul", items: [
+          "\"이건 그냥 간단한 질문이야\" → 질문도 작업이다",
+          "\"먼저 컨텍스트 더 모아야지\" → 스킬이 *어떻게* 모을지 알려준다",
+          "\"이건 스킬 쓸 정도는 아닌데\" → 스킬이 있으면 써라"
+        ]}
+      ],
+      output: ["다른 모든 스킬이 적절한 순간에 자동 트리거되는 환경"],
+      combos: ["brainstorming"],
+      meta: "🚀 Superpowers 진입점 · 모든 세션에 자동 로드"
+    },
+
+    "brainstorming": {
+      cmd: "brainstorming",
+      emoji: "🧠", role: "탐험가", roleEn: "EXPLORER",
+      tileSummary: "어떤 코드든 짜기 전 \"뭘 만들지\"가 막연할 때, 한 질문씩 소크라테스식 대화로 spec을 뽑아내고 사용자 승인을 받습니다",
+      heroSummary: "기능·구성요소·동작 변경 어떤 작업이든 *코드를 쓰기 전* 의도와 요구사항을 명확히 해야 할 때, 한 질문씩 소크라테스식 대화로 다듬어 design.md를 작성하고 섹션별 승인을 받은 뒤 writing-plans로 넘기는 정합성 게이트입니다",
+      when: ["새 기능을 만들기 전", "구성요소·기능 추가·동작 수정 직전", "\"이건 너무 단순해\" 싶어도 *항상*"],
+      howCode: ["(자동 트리거 — 무언가를 만들겠다고 하면 즉시)"],
+      howNote: "<span class='pop'>HARD-GATE</span>: 디자인 승인 전엔 어떤 구현 스킬도 invoke 못 합니다.",
+      what: [
+        { type: "p", html: "흐름: 프로젝트 컨텍스트 탐색 → 한 번에 한 질문 (multiple choice 선호) → 2~3가지 접근안 + 추천 제시 → 디자인 섹션별 승인 → <code class='inline'>docs/superpowers/specs/&lt;날짜&gt;-design.md</code> 저장 → 자기 검토 → 사용자 검토 → writing-plans 호출" },
+        { type: "p", html: "단일 책임 원칙: 각 단위는 *하나의* 명확한 목적, 잘 정의된 인터페이스, 독립 테스트 가능. 외부에서 내부를 모르고 쓸 수 있어야 함." },
+        { type: "p", html: "<span class='pop'>YAGNI</span>: 불필요한 기능은 디자인에서 제거. 스코프가 너무 크면 *서브 프로젝트*로 분해 제안." },
+        { type: "p", html: "종착지는 <em>writing-plans</em>입니다. 다른 어떤 구현 스킬도 호출하지 않습니다." }
+      ],
+      output: ["사용자 승인된 design.md (커밋됨)", "writing-plans 호출 가능 상태"],
+      combos: ["writing-plans"],
+      meta: "🧠 자동 트리거 · HARD-GATE · 종착지는 writing-plans"
+    },
+
+    "using-git-worktrees": {
+      cmd: "using-git-worktrees",
+      emoji: "🌳", role: "분기 개척자", roleEn: "WORKTREE-MAKER",
+      tileSummary: "기능 작업이 메인 브랜치를 더럽힐 위험이 있을 때, 격리된 worktree를 만들고 깨끗한 테스트 baseline을 검증해 안전한 출발점을 만듭니다",
+      heroSummary: "현재 워크스페이스에서 격리된 채 작업해야 할 때, 이미 격리된 상태인지 먼저 감지하고 → 플랫폼 네이티브 도구를 우선 → 없으면 git worktree로 폴백해 깨끗한 테스트 baseline을 검증한 작업 공간을 만들어 줍니다",
+      when: ["기능 작업을 시작하기 전", "구현 계획 실행 직전", "메인 브랜치 보호가 필요할 때"],
+      howCode: ["(자동 트리거 — brainstorming 승인 후)"],
+      howNote: "Step 0에서 이미 worktree인지 먼저 감지. 새로 만들 때만 사용자 동의 요청.",
+      what: [
+        { type: "ol", items: [
+          "<strong>Step 0</strong>: <code class='inline'>GIT_DIR</code> ↔ <code class='inline'>GIT_COMMON</code> 비교로 격리 상태 검사 (submodule 가드 포함)",
+          "<strong>Step 1a</strong>: 네이티브 worktree 도구(EnterWorktree 등) 우선 — 호환성·정리 자동",
+          "<strong>Step 1b</strong>: git worktree 폴백. 디렉토리 우선순위는 사용자 지정 > 기존 <code class='inline'>.worktrees/</code> > 글로벌 > 기본",
+          "<strong>Step 3</strong>: 프로젝트 셋업 자동 (npm install / cargo build / pip install / go mod download)",
+          "<strong>Step 4</strong>: 깨끗한 baseline 테스트 실행 — 실패면 진행 전 사용자에게 보고"
+        ]},
+        { type: "p", html: "<span class='pop'>주의</span>: 네이티브 도구가 있는데 git worktree를 직접 쓰는 게 #1 실수. 호스트가 모르는 *팬텀 상태*가 생김." }
+      ],
+      output: ["격리된 worktree", "통과하는 baseline 테스트", "다음 단계 진입 준비"],
+      combos: ["writing-plans", "subagent-driven-development"],
+      meta: "🌳 자동 트리거 · brainstorming 직후"
+    },
+
+    "writing-plans": {
+      cmd: "writing-plans",
+      emoji: "📋", role: "도면 설계사", roleEn: "PLANNER",
+      tileSummary: "design.md는 있는데 정작 누가 어떻게 구현할지 막막할 때, 2~5분짜리 미니 작업으로 쪼갠 상세 계획을 만들어 줍니다",
+      heroSummary: "spec이 있는데 다단계 구현이 필요할 때, <em>컨텍스트 0인 후속 엔지니어</em>가 그대로 따라할 수 있을 만큼 상세한 계획을 만듭니다 (정확한 파일 경로 / 완전한 코드 / 검증 명령 / 2~5분짜리 단계)",
+      when: ["brainstorming 후 spec이 승인됐을 때", "다단계 작업을 코드로 옮기기 전", "\"어디부터 손대야 하지\" 막막할 때"],
+      howCode: ["(자동 트리거 — brainstorming 종료 시점)"],
+      howNote: "<code class='inline'>docs/superpowers/plans/&lt;날짜&gt;-&lt;feature&gt;.md</code>에 저장.",
+      what: [
+        { type: "p", html: "각 단계는 <em>하나의 행동</em>(2~5분): RED 테스트 작성 → 실패 확인 → 최소 구현 → 통과 확인 → 커밋." },
+        { type: "p", html: "<span class='pop'>플레이스홀더 절대 금지</span>: TBD/TODO/\"적절한 에러 처리\"/\"엣지 케이스 처리\" 같은 모호한 표현은 *plan failure*. 정확한 파일 경로, 완전한 코드 블록, 정확한 명령과 예상 출력 모두 포함." },
+        { type: "p", html: "자기 검토 체크: spec 커버리지 / 플레이스홀더 스캔 / 타입 일관성 (Task 3에서 <code class='inline'>clearLayers()</code>인데 Task 7에서 <code class='inline'>clearFullLayers()</code> 같은 불일치는 버그)." },
+        { type: "p", html: "최종 핸드오프: <em>subagent-driven-development(권장)</em> 또는 <em>executing-plans</em> 중 사용자 선택." }
+      ],
+      output: ["미니 작업 단위로 나뉜 plan.md", "다음 실행 스킬 선택지 제시"],
+      combos: ["subagent-driven-development", "executing-plans", "using-git-worktrees"],
+      meta: "📋 자동 트리거 · spec → plan"
+    },
+
+    "subagent-driven-development": {
+      cmd: "subagent-driven-development",
+      emoji: "🤖", role: "작전 사령관", roleEn: "COMMANDER",
+      tileSummary: "독립적인 작업들이 있는 plan을 빠르게 실행하고 싶을 때, 작업마다 fresh subagent를 띄우고 spec→quality 두 단계 리뷰로 진행합니다",
+      heroSummary: "독립적인 작업들이 있는 plan을 <em>같은 세션에서 빠르게</em> 실행해야 할 때, 작업마다 fresh subagent를 띄우고 끝나면 spec compliance reviewer + code quality reviewer 두 단계 리뷰를 거치는 컨트롤러 역할을 합니다 (사람 개입 없이 연속 실행)",
+      when: ["plan이 있고 작업들이 대체로 독립적일 때", "같은 세션에서 빠르게 진행하고 싶을 때", "두 단계 품질 게이트가 필요할 때"],
+      howCode: ["(자동 트리거 — writing-plans 핸드오프)"],
+      howNote: "executing-plans보다 권장. 사람-in-the-loop 없이 연속 실행이 핵심.",
+      what: [
+        { type: "p", html: "작업당 흐름: implementer subagent(fresh) → 구현·테스트·커밋·자가 리뷰 → spec reviewer가 사양 일치 확인 → 이슈 있으면 implementer가 수정 → code quality reviewer 검토 → 통과하면 다음 작업" },
+        { type: "p", html: "모델 선택: 단순 구현은 cheap, 통합은 standard, 설계·리뷰는 most capable." },
+        { type: "p", html: "Implementer 상태 4가지 — <strong>DONE</strong>(리뷰 진입) / <strong>DONE_WITH_CONCERNS</strong>(우려 읽고 처리) / <strong>NEEDS_CONTEXT</strong>(컨텍스트 보강 후 재dispatch) / <strong>BLOCKED</strong>(원인 따라 모델 업그레이드·작업 분해·사용자 에스컬레이션)" },
+        { type: "p", html: "<span class='pop'>Red Flags</span>: spec compliance 끝나기 전 quality review 시작 X, 두 리뷰 중 하나라도 미해결인데 다음 작업으로 넘어가기 X." }
+      ],
+      output: ["완료된 코드 + 두 단계 리뷰 통과", "finishing-a-development-branch 호출 준비"],
+      combos: ["test-driven-development", "requesting-code-review", "finishing-a-development-branch"],
+      meta: "🤖 같은 세션 · 권장 실행 모드"
+    },
+
+    "executing-plans": {
+      cmd: "executing-plans",
+      emoji: "📦", role: "묶음 처리자", roleEn: "BATCHER",
+      tileSummary: "subagent를 못 쓰는 환경이거나 별도 세션에서 plan을 돌려야 할 때, plan을 일괄 실행하고 사람-in-the-loop 체크포인트를 거칩니다",
+      heroSummary: "subagent 지원이 없는 환경이거나 별도 세션에서 plan을 실행해야 할 때, plan을 비판적으로 검토한 뒤 작업들을 일괄 실행하고 자연스러운 체크포인트에서 사람의 검토를 받는 모드입니다 (subagent-driven-development의 대체)",
+      when: ["같은 세션에서 실행하지 않을 때", "subagent 지원이 없는 플랫폼", "사람의 중간 검토가 필요한 작업"],
+      howCode: ["(자동 트리거 — writing-plans에서 사용자가 이 모드 선택 시)"],
+      howNote: "subagent 지원 환경이라면 subagent-driven-development를 권장.",
+      what: [
+        { type: "ol", items: [
+          "<strong>Step 1</strong>: plan 로드 → 비판적 검토 → 우려 있으면 사용자에게 보고",
+          "<strong>Step 2</strong>: 각 작업을 정확히 따라 실행, 검증 단계 *절대* 생략 X",
+          "<strong>Step 3</strong>: 모두 끝나면 finishing-a-development-branch 호출"
+        ]},
+        { type: "p", html: "<span class='pop'>Stop & ask</span>: blocker / plan에 critical gap / 검증 반복 실패 / 지시가 불명확할 때." }
+      ],
+      output: ["실행된 plan", "finishing-a-development-branch 진입 준비"],
+      combos: ["using-git-worktrees", "finishing-a-development-branch"],
+      meta: "📦 별도 세션용 · subagent-driven 의 대체"
+    },
+
+    "test-driven-development": {
+      cmd: "test-driven-development",
+      emoji: "🔴", role: "레드 가드", roleEn: "RED-GUARD",
+      tileSummary: "테스트가 *실패하는 걸 보지 않으면* 그게 옳은 걸 검증하는지 모를 때, RED → GREEN → REFACTOR을 무조건 강제합니다",
+      heroSummary: "어떤 기능이든 버그 수정이든 구현 코드를 짜기 전, <em>실패하는 테스트를 보지 못하면 그 테스트가 진짜를 검증하는지 알 수 없다</em>는 원칙으로 RED → 실패 확인 → GREEN(최소 코드) → 통과 확인 → REFACTOR을 강제합니다",
+      when: ["새 기능, 버그 수정, 리팩터, 동작 변경 *항상*", "\"이번 한 번만 건너뛰자\"고 합리화가 보일 때"],
+      howCode: ["(자동 트리거 — 구현 직전)"],
+      howNote: "<span class='pop'>Iron Law</span>: 실패하는 테스트 없이 production code를 *절대* 안 씀. 어겼다? 코드 *삭제*하고 다시 시작.",
+      what: [
+        { type: "p", html: "<strong>RED</strong>: 한 행동만 검증하는 *실패하는* 테스트 작성 (가능하면 mock 없이 real code, 명확한 이름)." },
+        { type: "p", html: "<strong>Verify RED</strong>: 테스트가 *예상한 이유*로 실패하는지 확인. 오타로 에러 나는 게 아닌지." },
+        { type: "p", html: "<strong>GREEN</strong>: 통과시키는 *최소* 코드. <span class='pop'>YAGNI</span> — 옵션·플래그·미래 기능 추가 X." },
+        { type: "p", html: "<strong>Verify GREEN</strong>: 다른 테스트도 깨지지 않는지, 출력이 깨끗한지 확인." },
+        { type: "p", html: "<strong>REFACTOR</strong>: green 상태에서만. 동작 추가는 X, 중복 제거·이름 개선·헬퍼 추출만." },
+        { type: "p", html: "*테스트가 즉시 통과한다?* 잘못된 신호 — 이미 있는 동작을 테스트하고 있는 것." }
+      ],
+      output: ["행동별 테스트 (각 테스트가 명세)", "최소 구현", "리팩터 후에도 살아남는 안전망"],
+      combos: ["systematic-debugging", "verification-before-completion"],
+      meta: "🔴 자동 트리거 · 구현 직전 · IRON LAW"
+    },
+
+    "systematic-debugging": {
+      cmd: "systematic-debugging",
+      emoji: "🩺", role: "진단의", roleEn: "DIAGNOSTICIAN",
+      tileSummary: "랜덤 픽스로 시간만 날리지 않으려면, 4단계 root cause 조사를 강제해 *원인을 찾기 전엔 어떤 픽스도 시도 못 하게* 막습니다",
+      heroSummary: "버그·테스트 실패·예기치 않은 동작·성능 문제 어떤 기술 이슈든, 픽스를 제안하기 전 4단계 root cause 조사(원인 → 패턴 → 가설·검증 → 구현)를 강제해 <em>증상이 아닌 근본 원인</em>을 고치도록 만듭니다",
+      when: ["버그·테스트 실패·예기치 않은 동작·성능 문제 *어떤 것이든*", "시간 압박이 있을 때 *오히려 더*", "이미 여러 픽스를 시도했는데 안 됐을 때"],
+      howCode: ["(자동 트리거 — 어떤 기술 이슈든)"],
+      howNote: "<span class='pop'>Iron Law</span>: Phase 1을 마치기 전엔 어떤 픽스도 제안 X.",
+      what: [
+        { type: "ol", items: [
+          "<strong>Phase 1 — Root Cause Investigation</strong>: 에러 메시지 정확히 읽기, 일관 재현, 최근 변경 점검, 멀티 컴포넌트 시스템이면 *각 경계에 진단 로그* 추가해 어디서 깨지는지 먼저 본다",
+          "<strong>Phase 2 — Pattern Analysis</strong>: 작동하는 비슷한 코드 찾기, 차이점 *모두* 나열 (\"이건 중요하지 않을 거야\" 금지)",
+          "<strong>Phase 3 — Hypothesis</strong>: 단일 가설 수립 → *최소 변경*으로 테스트 → 한 번에 한 변수만",
+          "<strong>Phase 4 — Implementation</strong>: 실패하는 테스트 먼저 → 한 번에 한 픽스 → 검증"
+        ]},
+        { type: "p", html: "<span class='pop'>3개 이상 픽스 실패 시</span>: 아키텍처 자체를 의심하라. 더 이상 픽스 시도 X, 사용자와 상의. 매 픽스가 새 문제를 만들어내면 그건 *아키텍처가 잘못된 신호*." }
+      ],
+      output: ["근본 원인 식별", "회귀 테스트", "한 가지 픽스 + 결과 검증"],
+      combos: ["test-driven-development", "verification-before-completion"],
+      meta: "🩺 자동 트리거 · IRON LAW · 4 phases"
+    },
+
+    "verification-before-completion": {
+      cmd: "verification-before-completion",
+      emoji: "✅", role: "검증관", roleEn: "VERIFIER",
+      tileSummary: "\"완료\"·\"통과\"·\"고침\"이라고 말하기 전 *방금* 검증 명령을 실행하지 않았다면, 그 주장은 거짓말로 간주됩니다",
+      heroSummary: "어떤 작업·픽스·통과 주장도 하기 전, 그 주장을 증명하는 명령을 <em>이번 메시지에서</em> 직접 실행하고 출력을 확인하지 않으면 클레임 자체를 금지합니다 (\"확실해요\"·\"아마 통과할 거예요\"는 반칙)",
+      when: ["어떤 형태로든 성공·완료를 주장하기 직전", "만족 표현(\"완료!\", \"됐다!\") 직전", "커밋·PR·다음 작업 이동 직전", "에이전트 결과를 신뢰하기 직전"],
+      howCode: ["(자동 트리거 — 성공 주장 직전)"],
+      howNote: "Gate Function: IDENTIFY(어떤 명령이 증명?) → RUN → READ(전체 출력) → VERIFY → 그제서야 클레임.",
+      what: [
+        { type: "p", html: "<span class='pop'>Iron Law</span>: 이 메시지에서 검증 명령을 실행하지 않았다? 클레임 금지." },
+        { type: "p", html: "흔한 실수표:" },
+        { type: "ul", items: [
+          "\"테스트 통과\" → *0 failures 본 출력*이 필요 (\"should pass\"·\"아마\" 거부)",
+          "\"빌드 성공\" → 빌드 명령 *exit 0* 확인 (린터 통과 ≠ 컴파일 통과)",
+          "\"버그 픽스됨\" → 원래 증상을 *직접* 다시 테스트",
+          "\"에이전트 완료 보고\" → VCS diff로 변경 직접 확인"
+        ]},
+        { type: "p", html: "<span class='pop'>회귀 테스트 검증의 red-green 사이클</span>: 작성 → 통과 → 픽스 되돌리기 → *반드시 실패* → 픽스 복원 → 통과. 사이클을 본 적 없으면 검증 안 된 것." }
+      ],
+      output: ["증거에 기반한 클레임", "또는 솔직한 미완료 보고"],
+      combos: ["systematic-debugging", "test-driven-development"],
+      meta: "✅ 자동 트리거 · 모든 클레임 직전"
+    },
+
+    "dispatching-parallel-agents": {
+      cmd: "dispatching-parallel-agents",
+      emoji: "🪞", role: "분신술사", roleEn: "PARALLELIZER",
+      tileSummary: "독립적인 실패가 여럿 있을 때 순차로 조사하면 시간 낭비라, 영역마다 fresh subagent를 *동시에* 띄워 병렬로 해결합니다",
+      heroSummary: "테스트 파일 3개+가 <em>서로 무관한</em> 이유로 실패하는 등 독립 실패가 여럿일 때, 각 문제 영역마다 좁은 스코프와 명확한 출력을 가진 subagent를 동시 디스패치해 병렬로 해결하는 패턴입니다",
+      when: ["3+ 테스트 파일이 *다른* 원인으로 깨졌을 때", "여러 서브시스템이 독립적으로 깨진 경우", "각 문제가 다른 컨텍스트 없이도 이해 가능할 때"],
+      howCode: [
+        "Task(\"Fix file-A.test.ts failures\")",
+        "Task(\"Fix file-B.test.ts failures\")",
+        "Task(\"Fix file-C.test.ts failures\")"
+      ],
+      howNote: "관련 실패면 사용 X — 한 픽스가 다른 걸 고칠 수 있으면 단일 에이전트로 같이 조사.",
+      what: [
+        { type: "p", html: "각 에이전트에 줄 4가지: <strong>명확한 스코프</strong>(파일 1개), <strong>명확한 목표</strong>(이 테스트들 통과), <strong>제약</strong>(다른 코드 건드리지 마), <strong>기대 출력</strong>(요약 형식)." },
+        { type: "p", html: "디스패치 후: 각 요약 검토 → 충돌 점검 → 전체 스위트 재실행 → 통합." },
+        { type: "p", html: "흔한 실수: 너무 추상적(\"전부 고쳐라\") / 컨텍스트 부족 / 제약 없음(전체 리팩터 위험) / 출력 사양 모호." }
+      ],
+      output: ["동시에 해결된 여러 독립 문제", "충돌 없는 통합"],
+      combos: ["systematic-debugging", "verification-before-completion"],
+      meta: "🪞 병렬 디스패치 패턴"
+    },
+
+    "requesting-code-review": {
+      cmd: "requesting-code-review",
+      emoji: "🧐", role: "리뷰 의뢰인", roleEn: "REQUESTER",
+      tileSummary: "이슈가 누적되기 전에 잡고 싶을 때, 작업 단위마다 reviewer subagent를 디스패치해 사양 준수와 품질을 차단형으로 점검합니다",
+      heroSummary: "각 작업 완료, 주요 기능 마무리, 메인 머지 직전 <em>이슈가 쌓이기 전에</em> 잡으려면, 정밀하게 작성된 컨텍스트(세션 히스토리 X)로 reviewer subagent를 디스패치해 결과물만 평가받는 패턴입니다",
+      when: ["subagent-driven-development의 각 작업 후 (필수)", "주요 기능 완료 후 / 메인 머지 전", "막혔을 때 신선한 시각이 필요"],
+      howCode: [
+        "BASE_SHA=$(git rev-parse HEAD~1)",
+        "HEAD_SHA=$(git rev-parse HEAD)",
+        "(reviewer subagent 디스패치 — code-reviewer.md 템플릿)"
+      ],
+      howNote: "리뷰어가 받는 컨텍스트는 *결과물만*. 세션 히스토리는 절대 안 줌.",
+      what: [
+        { type: "p", html: "결과 활용: <span class='pop'>Critical 즉시 픽스</span> / <span class='pop'>Important 진행 전 픽스</span> / Minor 메모." },
+        { type: "p", html: "리뷰어가 틀린 경우엔 *기술적 근거*로 푸시백 — 작동하는 코드/테스트로 증명." },
+        { type: "p", html: "Red Flags: \"간단해서 리뷰 생략\" / Critical 무시 / Important 미해결 채로 진행." }
+      ],
+      output: ["우선순위별로 정리된 리뷰", "Critical/Important 해결 후 진행"],
+      combos: ["receiving-code-review", "subagent-driven-development"],
+      meta: "🧐 작업당 호출 · 차단형"
+    },
+
+    "receiving-code-review": {
+      cmd: "receiving-code-review",
+      emoji: "🥋", role: "리뷰 수신자", roleEn: "RECEIVER",
+      tileSummary: "리뷰가 와도 무조건 동의하지 말고, 코드베이스에 비춰 검증한 뒤 기술적 근거가 있으면 푸시백하라고 가르칩니다",
+      heroSummary: "코드 리뷰 피드백을 받았을 때, <em>수행적 동의</em>(\"You're absolutely right!\")와 <em>맹목적 구현</em>을 모두 금지하고 — 읽기 → 이해 → 코드베이스 검증 → 기술적 평가 → 합리적 응답(또는 근거 있는 푸시백) → 한 항목씩 구현 — 순서를 강제합니다",
+      when: ["리뷰 피드백을 받았을 때 (사람·외부 모두)", "어떤 항목이라도 불명확할 때 (전부 명료해질 때까지 *아무것도 구현 X*)"],
+      howCode: ["(자동 트리거 — 리뷰 수신 시)"],
+      howNote: "외부 리뷰는 의심부터, 사람 파트너 리뷰는 신뢰부터 — 단 *수행적 동의 어구*는 금지.",
+      what: [
+        { type: "p", html: "<span class='pop'>금지 어구</span>: \"You're absolutely right!\", \"Great point!\", \"Thanks for catching that!\" — 행동으로 보여라." },
+        { type: "p", html: "외부 리뷰 5점 점검: 이 코드베이스에서 기술적으로 맞나? / 기존 기능 깨지나? / 현재 구현의 이유는? / 모든 플랫폼에서 작동하나? / 리뷰어가 전체 컨텍스트를 이해하나?" },
+        { type: "p", html: "<span class='pop'>YAGNI 점검</span>: 리뷰어가 \"제대로 구현하라\"고 하면 *grep으로 사용 여부 확인* — 안 쓰이면 제거 제안." },
+        { type: "p", html: "구현 순서: 불명확 항목 *전부* 명료화 → 차단 이슈(보안/깨짐) → 단순 픽스 → 복잡한 픽스 → 항목별 테스트." }
+      ],
+      output: ["검증된 변경", "또는 명료해진 의견 충돌"],
+      combos: ["test-driven-development", "verification-before-completion"],
+      meta: "🥋 자동 트리거 · 수행적 동의 금지"
+    },
+
+    "finishing-a-development-branch": {
+      cmd: "finishing-a-development-branch",
+      emoji: "🏁", role: "마무리꾼", roleEn: "FINISHER",
+      tileSummary: "구현이 끝났을 때 \"이제 뭐?\"로 막연해지지 않게, 테스트 검증 → 환경 감지 → 머지/PR/유지/폐기 4가지 옵션을 구조적으로 제시합니다",
+      heroSummary: "구현이 완료되고 모든 테스트가 통과한 뒤 통합 방법을 정해야 할 때, 테스트 검증 → 워크스페이스 환경 감지 → 정확히 4개의 구조적 옵션(로컬 머지 / PR / 유지 / 폐기) 중 선택 → 실행 + 적절한 cleanup을 안내합니다",
+      when: ["구현이 완료되고 모든 테스트가 통과했을 때", "\"이제 어떻게 통합하지\" 시점"],
+      howCode: ["(자동 트리거 — 모든 작업 완료 후)"],
+      howNote: "테스트 실패 시 *옵션 제시 X*. 픽스부터.",
+      what: [
+        { type: "ol", items: [
+          "<strong>Step 1</strong>: 테스트 검증 (실패면 stop)",
+          "<strong>Step 2</strong>: 환경 감지 — normal repo / named-branch worktree / detached HEAD",
+          "<strong>Step 3</strong>: 베이스 브랜치 결정 (main/master)",
+          "<strong>Step 4</strong>: 정확히 4개 옵션 제시 (detached HEAD는 3개) — 추가 설명 없이 *간결하게*",
+          "<strong>Step 5</strong>: 옵션별 실행 — 로컬 머지(머지 → 검증 → cleanup → 브랜치 삭제) / PR(푸시 → gh pr create / *cleanup 안 함*) / 유지 / 폐기(\"discard\" 입력 확인)",
+          "<strong>Step 6</strong>: cleanup — superpowers가 만든 worktree만 (`.worktrees/` 등). 호스트 환경 worktree는 건드리지 X"
+        ]},
+        { type: "p", html: "<span class='pop'>주의</span>: PR 옵션에선 worktree를 *유지*. 사용자가 PR 피드백 반영 때 필요." }
+      ],
+      output: ["통합된 작업", "옵션별로 정리된 worktree 상태"],
+      combos: ["subagent-driven-development", "executing-plans"],
+      meta: "🏁 워크플로우 종착점"
+    },
+
+    "writing-skills": {
+      cmd: "writing-skills",
+      emoji: "🛠️", role: "메타 장인", roleEn: "SMITH",
+      tileSummary: "새 스킬을 만들거나 수정해야 할 때, *문서판 TDD*로 검증되지 않은 스킬은 절대 배포 못 하게 막습니다",
+      heroSummary: "새 스킬 작성·기존 스킬 수정·배포 전 검증이 필요할 때, <em>문서판 TDD</em> 방법론(서브에이전트 압박 시나리오로 RED → 스킬 작성 GREEN → 합리화 빈틈 메우는 REFACTOR)으로 베이스라인 실패를 본 적 없는 스킬은 배포 못 하게 강제합니다",
+      when: ["새 스킬 작성 또는 기존 스킬 수정", "배포 전 검증이 필요할 때", "\"이건 너무 단순하니 테스트 생략\" 충동이 들 때"],
+      howCode: ["(스킬 작성 시)"],
+      howNote: "<span class='pop'>Iron Law</span>: 실패하는 테스트(서브에이전트 압박 시나리오) 없이 스킬 배포 X.",
+      what: [
+        { type: "p", html: "TDD 매핑: 테스트 케이스 = 압박 시나리오 / production code = SKILL.md / RED = 스킬 없을 때 베이스라인 위반 / GREEN = 스킬과 함께 준수 / REFACTOR = 합리화 빈틈 메우기." },
+        { type: "p", html: "<span class='pop'>Description은 *언제* 쓰는지만, *무엇을 하는지*는 X</span>. 워크플로우를 description에 요약하면 에이전트가 본문을 *건너뛰고* description만 따른다는 게 실측됨. 두 단계 리뷰 워크플로우인데 description에 \"리뷰 진행\"이라고 적었더니 한 단계만 했음." },
+        { type: "p", html: "Claude Search Optimization (CSO): 풍부한 description, 키워드 커버리지, 동사형 이름 (<code class='inline'>creating-skills</code> > <code class='inline'>skill-creation</code>), 토큰 효율 (자주 로드되는 스킬은 &lt;200 단어)." },
+        { type: "p", html: "Bulletproofing: 모든 합리화를 *명시적으로 차단*, Red Flags 표, \"문자가 곧 정신\" 원칙 명문화." }
+      ],
+      output: ["압박 시나리오를 통과한 스킬", "배포 가능 상태"],
+      combos: ["test-driven-development", "verification-before-completion"],
+      meta: "🛠️ META · TDD for documentation"
+    }
+  },
+
+  combos: [
+    {
+      n: "①",
+      title: "신규 기능 풀-사이클 (공식 7단계)",
+      scenario: "백지 기능을 머지까지 끌고 가는 일을, 의도부터 정렬하고 격리 worktree의 작은 작업으로 쪼개 fresh subagent + 두 단계 리뷰로 빠르게 통과시키는 7단계 워크플로우 (Jesse README 명시).",
+      flow: [
+        { skill: "brainstorming", why: "<strong>왜?</strong> 의도를 정렬 안 한 채 코드 짜는 위험을, HARD-GATE로 design.md 승인부터 받아 막으려고" },
+        { skill: "using-git-worktrees", why: "<strong>왜?</strong> 메인 브랜치를 더럽힐 위험을, 격리된 worktree와 깨끗한 baseline 검증으로 막으려고" },
+        { skill: "writing-plans", why: "<strong>왜?</strong> 구현이 막연한 막막함을, 컨텍스트 0인 후속 엔지니어도 따라할 수 있는 미니 작업으로 쪼개 풀려고" },
+        { skill: "subagent-driven-development", why: "<strong>왜?</strong> 작업당 사람 개입의 느림을, fresh subagent + 두 단계 리뷰로 빠르게 풀려고" },
+        { skill: "test-driven-development", why: "<strong>왜?</strong> 구현 정확도가 흔들리지 않게, 각 작업을 RED → GREEN 사이클로 자연스럽게 강제" },
+        { skill: "requesting-code-review", why: "<strong>왜?</strong> 이슈가 누적되면 잡기 어려운 위험을, 작업 단위마다 reviewer subagent로 차단해 막으려고" },
+        { skill: "finishing-a-development-branch", why: "<strong>왜?</strong> 통합 옵션이 모호한 막막함을, 머지/PR/유지/폐기 4가지 구조적 옵션으로 풀려고" }
+      ]
+    },
+    {
+      n: "②",
+      title: "버그 수정",
+      scenario: "버그·테스트 실패·예기치 않은 동작이 났을 때, 픽스 제안 전 4단계 root cause 조사로 원인을 잡고 회귀 테스트로 확정한 뒤 *방금 실행한* 검증으로 완료를 증명합니다.",
+      flow: [
+        { skill: "systematic-debugging", why: "<strong>왜?</strong> 픽스를 먼저 시도하면 root cause를 놓치는 위험을, 4단계 조사로 *원인부터* 잡아 막으려고" },
+        { skill: "test-driven-development", why: "<strong>왜?</strong> Phase 4의 실패하는 테스트 작성이 사실상 RED 한 사이클이라, 그 흐름을 그대로 이어 가려고" },
+        { skill: "verification-before-completion", why: "<strong>왜?</strong> \"아마 통과할 거예요\"는 거짓말이니까, 방금 실행한 명령 출력으로 완료를 증명하려고" }
+      ]
+    },
+    {
+      n: "③",
+      title: "여러 독립 버그 동시 처리",
+      scenario: "독립적 실패 여러 개를 순차로 조사하면 시간 낭비일 때, 영역마다 fresh subagent를 *동시에* 디스패치해 병렬 처리한 뒤 통합 검증으로 충돌이 없는지 확인합니다.",
+      flow: [
+        { skill: "dispatching-parallel-agents", why: "<strong>왜?</strong> 독립 실패를 순차로 잡으면 시간 낭비라, 영역마다 fresh subagent를 동시에 디스패치해 풀려고" },
+        { skill: "systematic-debugging", why: "<strong>왜?</strong> 각 subagent도 랜덤 픽스 위험이 있으니까, 4단계 root cause를 그대로 따르도록 강제" },
+        { skill: "verification-before-completion", why: "<strong>왜?</strong> 통합 후 충돌이 있을 수 있으니까, 전체 스위트 재실행으로 직접 검증해 막으려고" }
+      ]
+    },
+    {
+      n: "④",
+      title: "별도 세션에서 plan 실행",
+      scenario: "subagent 지원이 없는 환경이거나 사람 검토 체크포인트가 필요할 때, 격리 워크스페이스에서 plan을 비판적으로 검토하고 일괄 실행한 뒤 마무리 옵션을 받습니다.",
+      flow: [
+        { skill: "using-git-worktrees", why: "<strong>왜?</strong> 격리된 시작점 없이 baseline이 흐려지는 위험을, 깨끗한 worktree 베이스라인으로 막으려고" },
+        { skill: "executing-plans", why: "<strong>왜?</strong> subagent 없이 plan을 일괄 실행할 때 사고 위험을, 비판적 검토와 자연스러운 체크포인트로 풀려고" },
+        { skill: "finishing-a-development-branch", why: "<strong>왜?</strong> 통합 단계가 silent하게 실패할 위험을, 4옵션으로 명시적 결정해 막으려고" }
+      ]
+    },
+    {
+      n: "⑤",
+      title: "코드 리뷰 받고 대응",
+      scenario: "리뷰가 왔을 때 수행적 동의나 맹목적 구현으로 사고 나지 않게, 기술 검증부터 한 뒤 한 항목씩 RED→GREEN 픽스 → *방금 실행한* 검증으로 완료합니다.",
+      flow: [
+        { skill: "receiving-code-review", why: "<strong>왜?</strong> 수행적 동의·맹목적 구현으로 사고 나는 위험을, 코드베이스에 비춰 검증부터 해 막으려고" },
+        { skill: "test-driven-development", why: "<strong>왜?</strong> 픽스가 의도를 빗나갈 위험을, 한 항목씩 실패 테스트 먼저 써서 막으려고" },
+        { skill: "verification-before-completion", why: "<strong>왜?</strong> 픽스 작동 주장에 거짓말이 끼어들지 않게, 직접 명령을 실행해 출력으로 증명" }
+      ]
+    },
+    {
+      n: "⑥",
+      title: "메타: 새 스킬 만들기",
+      scenario: "팀 워크플로우를 스킬로 패키징할 때, 문서판 TDD로 베이스라인 압박 시나리오를 먼저 보고 합리화 빈틈을 메운 뒤 검증을 통과해야만 배포합니다.",
+      flow: [
+        { skill: "writing-skills", why: "<strong>왜?</strong> 검증 안 된 스킬을 배포하면 사고 나니까, 압박 시나리오로 베이스라인 RED부터 보려고" },
+        { skill: "test-driven-development", why: "<strong>왜?</strong> writing-skills의 REQUIRED BACKGROUND라, RED → GREEN → REFACTOR 원칙을 문서에 그대로 적용" },
+        { skill: "verification-before-completion", why: "<strong>왜?</strong> 실제로 압박 시나리오를 통과하는지 확인해야, 배포 전 검증으로 완료를 증명" }
+      ]
+    }
+  ]
+},
+
+// ────────────────────────────────────────────────────────────────
+// ❸ GStack (garrytan/gstack · Garry Tan, YC)
+//   44개 중 22개 큐레이션. 콘텐츠는 한국어 요약/해석.
+// ────────────────────────────────────────────────────────────────
+gstack: {
+  preTitle: "GSTACK · GARRY TAN (YC)",
+  lead: "Garry Tan(YC)이 만든 <em>풀 라이프사이클 프레임워크</em>. 전체 44개 중 <strong>22개를 큐레이션</strong>해서, ideation부터 production canary 모니터링까지 한 흐름으로 관리하는 도구들.",
+  footer: '원문 저장소: <a href="https://github.com/garrytan/gstack" target="_blank" rel="noopener">github.com/garrytan/gstack</a><br>스킬 색인: <a href="https://github.com/garrytan/gstack/blob/main/docs/skills.md" target="_blank" rel="noopener">docs/skills.md</a>',
+
+  skills: {
+
+    "office-hours": {
+      cmd: "/office-hours",
+      emoji: "🛋️", role: "문제 재정의자", roleEn: "REFRAMER",
+      tileSummary: "기능 요청을 바로 코딩하면 잘못된 걸 만들 위험일 때, YC 스타일로 *문제부터* 다시 정의해 디자인 문서로 굳혀 줍니다",
+      heroSummary: "검증된 *문제* 없이 기능 요청만으로 코드를 짜기 시작하면 잘못된 걸 만들 위험이 클 때, YC식 '오피스 아워'로 문제를 재정의하고 검증된 전제와 2~3가지 구현 접근안을 디자인 문서로 굳혀 줍니다",
+      when: ["어떤 기획·코드 작업을 시작하기 *직전*", "스타트업 모드: PMF 검증이 필요할 때", "빌더 모드: 해커톤·프로토타입"],
+      howCode: ["/office-hours"],
+      howNote: "다른 plan·코드 스킬을 호출하기 전에 가장 먼저 돌립니다.",
+      what: [
+        { type: "p", html: "기능 요청을 그대로 받아들이지 않고 <em>이게 진짜 풀어야 할 문제인지</em>부터 다시 묻습니다." },
+        { type: "p", html: "산출 4가지: 재정의된 문제 진술 / 검증된 전제 / 2~3가지 구현 접근 + 노력 추정 / *내 사고 방식*에 대한 관찰." }
+      ],
+      output: ["design 문서 (재정의된 문제 + 접근안)"],
+      combos: ["plan-ceo-review", "plan-eng-review", "autoplan"],
+      meta: "🛋️ 라이프사이클의 첫 단계 · YC 스타일"
+    },
+
+    "plan-ceo-review": {
+      cmd: "/plan-ceo-review",
+      emoji: "👑", role: "비전 검증관", roleEn: "VISIONARY",
+      tileSummary: "80% 솔루션이 출시되기 직전 *10점짜리 버전*이 가능한지 묻고 싶을 때, 4가지 모드로 scope를 첫 원칙부터 다시 잡습니다",
+      heroSummary: "Plan이 실현 가능성에 최적화되어 *10점 버전*을 놓칠 위험이 있을 때, 사용자 공감을 근거로 scope를 다시 결정합니다 (확장 / 선택 확장 / 유지 / 축소 4가지 모드)",
+      when: ["/office-hours 직후 첫 원칙 재검토", "\"이 제품이 진짜 무엇을 위한 건지\" 다시 묻고 싶을 때"],
+      howCode: ["/plan-ceo-review"],
+      howNote: "각 scope 결정에 사용자 공감 추론을 강제로 붙임.",
+      what: [
+        { type: "p", html: "예시 변환: \"사진 업로드 기능\" → <em>\"판매자가 전환률 높은 리스팅을 만들도록 돕는 기능\"</em>. 표면적 기능에서 *사용자 가치*로 재정의." },
+        { type: "p", html: "<span class='pop'>4가지 모드</span>: 확장(더 야심차게) / 선택 확장(일부만) / 유지 / 축소(YAGNI)." }
+      ],
+      output: ["scope 결정이 박힌 제품 비전 문서"],
+      combos: ["plan-design-review", "plan-eng-review", "autoplan"],
+      meta: "👑 founder mode · 첫 원칙 검토"
+    },
+
+    "plan-design-review": {
+      cmd: "/plan-design-review",
+      emoji: "🎨", role: "UI 상태 감독관", roleEn: "UI-AUDITOR",
+      tileSummary: "Plan이 백엔드 로직만 다루고 빈 상태·에러·로딩이 통째로 빠져 있을 때, 차원별로 0~10 점수와 10점 예시로 plan을 인터랙티브 보강합니다",
+      heroSummary: "Plan이 backend 로직만 적혀 있고 빈/에러/로딩 같은 인터랙션 상태가 미정의일 때, UI 차원별로 0~10 점수와 10점 예시를 제시하며 정보 계층·5+ 상태 커버리지·모바일 동작·AI 슬롭 위험을 함께 plan에 채워 넣습니다",
+      when: ["plan-eng-review 전 UI 상태 점검", "기능마다 5+ 인터랙션 상태가 누락됐을 때"],
+      howCode: ["/plan-design-review"],
+      howNote: "코드 짜기 *전에* UI 상태를 plan에 미리 박는 게 핵심.",
+      what: [
+        { type: "p", html: "각 UI 차원에 0~10 점수 매기고 *10점이 어떤 모습인지* 직접 보여 줍니다." },
+        { type: "p", html: "기능당 5+ 상태 커버리지 강제: 빈 / 로딩 / 에러 / 부분 / 성공." }
+      ],
+      output: ["UI 상태가 채워진 plan", "AI-slop 위험 완화"],
+      combos: ["plan-eng-review", "design-consultation", "autoplan"],
+      meta: "🎨 plan 단계 · 5+ 상태 커버리지"
+    },
+
+    "plan-eng-review": {
+      cmd: "/plan-eng-review",
+      emoji: "⚙️", role: "기술 척추", roleEn: "ARCHITECT",
+      tileSummary: "야심찬 plan에 기술적 척추가 없어 race condition·N+1·edge case가 production에서 터지기 *전에*, 가설을 다이어그램으로 강제로 끄집어내 락인합니다",
+      heroSummary: "야심찬 plan에 기술적 척추가 없어 race condition·N+1·edge case가 *production에서* 발견될 위험이 클 때, 시스템·데이터플로우·상태 머신 다이어그램과 컴포넌트 경계, 실패 모드, edge case 매트릭스, 테스트 커버리지 스켈레톤으로 가설을 강제 락인합니다",
+      when: ["CEO 리뷰 후, 코딩 *전*", "race condition·N+1·edge case 미정의 의심"],
+      howCode: ["/plan-eng-review"],
+      howNote: "숨은 기술 가정을 다이어그램으로 강제 추출.",
+      what: [
+        { type: "ul", items: [
+          "시스템 / 데이터플로우 / 상태 머신 다이어그램",
+          "컴포넌트 경계 + 실패 모드 매핑",
+          "edge case 매트릭스",
+          "테스트 커버리지 스켈레톤"
+        ]}
+      ],
+      output: ["기술 디자인 문서 (다이어그램 + 매트릭스)"],
+      combos: ["review", "qa", "autoplan"],
+      meta: "⚙️ plan 단계 · 코딩 직전 락인"
+    },
+
+    "design-consultation": {
+      cmd: "/design-consultation",
+      emoji: "🎨", role: "디자인 시스템 빌더", roleEn: "BUILDER",
+      tileSummary: "디자인 시스템·미학·타이포가 모두 0에서 시작이라 generic하고 잊히기 쉬운 UI를 만들 위험일 때, 카테고리를 리서치해 안전한 선택과 의도된 위험을 함께 제안합니다",
+      heroSummary: "시작점이 zero (디자인 시스템·미학·타이포 결정 안 됨)라 generic 한 UI 위험이 클 때, 카테고리를 리서치해 안전한 선택과 의도된 창의적 위험을 함께 제안하고 완전한 디자인 시스템을 한 번에 마련해 줍니다",
+      when: ["새 프로젝트 디자인 시작점", "어떤 visual 구현보다 *먼저*"],
+      howCode: ["/design-consultation"],
+      howNote: "DESIGN.md와 CLAUDE.md를 함께 갱신해 미래 세션이 자동 참조.",
+      what: [
+        { type: "p", html: "산출물: 타이포그래피 + 컬러 팔레트(hex) + 스페이싱 스케일 + 레이아웃 + 모션." },
+        { type: "p", html: "라이트/다크 인터랙티브 미리보기 + DESIGN.md + CLAUDE.md 갱신." }
+      ],
+      output: ["완전한 디자인 시스템", "DESIGN.md + 인터랙티브 미리보기"],
+      combos: ["design-shotgun", "design-html", "design-review"],
+      meta: "🎨 디자인 시작점 · zero → 시스템"
+    },
+
+    "design-shotgun": {
+      cmd: "/design-shotgun",
+      emoji: "🎯", role: "변형 생성자", roleEn: "VARIATIONIST",
+      tileSummary: "한 디자인이 정답인지 확신 없을 때, AI로 3가지 시각 변형을 생성하고 비교 보드로 띄워 *내 취향*을 세션 간 기억합니다",
+      heroSummary: "한 디자인 방향에 확신이 없어 옵션 비교가 필요할 때, 3가지 시각 변형(PNG)을 생성해 비교 보드로 나란히 띄우고 사용자의 취향 선호를 세션 간 기억합니다",
+      when: ["디자인 방향 결정 전 옵션 탐색", "취향 학습이 누적되길 원할 때"],
+      howCode: ["/design-shotgun"],
+      howNote: "사용자 선택이 향후 다른 디자인 스킬에 영향을 줌.",
+      what: [
+        { type: "p", html: "3개의 *근본적으로 다른* 디자인을 생성 — 한 가지 방향에 갇히지 않게." },
+        { type: "p", html: "비교 보드 + 취향 누적 기억으로 다음 호출에서 학습 적용." }
+      ],
+      output: ["3개 디자인 변형 PNG + 비교 보드", "갱신된 취향 선호"],
+      combos: ["design-consultation", "design-html", "design-review"],
+      meta: "🎯 옵션 탐색 · 취향 누적"
+    },
+
+    "design-html": {
+      cmd: "/design-html",
+      emoji: "📐", role: "HTML 장인", roleEn: "HTML-CRAFTER",
+      tileSummary: "승인된 mockup이나 CEO plan에서 production 품질 HTML이 필요할 때, Pretext 기반 반응형(텍스트 리플로우·동적 높이)으로 만들어 줍니다",
+      heroSummary: "디자인 결정이 끝나 production 품질의 반응형 HTML이 필요할 때, Pretext(텍스트 리플로우와 동적 높이 처리)를 활용해 mockup·CEO plan·zero 어디서든 시작할 수 있는 HTML을 생성합니다",
+      when: ["승인된 mockup → 구현", "CEO plan → 첫 시각 구현", "zero에서 시작"],
+      howCode: ["/design-html"],
+      howNote: "다른 디자인 스킬과 자연스럽게 연결.",
+      what: [
+        { type: "p", html: "<em>Pretext</em>: 텍스트가 reflow되고 컨테이너 높이가 동적 — 진짜 반응형." },
+        { type: "p", html: "3가지 입력: 승인 mockup / CEO plan / zero." }
+      ],
+      output: ["production 품질 반응형 HTML"],
+      combos: ["design-consultation", "design-shotgun", "design-review"],
+      meta: "📐 production HTML · Pretext 기반"
+    },
+
+    "design-review": {
+      cmd: "/design-review",
+      emoji: "🔎", role: "디자인 부채 청소부", roleEn: "DESIGN-AUDITOR",
+      tileSummary: "라이브 사이트에 그라디언트·generic 그리드·AI 패턴이 누적돼 제품 정체성이 흐려질 때, 80항목 체크리스트로 atomic 커밋 단위 자동 픽스",
+      heroSummary: "라이브 사이트에 디자인 부채가 누적될 때, 80항목 체크리스트로 시각 감사를 수행하고 CSS-only 발견은 *atomic 커밋*(픽스 1건당 1커밋)으로 자동 적용합니다",
+      when: ["구현 완료 후 시각 감사", "디자인 부채 누적 의심"],
+      howCode: ["/design-review"],
+      howNote: "각 픽스가 별도 커밋이라 bisect 가능.",
+      what: [
+        { type: "p", html: "before/after 스크린샷 비교." },
+        { type: "p", html: "<span class='pop'>점수 보고</span>: 디자인 점수 (C → B 식), AI Slop 점수 (D → A 식)." }
+      ],
+      output: ["before/after + atomic 커밋들 + 점수 트렌드"],
+      combos: ["design-consultation", "design-shotgun", "design-html"],
+      meta: "🔎 80항목 체크리스트 · atomic 커밋"
+    },
+
+    "review": {
+      cmd: "/review",
+      emoji: "🧐", role: "스태프 엔지니어", roleEn: "STAFF-AUDITOR",
+      tileSummary: "테스트 통과·CI 그린인데 production은 깨지는 사고를 막고 싶을 때, 스타일 잔소리가 아닌 *편집증적 구조 점검*을 수행합니다",
+      heroSummary: "ship 전, 테스트 통과·CI 그린인데도 production에서 N+1·race condition·잊힌 enum 핸들러가 살아남는 사고를 막기 위해, 스타일이 아닌 *구조* 차원의 편집증적 감사를 합니다",
+      when: ["/ship 직전", "production 사고 위험 의심"],
+      howCode: ["/review"],
+      howNote: "obvious 픽스는 자동 적용, 모호한 건 사용자 결정.",
+      what: [
+        { type: "ul", items: [
+          "<span class='pop'>High-confidence</span>: dead code 등 자동 픽스",
+          "<span class='pop'>Ambiguous</span>: 사용자 콜",
+          "<span class='pop'>완성도 갭</span>: 빠진 부분 플래그"
+        ]}
+      ],
+      output: ["픽스된 high-confidence 발견", "사용자 결정 대기 모호한 발견", "완성도 갭 리포트"],
+      combos: ["qa", "ship", "investigate"],
+      meta: "🧐 ship 직전 · 편집증적 구조 점검"
+    },
+
+    "investigate": {
+      cmd: "/investigate",
+      emoji: "🔍", role: "근본 원인 추적자", roleEn: "TRACER",
+      tileSummary: "버그 원인이 숨어 있어 팀이 thrash하며 랜덤 픽스로 시간 낭비할 때, *원인 조사 없이는 픽스 금지* (Iron Law)로 데이터 흐름과 가설 검증을 강제합니다",
+      heroSummary: "production incident나 QA가 발견한 버그를 잡을 때, <em>원인을 조사하기 전엔 어떤 픽스도 시도 못 하게</em> 막는 Iron Law로 데이터 흐름 추적과 가설 검증을 체계적으로 수행합니다",
+      when: ["production incident", "QA-found 버그", "랜덤 픽스 thrash 위험"],
+      howCode: ["/investigate"],
+      howNote: "<span class='pop'>Iron Law</span>: no fixes without investigation first.",
+      what: [
+        { type: "p", html: "체계적 root-cause trace: 데이터 흐름 → 가설 → 검증 → 픽스." },
+        { type: "p", html: "<span class='pop'>3번 픽스 실패 시 멈춤</span> — 더 이상 픽스 시도 X, 아키텍처 자체를 의심하라." },
+        { type: "p", html: "/freeze 가 자동 활성화되어 *조사 중 다른 영역 수정* 사고 방지." }
+      ],
+      output: ["root-cause trace", "타깃 픽스 + 회귀 테스트"],
+      combos: ["qa", "review", "ship"],
+      meta: "🔍 IRON LAW · /freeze 자동 활성"
+    },
+
+    "qa": {
+      cmd: "/qa",
+      emoji: "🧪", role: "테스터", roleEn: "QA",
+      tileSummary: "수동 테스트는 edge case를 놓치고 자동 테스트는 짠 것만 잡을 때, diff-aware(feature 브랜치)·systematic(main) 모드로 자동 회귀 테스트까지 만들어 줍니다",
+      heroSummary: "코딩 후 수동/자동 테스트의 빈틈을 메우기 위해, 브랜치에 따라 diff-aware(feature)나 systematic(main) 모드로 테스트하고 *발견된 버그마다 회귀 테스트를 자동 생성*합니다",
+      when: ["코딩 직후, /ship 전", "정기 systematic 검증"],
+      howCode: ["/qa"],
+      howNote: "발견 버그를 그 자리에서 픽스하고 회귀 테스트로 굳힘. (보고만 원하면 /qa-only)",
+      what: [
+        { type: "p", html: "QA 리포트: 스크린샷 + severity 정렬 버그 목록." },
+        { type: "p", html: "각 픽스마다 <span class='pop'>회귀 테스트 자동 생성</span> — 같은 버그 재발 방지." }
+      ],
+      output: ["QA 리포트", "버그 픽스 + 자동 회귀 테스트"],
+      combos: ["review", "investigate", "ship"],
+      meta: "🧪 자동 회귀 테스트 생성 · diff-aware"
+    },
+
+    "codex": {
+      cmd: "/codex",
+      emoji: "🔄", role: "교차 검증관", roleEn: "CROSS-CHECKER",
+      tileSummary: "Claude만의 시각이 편향됐을 수 있을 때, OpenAI Codex의 *독립* 리뷰로 교차 검증합니다 (3 모드: 게이트/적대/오픈)",
+      heroSummary: "코드 리뷰가 한 모델의 시각에만 의존해 편향될 위험일 때, OpenAI Codex의 독립 리뷰로 교차 검증합니다 (3 모드: 코드 리뷰 게이트, 적대적 챌린지, 오픈 컨설팅)",
+      when: ["중요한 PR 직전", "Claude의 판단을 외부 시각으로 검증하고 싶을 때"],
+      howCode: ["/codex"],
+      howNote: "다른 모델 비용·시간 발생 — 중요한 결정에만.",
+      what: [
+        { type: "ul", items: [
+          "<em>코드 리뷰 게이트</em>: ship 전 OpenAI 통과 강제",
+          "<em>적대적 챌린지</em>: 약점·반론 수집",
+          "<em>오픈 컨설팅</em>: 자유 형식 의견"
+        ]}
+      ],
+      output: ["OpenAI Codex의 독립 리뷰 결과"],
+      combos: ["review", "ship"],
+      meta: "🔄 cross-model 검증 · 3 모드"
+    },
+
+    "ship": {
+      cmd: "/ship",
+      emoji: "🚢", role: "출시자", roleEn: "SHIPPER",
+      tileSummary: "재밌는 작업 끝나고 지루한 릴리스 작업(sync·test·push·PR)을 미루거나 잊을 때, 한 명령으로 모두 처리하고 PR까지 만듭니다",
+      heroSummary: "ready 브랜치에 패스하는 리뷰가 있을 때, sync·test·커버리지 감사·push·PR 생성을 한 번에 처리합니다 (테스트 프레임워크가 없으면 부트스트랩까지)",
+      when: ["리뷰 통과한 ready 브랜치", "릴리스 절차를 미루지 않고 싶을 때"],
+      howCode: ["/ship"],
+      howNote: "테스트 프레임워크가 없으면 자동 부트스트랩.",
+      what: [
+        { type: "p", html: "PR 본문에 <em>커버리지 다이어그램</em> 자동 포함: <code class='inline'>Tests: 42 → 47 (+5 new)</code>." },
+        { type: "p", html: "CI 통과 + 리뷰 준비 상태 보고." }
+      ],
+      output: ["PR (커버리지 다이어그램 포함)", "CI 통과", "리뷰 준비 상태"],
+      combos: ["land-and-deploy", "review", "qa"],
+      meta: "🚢 sync·test·push·PR 한 번에"
+    },
+
+    "land-and-deploy": {
+      cmd: "/land-and-deploy",
+      emoji: "🛬", role: "배포 마스터", roleEn: "DEPLOYER",
+      tileSummary: "PR 승인됐는데 그 다음 머지·CI 대기·배포·검증의 각 단계가 silent하게 실패할 위험일 때, 한 명령으로 승인 → production 검증까지",
+      heroSummary: "PR 승인 후 머지·CI 대기·배포·health check 각 단계가 silent하게 실패할 위험이 있을 때, 한 명령으로 승인부터 production 검증까지 끌고 가고 canary 모니터링까지 자동 활성화합니다",
+      when: ["PR 승인 직후"],
+      howCode: ["/land-and-deploy"],
+      howNote: "/canary가 자동 활성화되어 배포 후 모니터링 시작.",
+      what: [
+        { type: "ol", items: [
+          "PR 머지",
+          "CI 통과 대기",
+          "production 배포",
+          "health check 검증",
+          "/canary 자동 시작"
+        ]}
+      ],
+      output: ["배포된 production", "활성 canary 모니터링"],
+      combos: ["ship", "canary"],
+      meta: "🛬 한 명령 · 승인 → production 검증"
+    },
+
+    "canary": {
+      cmd: "/canary",
+      emoji: "🐤", role: "모니터", roleEn: "MONITOR",
+      tileSummary: "배포 끝나고 노트북 닫는 사이 사용자가 console error·404·성능 추락을 보는 사고를 막기 위해, 핵심 페이지를 루프하며 trouble을 감지합니다",
+      heroSummary: "배포 직후나 위험한 릴리스 후 사용자가 console error·Core Web Vitals 추락·페이지 404를 먼저 보는 사고를 막기 위해, 핵심 페이지를 루프 모니터링하며 이상치 발생 시 알림을 띄웁니다",
+      when: ["/land-and-deploy 직후", "위험한 배포 후 정기 모니터링"],
+      howCode: ["/canary"],
+      howNote: "스케줄링 가능 — 위험한 배포는 더 오래.",
+      what: [
+        { type: "p", html: "실시간 감시 대상: 콘솔 에러 / Core Web Vitals (LCP·CLS·INP) / 페이지 실패 (404·5xx)." },
+        { type: "p", html: "이상 탐지 시 즉시 알림 — 사용자가 보기 전에 잡음." }
+      ],
+      output: ["실시간 모니터링 + 이상 탐지 알림"],
+      combos: ["land-and-deploy", "ship"],
+      meta: "🐤 배포 후 모니터 · Core Web Vitals 감시"
+    },
+
+    "autoplan": {
+      cmd: "/autoplan",
+      emoji: "🤖", role: "자동 파이프라인", roleEn: "AUTOPILOT",
+      tileSummary: "CEO → Design → Eng 리뷰를 순차로 돌리면 15~30개 중간 질문이 폭격일 때, 완성도·일관성·되돌릴 수 있는 결정은 자동 해결, *취향 결정만* 승인 게이트로 띄웁니다",
+      heroSummary: "/plan-* 리뷰들을 사람 개입을 최소화하면서 한 번에 돌리고 싶을 때, 완성도·일관성·되돌릴 수 있는 결정은 자동 해결하고 *취향 결정만* 사용자 승인 게이트로 띄우는 자동화 파이프라인입니다",
+      when: ["plan-* 리뷰 3개를 한 번에 돌리고 싶을 때", "중간 질문 폭격을 피하고 취향 결정에만 집중하고 싶을 때"],
+      howCode: ["/autoplan"],
+      howNote: "사용자에게 묻는 빈도가 줄지만 취향 결정은 여전히 인간이.",
+      what: [
+        { type: "p", html: "자동 해결: 완성도 / 일관성 / 되돌릴 수 있는 결정." },
+        { type: "p", html: "에스컬레이션: <span class='pop'>취향 결정만</span> 한 번에 모아 사용자 승인 게이트." }
+      ],
+      output: ["한 번에 리뷰된 plan", "취향 결정 승인 게이트"],
+      combos: ["office-hours", "plan-ceo-review", "plan-eng-review"],
+      meta: "🤖 META · CEO + Design + Eng 리뷰 자동화"
+    },
+
+    "retro": {
+      cmd: "/retro",
+      emoji: "📊", role: "회고 분석가", roleEn: "RETROSPECTOR",
+      tileSummary: "한 주가 끝나고 \"뭐가 일어났지?\"가 vibes에 머무를 때, 컨트리뷰터별 메트릭과 shipping streak·테스트 헬스·성장 포인트를 JSON 스냅샷으로 트렌드 추적합니다",
+      heroSummary: "주간 회고가 vibes만으로는 부족할 때, 팀 인지(컨트리뷰터별 메트릭 / shipping streak / 테스트 헬스 / 성장 기회)를 JSON 스냅샷으로 저장해 *트렌드*를 추적하게 만듭니다",
+      when: ["주간 정기 회고", "팀 메트릭 트렌드 추적"],
+      howCode: ["/retro"],
+      howNote: ".context/retros/에 누적 JSON 스냅샷 저장.",
+      what: [
+        { type: "p", html: "메트릭: 커밋 수 / LOC / 테스트 비율 / 사람별 칭찬·성장 포인트." },
+        { type: "p", html: "트렌드 비교: 지난 주 vs 이번 주, 회복 곡선·번아웃 신호." }
+      ],
+      output: ["JSON 스냅샷 (.context/retros/)", "팀 트렌드 리포트"],
+      combos: ["learn", "health"],
+      meta: "📊 META · 주간 + JSON 트렌드"
+    },
+
+    "learn": {
+      cmd: "/learn",
+      emoji: "🧠", role: "기관 기억", roleEn: "ARCHIVIST",
+      tileSummary: "프로젝트마다 학습한 패턴·함정·선호가 세션 종료와 함께 사라질 때, 학습을 누적하고 다른 스킬이 자동으로 참조하게 만들어 팀 플레이북으로 export합니다",
+      heroSummary: "각 프로젝트가 가르쳐 주는 gstack 패턴·함정·선호가 세션 종료와 함께 사라지는 문제를 막기 위해, 학습을 confidence 등급(high/medium/low)으로 누적하고 *다른 스킬이 자동으로 참조*하게 만듭니다",
+      when: ["진행 중 학습이 발생할 때", "팀 노하우를 export하고 싶을 때"],
+      howCode: ["/learn"],
+      howNote: "다른 스킬이 \"Prior learning applied\" 주석으로 자동 활용.",
+      what: [
+        { type: "p", html: "23+ 학습 누적 (high / medium / low confidence)." },
+        { type: "p", html: "검색 / 프루닝(stale 학습 제거) / 팀 플레이북 export." },
+        { type: "p", html: "다른 스킬이 자동 consult — <em>\"Prior learning applied\"</em> 주석으로 표시." }
+      ],
+      output: ["누적 학습 + 검색 가능", "팀 플레이북 export"],
+      combos: ["retro", "health"],
+      meta: "🧠 META · 다른 스킬 자동 참조"
+    },
+
+    "health": {
+      cmd: "/health",
+      emoji: "💓", role: "건강 진단", roleEn: "HEALTH-MONITOR",
+      tileSummary: "타입체커·린터·테스트·dead code가 따로 따로 동작해 코드 품질이 한눈에 안 보일 때, 0~10 가중 점수와 트렌드 대시보드로 묶어 보여 줍니다",
+      heroSummary: "코드 품질 신호(타입체커·린터·테스트·dead code)가 도구마다 흩어져 한눈에 안 보일 때, 0~10 가중 점수와 트렌드를 보여 주는 대시보드로 묶어 정기 건강 검진을 가능하게 합니다",
+      when: ["정기 코드 품질 점검", "회고와 함께 건강 신호 보기"],
+      howCode: ["/health"],
+      howNote: "/retro와 결합해 트렌드 추적.",
+      what: [
+        { type: "p", html: "통합 신호: 타입체커 / 린터 / 테스트 / dead code 탐지." },
+        { type: "p", html: "0~10 가중 점수 + 시간에 따른 트렌드 그래프." }
+      ],
+      output: ["0~10 코드 품질 점수 + 트렌드 대시보드"],
+      combos: ["retro", "learn"],
+      meta: "💓 META · 0~10 가중 점수"
+    },
+
+    "careful": {
+      cmd: "/careful",
+      emoji: "⚠️", role: "안전망", roleEn: "GUARDRAIL",
+      tileSummary: "한 번의 오타로 production이 내려갈 위험일 때, 모든 bash 명령을 위험 패턴 대조해 *경고만* 띄우고 사용자가 override 가능하게 합니다",
+      heroSummary: "production 근처 작업이나 파괴적 명령 가까이서 한 번의 오타가 큰 사고로 번질 위험일 때, 모든 bash 명령을 위험 패턴(rm -rf / DROP TABLE / git push --force 등)에 대조해 *경고*를 띄우고 사용자가 case-by-case로 override할 수 있게 합니다",
+      when: ["production 근처 작업", "파괴적 작업 가까이", "안전망이 필요한 세션"],
+      howCode: ["/careful"],
+      howNote: "빌드 산출물 cleanup 같은 안전한 패턴은 화이트리스트.",
+      what: [
+        { type: "p", html: "감지 패턴: <code class='inline'>rm -rf</code> / <code class='inline'>DROP TABLE</code> / <code class='inline'>git push --force</code> / <code class='inline'>:force = true</code> 등." },
+        { type: "p", html: "*sandbox가 아닌 사고 방지* — 사용자가 의도적이라면 어떤 경고든 override 가능." }
+      ],
+      output: ["위험 명령 경고 (override 가능)"],
+      combos: ["freeze", "guard"],
+      meta: "⚠️ SAFETY · 경고만 (override 가능)"
+    },
+
+    "freeze": {
+      cmd: "/freeze",
+      emoji: "🧊", role: "영역 보호자", roleEn: "AREA-LOCK",
+      tileSummary: "billing 버그 디버깅 중 Claude가 *auth 미들웨어를 고치는* 사고를 막고 싶을 때, 한 디렉토리 외 Edit/Write를 차단합니다 (Bash는 살림)",
+      heroSummary: "한 영역을 디버깅하다가 다른 영역을 실수로 수정하는 사고(예: billing 버그 보다가 auth 미들웨어 변경)를 막기 위해, Edit/Write를 한 디렉토리 안으로 묶어 두는 *사고 방지* 게이트입니다 (Bash는 그대로 — sandbox가 아님)",
+      when: ["디버깅 중 다른 영역 보호", "/investigate가 자동 활성화"],
+      howCode: ["/freeze", "/unfreeze"],
+      howNote: "/investigate 사용 시 자동 활성. 수동 활성도 가능.",
+      what: [
+        { type: "p", html: "Edit / Write 도구가 boundary 밖 파일에 동작 안 함." },
+        { type: "p", html: "Bash는 그대로 — *전체 sandbox가 아니라* 우발 사고 방지용." }
+      ],
+      output: ["디렉토리 안으로 갇힌 Edit/Write"],
+      combos: ["careful", "guard", "investigate"],
+      meta: "🧊 SAFETY · /investigate 자동 활성"
+    },
+
+    "guard": {
+      cmd: "/guard",
+      emoji: "🛡️", role: "종합 안전 모드", roleEn: "FULL-GUARD",
+      tileSummary: "production 작업에 최대 안전(파괴 명령 경고 + 디렉토리 스코프) 모두 필요할 때, /careful과 /freeze를 한 명령으로 묶어 활성화합니다",
+      heroSummary: "production 작업에 최대 안전 모드가 필요할 때, /careful(파괴적 명령 경고)과 /freeze(디렉토리 스코프)를 한 명령으로 함께 활성화하는 단축 스킬입니다",
+      when: ["production 직접 작업", "파괴적 명령 + 영역 보호 둘 다 필요할 때"],
+      howCode: ["/guard"],
+      howNote: "/unfreeze로 디렉토리 제약은 해제 가능.",
+      what: [
+        { type: "p", html: "= /careful + /freeze 한 번에 활성화." },
+        { type: "p", html: "전체 세션 동안 유지되며 /unfreeze로 freeze 부분만 풀 수 있음." }
+      ],
+      output: ["/careful + /freeze 동시 활성"],
+      combos: ["careful", "freeze"],
+      meta: "🛡️ SAFETY · /careful + /freeze 통합"
+    }
+
+  }, // end of skills
+
+  combos: [
+    {
+      n: "①",
+      title: "공식 풀 라이프사이클: 백지부터 production 검증까지",
+      scenario: "한 기능을 zero에서 production 모니터링까지 끌고 갈 때, 문제 재정의 → 4단계 plan 리뷰 → 편집증 점검 → QA → ship → 배포 → canary 모니터링까지 한 흐름으로 흘려보냅니다 (gstack의 핵심 워크플로우).",
+      flow: [
+        { skill: "office-hours", why: "<strong>왜?</strong> 검증 안 된 문제를 풀 위험을, YC식 재정의로 *문제부터* 다시 잡아 막으려고" },
+        { skill: "plan-ceo-review", why: "<strong>왜?</strong> 80% 솔루션이 10점 버전을 놓칠 위험을, 4가지 모드로 scope 재검토해 막으려고" },
+        { skill: "plan-design-review", why: "<strong>왜?</strong> 빈/에러/로딩 등 UI 상태가 코드 후 발견되는 사고를, plan에서 미리 채워 막으려고" },
+        { skill: "plan-eng-review", why: "<strong>왜?</strong> race condition·N+1·edge case가 production에서 터질 위험을, 다이어그램으로 가설 락인해 막으려고" },
+        { skill: "review", why: "<strong>왜?</strong> 테스트 통과·CI 그린이라도 production이 깨질 위험을, 스타일이 아닌 구조 차원에서 잡으려고" },
+        { skill: "qa", why: "<strong>왜?</strong> edge case를 놓친 채 ship할 위험을, diff-aware 테스트와 자동 회귀 생성으로 막으려고" },
+        { skill: "ship", why: "<strong>왜?</strong> 릴리스 작업을 미루거나 잊을 위험을, sync·test·push·PR을 한 명령으로 묶어 풀려고" },
+        { skill: "land-and-deploy", why: "<strong>왜?</strong> 머지·CI·배포·검증 각 단계가 silent하게 실패할 위험을, 한 명령으로 production 검증까지 끌고 가서 막으려고" },
+        { skill: "canary", why: "<strong>왜?</strong> 배포 후 사용자가 console error·404를 먼저 볼 위험을, 핵심 페이지 루프 모니터링으로 미리 잡으려고" }
+      ]
+    },
+    {
+      n: "②",
+      title: "자동 리뷰 파이프라인: 사람 개입 최소화",
+      scenario: "plan 리뷰 3개를 순차로 돌리면 15~30개 중간 질문이 폭격일 때, 문제 재정의는 사람이 직접 하고 CEO·Design·Eng 리뷰는 자동 연결해 *취향 결정만* 승인 게이트로 띄웁니다.",
+      flow: [
+        { skill: "office-hours", why: "<strong>왜?</strong> 자동화 *이전*에 문제 재정의는 사람의 판단이 필요하니까, 가장 먼저 직접" },
+        { skill: "autoplan", why: "<strong>왜?</strong> 15~30개 중간 질문 폭격을 피하면서, CEO·Design·Eng 리뷰는 자동 연결하고 취향 결정만 게이트로 띄우려고" }
+      ]
+    },
+    {
+      n: "③",
+      title: "버그 추적부터 수정까지",
+      scenario: "production incident에서 랜덤 픽스로 시간 낭비할 위험일 때, Iron Law로 원인부터 추적해 회귀 테스트를 자동 생성하고 편집증 점검을 거쳐 ship까지 한 번에 끌고 갑니다.",
+      flow: [
+        { skill: "investigate", why: "<strong>왜?</strong> 랜덤 픽스로 시간 낭비할 위험을, Iron Law(원인 조사 없이 픽스 X)로 막으려고. /freeze 자동 활성" },
+        { skill: "qa", why: "<strong>왜?</strong> 픽스 후 같은 버그 재발 위험을, 자동 회귀 테스트 생성으로 막으려고" },
+        { skill: "review", why: "<strong>왜?</strong> 픽스가 다른 곳을 깨뜨릴 위험을, 편집증 점검으로 잡으려고" },
+        { skill: "ship", why: "<strong>왜?</strong> 픽스를 production까지 안전하게 끌고 가려고, sync·test·PR을 한 명령으로 묶어 풀려고" }
+      ]
+    },
+    {
+      n: "④",
+      title: "디자인 시스템 구축",
+      scenario: "디자인 시스템·미학·타이포가 모두 zero라 generic UI 위험이 클 때, 카테고리 리서치 → 3가지 변형 비교 → production HTML → 80항목 audit 순으로 정체성 있는 UI를 만듭니다.",
+      flow: [
+        { skill: "design-consultation", why: "<strong>왜?</strong> zero에서 generic UI를 만들 위험을, 카테고리 리서치로 안전·창의적 제안을 같이 풀어 막으려고" },
+        { skill: "design-shotgun", why: "<strong>왜?</strong> 한 방향에 갇힐 위험을, 3가지 변형 비교로 옵션을 넓혀 막으려고. 취향도 누적" },
+        { skill: "design-html", why: "<strong>왜?</strong> mockup을 production HTML로 옮기는 단계가 막연한 작업이라, Pretext 기반 반응형으로 풀려고" },
+        { skill: "design-review", why: "<strong>왜?</strong> 라이브 사이트의 디자인 부채(generic 그리드·AI 패턴)를, 80항목 체크리스트와 atomic 커밋으로 청소" }
+      ]
+    },
+    {
+      n: "⑤",
+      title: "안전한 작업 환경",
+      scenario: "production 작업에서 한 번의 오타나 영역 밖 수정이 큰 사고로 번질 위험을, 위험 명령 경고와 디렉토리 스코프를 한 번에 거는 안전 모드로 차단합니다.",
+      flow: [
+        { skill: "careful", why: "<strong>왜?</strong> 한 번의 오타로 production이 내려갈 위험을, 위험 명령마다 경고를 띄워 막으려고" },
+        { skill: "freeze", why: "<strong>왜?</strong> 한 영역 디버깅 중 다른 영역 실수 수정 사고를, 디렉토리 외 Edit/Write 차단으로 막으려고 (Bash는 살림)" },
+        { skill: "guard", why: "<strong>왜?</strong> 위 둘을 매번 따로 켜는 번거로움을, /careful + /freeze를 한 명령으로 묶어 풀려고" }
+      ],
+      arrows: ["+", "= 한 번에"]
+    },
+    {
+      n: "⑥",
+      title: "주간 회고와 학습",
+      scenario: "한 주 끝나고 vibes 회고로는 부족할 때, 메트릭 JSON 스냅샷 → 학습 누적(다음 세션이 자동 참조) → 코드 품질 트렌드까지 데이터로 묶어 보여 줍니다.",
+      flow: [
+        { skill: "retro", why: "<strong>왜?</strong> 한 주 회고가 vibes에만 머무르는 위험을, 컨트리뷰터별 메트릭 JSON 스냅샷으로 트렌드 추적해 막으려고" },
+        { skill: "learn", why: "<strong>왜?</strong> 학습이 세션과 함께 사라지는 위험을, 누적 + 다른 스킬이 자동 참조하게 만들어 막으려고" },
+        { skill: "health", why: "<strong>왜?</strong> 도구마다 흩어진 코드 품질 신호를, 0~10 가중 점수와 트렌드로 묶어 한눈에 보여 주려고" }
+      ]
+    }
+  ]
+
+}
+
+}; // end of DATASETS
+
+
+//
+// ════════════════════════════════════════════════════════════════
+//   STATE & RENDERERS
+// ════════════════════════════════════════════════════════════════
+//
+
+let active = 'matt';
+const ds  = () => DATASETS[active];
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+//
+// ─── HTML → Markdown 변환 헬퍼 ──────────────────────────────────
+//
+function htmlToMd(html) {
+  if (!html) return '';
+  return String(html)
+    .replace(/<br\s*\/?>/gi, '  \n')
+    .replace(/<strong>(.*?)<\/strong>/gi, '**$1**')
+    .replace(/<b>(.*?)<\/b>/gi, '**$1**')
+    .replace(/<em>(.*?)<\/em>/gi, '*$1*')
+    .replace(/<i>(.*?)<\/i>/gi, '*$1*')
+    .replace(/<code\s+class="inline">(.*?)<\/code>/gi, '`$1`')
+    .replace(/<code>(.*?)<\/code>/gi, '`$1`')
+    .replace(/<span\s+class="pop">(.*?)<\/span>/gi, '**$1**')
+    .replace(/<span[^>]*>(.*?)<\/span>/gi, '$1')
+    .replace(/<a\s+href="([^"]*)"[^>]*>(.*?)<\/a>/gi, '[$2]($1)')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&')
+    .trim();
+}
+
+//
+// ─── 데이터셋 → Markdown 문서 ───────────────────────────────────
+//
+function datasetToMarkdown(d) {
+  const out = [];
+
+  out.push(`# ${d.preTitle}`);
+  out.push('');
+  out.push(htmlToMd(d.lead));
+  out.push('');
+
+  out.push('## 스킬');
+  out.push('');
+
+  for (const id in d.skills) {
+    const s = d.skills[id];
+
+    out.push(`### ${s.cmd} ${s.emoji}`);
+    out.push('');
+    out.push(`**${s.role} · ${s.roleEn}**`);
+    out.push('');
+    out.push(`> ${htmlToMd(s.tileSummary)}`);
+    out.push('');
+    out.push(htmlToMd(s.heroSummary));
+    out.push('');
+
+    out.push('**📌 언제 쓰나**');
+    out.push('');
+    s.when.forEach(w => out.push(`- ${htmlToMd(w)}`));
+    out.push('');
+
+    out.push('**🎮 어떻게 쓰나**');
+    out.push('');
+    s.howCode.forEach(c => {
+      out.push('```');
+      out.push(c);
+      out.push('```');
+    });
+    if (s.howNote) {
+      out.push('');
+      out.push(htmlToMd(s.howNote));
+    }
+    out.push('');
+
+    out.push('**⚡ 무엇을 하나**');
+    out.push('');
+    s.what.forEach(b => {
+      if (b.type === 'p') {
+        out.push(htmlToMd(b.html));
+        out.push('');
+      } else if (b.type === 'blockquote') {
+        out.push(`> ${htmlToMd(b.html)}`);
+        out.push('');
+      } else if (b.type === 'ol') {
+        b.items.forEach((i, idx) => out.push(`${idx + 1}. ${htmlToMd(i)}`));
+        out.push('');
+      } else if (b.type === 'ul') {
+        b.items.forEach(i => out.push(`- ${htmlToMd(i)}`));
+        out.push('');
+      }
+    });
+
+    out.push('**🎁 결과물**');
+    out.push('');
+    s.output.forEach(o => out.push(`- ${htmlToMd(o)}`));
+    out.push('');
+
+    if (s.combos && s.combos.length) {
+      const chips = s.combos.map(cid => {
+        const linked = d.skills[cid];
+        return linked ? `\`${linked.cmd}\`` : `\`${cid}\``;
+      }).join(' · ');
+      const note = s.comboNote ? ' — ' + htmlToMd(s.comboNote) : '';
+      out.push(`**🔗 콤보**: ${chips}${note}`);
+      out.push('');
+    }
+
+    out.push(`*${htmlToMd(s.meta)}*`);
+    out.push('');
+    out.push('---');
+    out.push('');
+  }
+
+  out.push('## 콤보 시나리오');
+  out.push('');
+
+  d.combos.forEach(c => {
+    out.push(`### ${c.n} ${c.title}`);
+    out.push('');
+    out.push(`*${htmlToMd(c.scenario)}*`);
+    out.push('');
+
+    const arrows = c.arrows || [];
+    c.flow.forEach((item, i) => {
+      let header;
+      if (item.type === 'cli') {
+        header = `${item.emoji} \`${item.cmd}\` _(${item.role})_`;
+      } else {
+        const sk = d.skills[item.skill];
+        if (!sk) return;
+        header = `${sk.emoji} \`${sk.cmd}\` _(${sk.role})_`;
+      }
+      out.push(`${i + 1}. ${header}`);
+      out.push('');
+      out.push(`   ${htmlToMd(item.why)}`);
+      out.push('');
+      // JSON에 명시된 special arrow만 출력 (기본 "→"는 숫자가 대신함)
+      if (i < c.flow.length - 1 && arrows[i]) {
+        out.push(`   _${arrows[i]}_`);
+        out.push('');
+      }
+    });
+    out.push('---');
+    out.push('');
+  });
+
+  out.push('');
+  out.push(htmlToMd(d.footer));
+  out.push('');
+
+  return out.join('\n');
+}
+
+function renderTile(id, s) {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'skill-tile';
+  btn.dataset.skill = id;
+  btn.innerHTML = `
+    <div class="tile-emoji">${s.emoji}</div>
+    <div class="tile-cmd">${escapeHtml(s.cmd)}</div>
+    <div class="tile-role">${escapeHtml(s.role)}</div>
+    <div class="tile-summary">${escapeHtml(s.tileSummary)}</div>
+  `;
+  return btn;
+}
+
+function renderWhatBlock(b) {
+  if (b.type === 'p')          return `<p>${b.html}</p>`;
+  if (b.type === 'blockquote') return `<blockquote>${b.html}</blockquote>`;
+  if (b.type === 'ol' || b.type === 'ul') {
+    const tag = b.type;
+    const styleAttr = b.style ? ` style="${b.style}"` : '';
+    const items = b.items.map(i => `<li>${i}</li>`).join('');
+    return `<${tag}${styleAttr}>${items}</${tag}>`;
+  }
+  return '';
+}
+
+function renderDetailCard(id) {
+  const s = ds().skills[id];
+  if (!s) return null;
+  const card = document.createElement('article');
+  card.className = 'card';
+
+  const whatHtml   = s.what.map(renderWhatBlock).join('');
+  const whenHtml   = s.when.map(w => `<li>${w}</li>`).join('');
+  const outputHtml = s.output.map(o => `<li>${o}</li>`).join('');
+  const codeHtml   = s.howCode.map(c => `<code>${escapeHtml(c)}</code>`).join('');
+  const noteHtml   = s.howNote ? `<p>${s.howNote}</p>` : '';
+  const chipsHtml  = s.combos
+    .map(cid => ds().skills[cid] ? `<span class="chip">${escapeHtml(ds().skills[cid].cmd)}</span>` : '')
+    .join(' ');
+  const comboNoteHtml = s.comboNote
+    ? ` <span style="font-size:11px;color:var(--text-mute)">${s.comboNote}</span>`
+    : '';
+  card.innerHTML = `
+    <header class="card-head">
+      <span class="cmd">${escapeHtml(s.cmd)}</span>
+    </header>
+    <div class="card-hero">
+      <div class="emoji">${s.emoji}</div>
+      <div class="role">${escapeHtml(s.role)} · ${escapeHtml(s.roleEn)}</div>
+      <div class="summary">${s.heroSummary}</div>
+    </div>
+    <div class="stats">
+      <div class="stat-block">
+        <h4>📌 언제 쓰나</h4>
+        <ul>${whenHtml}</ul>
+      </div>
+      <div class="stat-block">
+        <h4>🎮 어떻게 쓰나</h4>
+        ${codeHtml}
+        ${noteHtml}
+      </div>
+      <div class="stat-block">
+        <h4>⚡ 무엇을 하나</h4>
+        ${whatHtml}
+      </div>
+      <div class="stat-block">
+        <h4>🎁 결과물</h4>
+        <ul>${outputHtml}</ul>
+      </div>
+    </div>
+    <footer class="card-foot">
+      <div class="combo">
+        <span class="combo-label">콤보</span>
+        ${chipsHtml}${comboNoteHtml}
+      </div>
+      <div class="meta">${s.meta}</div>
+    </footer>
+  `;
+  return card;
+}
+
+function renderMini(item) {
+  if (item.type === 'cli') {
+    return `
+      <div class="mini cli" aria-disabled="true">
+        <div class="mini-top"><span class="mini-emoji">${item.emoji}</span><span class="mini-cmd">${escapeHtml(item.cmd)}</span></div>
+        <div class="mini-role">${escapeHtml(item.role)}</div>
+        <div class="mini-why">${item.why}</div>
+      </div>
+    `;
+  }
+  const s = ds().skills[item.skill];
+  if (!s) return '';
+  return `
+    <button class="mini" data-skill="${item.skill}" type="button">
+      <div class="mini-top"><span class="mini-emoji">${s.emoji}</span><span class="mini-cmd">${escapeHtml(s.cmd)}</span></div>
+      <div class="mini-role">${escapeHtml(s.role)}</div>
+      <div class="mini-why">${item.why}</div>
+    </button>
+  `;
+}
+
+function renderCombo(c) {
+  const arrows = c.arrows || [];
+  const flowHtml = c.flow.map((item, i) => {
+    let html = renderMini(item);
+    if (i < c.flow.length - 1) {
+      const arrow = arrows[i] || '→';
+      html += `<div class="arrow">${escapeHtml(arrow)}</div>`;
+    }
+    return html;
+  }).join('');
+  return `
+    <article class="combo-card">
+      <header>
+        <span class="combo-num">${c.n}</span>
+        <h3>${escapeHtml(c.title)}</h3>
+        <p class="scenario">${escapeHtml(c.scenario)}</p>
+      </header>
+      <div class="combo-flow">${flowHtml}</div>
+    </article>
+  `;
+}
+
+function renderAll() {
+  const d = ds();
+
+  // Hero
+  document.getElementById('lead').innerHTML = d.lead;
+  document.getElementById('footer-note').innerHTML = d.footer;
+
+  // Grid
+  const grid = document.getElementById('skill-grid');
+  grid.innerHTML = '';
+  for (const id in d.skills) grid.appendChild(renderTile(id, d.skills[id]));
+
+  // Combos
+  document.getElementById('combos').innerHTML = d.combos.map(renderCombo).join('');
+}
+
+function setActive(name) {
+  if (active === name) return;
+  if (!DATASETS[name]) return;
+  active = name;
+  document.querySelectorAll('.tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.dataset === name)
+  );
+  // 모달이 열려 있으면 즉시 닫기 (다른 데이터셋의 카드 표시 방지)
+  if (document.getElementById('modal').classList.contains('open')) {
+    document.getElementById('modal-close').click();
+  }
+  renderAll();
+}
+
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => setActive(t.dataset.dataset));
+});
+
+renderAll();
+
+
+//
+// ════════════════════════════════════════════════════════════════
+//   MODAL + FLIP ANIMATION
+// ════════════════════════════════════════════════════════════════
+//
+(function () {
+  const modal      = document.getElementById('modal');
+  const stage      = document.getElementById('modal-stage');
+  const closeBtn   = document.getElementById('modal-close');
+
+  let lastSourceEl = null;
+  let isAnimating  = false;
+
+  const OPEN_MS  = 420;
+  const CLOSE_MS = 260;
+
+  function openSkill(srcEl) {
+    if (isAnimating) return;
+    const id = srcEl.dataset.skill;
+    if (!id) return;
+
+    const card = renderDetailCard(id);
+    if (!card) return;
+
+    isAnimating = true;
+    lastSourceEl = srcEl;
+
+    // 카드만 제거 (닫기 버튼은 stage 안에 영구 보존)
+    stage.querySelectorAll('.card').forEach(c => c.remove());
+    // 카드를 닫기 버튼 *앞에* 삽입 (닫기 버튼이 카드 위에 떠 있도록)
+    stage.insertBefore(card, closeBtn);
+
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('modal-open');
+
+    const srcRect = srcEl.getBoundingClientRect();
+    const dstRect = stage.getBoundingClientRect();
+    if (!dstRect.width || !dstRect.height) {
+      isAnimating = false;
+      return;
+    }
+
+    const dx = srcRect.left - dstRect.left;
+    const dy = srcRect.top  - dstRect.top;
+    const sx = srcRect.width  / dstRect.width;
+    const sy = srcRect.height / dstRect.height;
+
+    stage.style.transformOrigin = '0 0';
+    stage.style.transition      = 'none';
+    stage.style.transform       = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
+    stage.style.opacity         = '1';
+
+    void stage.offsetWidth;
+
+    requestAnimationFrame(() => {
+      stage.style.transition = 'transform ' + OPEN_MS + 'ms cubic-bezier(0.16, 1, 0.3, 1)';
+      stage.style.transform  = 'translate(0px, 0px) scale(1, 1)';
+    });
+
+    window.setTimeout(() => {
+      stage.style.transition = '';
+      isAnimating = false;
+    }, OPEN_MS + 30);
+  }
+
+  function closeSkill() {
+    if (isAnimating) return;
+    if (!modal.classList.contains('open')) return;
+
+    const card = stage.querySelector('.card');
+    if (!card || !lastSourceEl) {
+      finalizeClose();
+      return;
+    }
+
+    isAnimating = true;
+
+    const srcRect = lastSourceEl.getBoundingClientRect();
+    const dstRect = stage.getBoundingClientRect();
+
+    const dx = srcRect.left - dstRect.left;
+    const dy = srcRect.top  - dstRect.top;
+    const sx = srcRect.width  / Math.max(dstRect.width, 1);
+    const sy = srcRect.height / Math.max(dstRect.height, 1);
+
+    stage.style.transformOrigin = '0 0';
+    stage.style.transition      = 'transform ' + CLOSE_MS + 'ms cubic-bezier(0.7, 0, 0.84, 0), opacity ' + CLOSE_MS + 'ms ease';
+
+    requestAnimationFrame(() => {
+      stage.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
+      stage.style.opacity   = '0';
+    });
+
+    window.setTimeout(finalizeClose, CLOSE_MS + 20);
+  }
+
+  function finalizeClose() {
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
+    // 카드만 제거, 닫기 버튼은 stage 안에 보존
+    stage.querySelectorAll('.card').forEach(c => c.remove());
+    stage.style.transform       = '';
+    stage.style.transformOrigin = '';
+    stage.style.transition      = '';
+    stage.style.opacity         = '';
+    lastSourceEl = null;
+    isAnimating  = false;
+  }
+
+  document.addEventListener('click', function (e) {
+    const opener = e.target.closest('[data-skill]');
+    if (opener) {
+      e.preventDefault();
+      openSkill(opener);
+      return;
+    }
+    if (e.target === modal) closeSkill();
+  });
+
+  closeBtn.addEventListener('click', closeSkill);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeSkill();
+  });
+})();
+
+
+//
+// ════════════════════════════════════════════════════════════════
+//   MD EXPORT — 현재 데이터셋을 Markdown으로 변환해 모달로 표시
+// ════════════════════════════════════════════════════════════════
+//
+(function () {
+  const btn       = document.getElementById('md-button');
+  const modal     = document.getElementById('md-modal');
+  const content   = document.getElementById('md-content');
+  const copyBtn   = document.getElementById('md-copy');
+  const closeBtn  = document.getElementById('md-close');
+  const titleEl   = document.getElementById('md-modal-title');
+
+  function open() {
+    const md = datasetToMarkdown(ds());
+    content.textContent = md;
+    titleEl.textContent = active.toUpperCase() + ' — Markdown';
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+
+  function close() {
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
+  btn.addEventListener('click', open);
+  closeBtn.addEventListener('click', close);
+  modal.addEventListener('click', e => { if (e.target === modal) close(); });
+
+  copyBtn.addEventListener('click', async () => {
+    const orig = copyBtn.textContent;
+    try {
+      await navigator.clipboard.writeText(content.textContent);
+      copyBtn.textContent = '✓ 복사됨';
+      copyBtn.classList.add('copied');
+      setTimeout(() => {
+        copyBtn.textContent = orig;
+        copyBtn.classList.remove('copied');
+      }, 1500);
+    } catch (err) {
+      // 폴백: 텍스트 선택만
+      const range = document.createRange();
+      range.selectNodeContents(content);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && modal.classList.contains('open')) close();
+  });
+})();
+</script>
+
+</body>
+</html>
