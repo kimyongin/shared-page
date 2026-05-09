@@ -19,10 +19,23 @@ shared-page/
 
 ## 페이지 추가하기
 
-1. 새 폴더 생성 후 `index.html` 작성
+각 서브 페이지는 `index.html` + `README.md` 한 쌍으로 구성한다. README는 *해당
+페이지의 목적과 콘텐츠·기술 컨셉*을 적어, 이후 그 페이지를 수정할 때 기존
+컨셉을 따를 수 있게 한다.
+
+1. 새 폴더 생성 후 `index.html`과 `README.md` 작성
    ```
    shared-page/<페이지-이름>/index.html
+   shared-page/<페이지-이름>/README.md
    ```
+
+   README에는 최소한 다음을 포함:
+   - **목적**: 이 페이지가 왜 존재하는지
+   - **콘텐츠 컨셉**: 톤·스타일·구조 규칙
+   - **기술 컨셉**: 어떤 데이터 모델·렌더링 방식을 쓰는지
+   - **수정 가이드**: 새 항목 추가 시 따를 규칙
+
+   참고 예시: [skills-deck/README.md](./skills-deck/README.md)
 
 2. 루트 `index.html`의 `.grid` 안에 카드 추가
    ```html
