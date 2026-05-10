@@ -454,11 +454,10 @@
     gap: 10px;
     align-items: stretch;
   }
-  /* 콤보 안 카드는 좌측 상단 번호 배지 자리만큼 padding 확보 */
-  .combo-flow .mini { padding-left: 38px; }
+  /* 번호 배지: mini-top 마지막 flex 항목, margin-left: auto 로 우측 끝에 정렬 */
   .mini-num {
-    position: absolute;
-    top: 10px; left: 10px;
+    margin-left: auto;
+    flex-shrink: 0;
     width: 22px; height: 22px;
     border-radius: 50%;
     background: var(--gold);
@@ -469,7 +468,6 @@
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 0;
-    z-index: 2;
     box-shadow: 0 2px 8px rgba(255,217,107,0.4);
     pointer-events: none;
   }
@@ -490,7 +488,7 @@
   .mini.cli  { border-color: rgba(255,217,107,0.3); cursor: default; }
   .mini:hover { transform: translateY(-3px); box-shadow: 0 8px 24px -4px var(--eng-glow); border-color: var(--eng); }
   .mini.cli:hover  { transform: none; box-shadow: none; border-color: rgba(255,217,107,0.3); }
-  .mini-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+  .mini-top { display: flex; align-items: center; gap: 6px; }
   .mini .mini-emoji { font-size: 24px; line-height: 1; }
   .mini .mini-cmd {
     font-family: ui-monospace, monospace;
@@ -2138,9 +2136,8 @@ function renderMini(item, index) {
   if (item.type === 'cli') {
     return `
       <div class="mini cli" aria-disabled="true">
-        ${badge}
-        <div class="mini-top"><span class="mini-emoji">${item.emoji}</span><span class="mini-cmd">${escapeHtml(item.cmd)}</span></div>
-        <div class="mini-role">${escapeHtml(item.role)}</div>
+        <div class="mini-top"><span class="mini-emoji">${item.emoji}</span><span class="mini-role">${escapeHtml(item.role)}</span>${badge}</div>
+        <div class="mini-cmd">${escapeHtml(item.cmd)}</div>
         <div class="mini-why">${item.why}</div>
       </div>
     `;
@@ -2149,9 +2146,8 @@ function renderMini(item, index) {
   if (!s) return '';
   return `
     <button class="mini" data-skill="${item.skill}" type="button">
-      ${badge}
-      <div class="mini-top"><span class="mini-emoji">${s.emoji}</span><span class="mini-cmd">${escapeHtml(s.cmd)}</span></div>
-      <div class="mini-role">${escapeHtml(s.role)}</div>
+      <div class="mini-top"><span class="mini-emoji">${s.emoji}</span><span class="mini-role">${escapeHtml(s.role)}</span>${badge}</div>
+      <div class="mini-cmd">${escapeHtml(s.cmd)}</div>
       <div class="mini-why">${item.why}</div>
     </button>
   `;
