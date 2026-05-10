@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko">
-<head>
+ <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>스킬 카드 덱 — Matt Pocock · Superpowers</title>
@@ -614,8 +614,13 @@
     *, *::before, *::after { transition: none !important; animation: none !important; }
   }
   @media (max-width: 540px) {
-    .mini { flex-basis: 150px; width: 150px; }
     .skill-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+
+    /* 콤보 흐름: 가로 wrap 대신 세로 스택으로 — 모바일 공간 활용 극대화 */
+    .combo-flow { flex-direction: column; align-items: stretch; gap: 6px; }
+    .mini { flex: 0 0 auto; width: 100%; }
+    .combo-flow .arrow { align-self: center; padding: 2px 0; }
+    .combo-flow .arrow-symbol { transform: rotate(90deg); }  /* → 를 ↓ 로 */
   }
 </style>
 </head>
@@ -711,7 +716,7 @@ matt: {
           "라벨 이름이 뭔가? (표준 5개 / 커스텀 매핑)",
           "도메인 문서가 어디 있나? (단일 / 멀티 컨텍스트)"
         ]},
-        { type: "p", html: "탐색 → 결정 3개 → 확인 → <code class='inline'>CLAUDE.md</code> 또는 <code class='inline'>AGENTS.md</code>에 기록. <span class='pop'>자동 트리거 안 됨</span>, 명시적으로 호출해야 동작합니다." }
+        { type: "p", html: "탐색 → 결정 3개 → 확인 → <code class='inline'>CLAUDE.md</code> or <code class='inline'>AGENTS.md</code>에 기록. <span class='pop'>자동 트리거 안 됨</span>, 명시적으로 호출해야 동작합니다." }
       ],
       output: ["한 번 정리되면 다른 스킬이 그대로 읽는 설정", "<code class='inline'>## Agent skills</code> 블록 + <code class='inline'>docs/agents/</code> 3개 파일"],
       combos: ["triage", "to-issues", "write-a-skill"],
@@ -814,7 +819,7 @@ matt: {
       cmd: "/prototype",
       emoji: "🧪", role: "시제품 장인", roleEn: "TINKERER",
       tileSummary: "본 코드에 곧장 짜긴 위험한 가설일 때, 일회용 코드로 먼저 두드려 본 뒤 답만 흡수하고 나머지는 버립니다",
-      heroSummary: "본 코드에 곧장 짜기엔 위험한 설계 가설이 있을 때, <em>일회용</em> LOGIC 또는 UI 코드로 먼저 두드려 본 뒤 답만 본 코드에 흡수하고 나머지는 모두 버립니다",
+      heroSummary: "본 코드에 곧장 짜기엔 위험한 설계 가설이 있을 때, <em>일회용</em> LOGIC or UI 코드로 먼저 두드려 본 뒤 답만 본 코드에 흡수하고 나머지는 모두 버립니다",
       when: ["답이 안 나오는 설계/UI 가설", "본 코드에 곧장 짜기엔 위험할 때", "PRD 쓰기 전 손으로 만져 봐야 할 때"],
       howCode: ["/prototype 마지막 동기화 시점에서 충돌이 어떻게 나는지"],
       howNote: "추상 말고 <em>구체적인 질문</em> 하나로. 스킬이 LOGIC/UI 분기를 묻습니다.",
@@ -879,7 +884,7 @@ matt: {
       heroSummary: "같은 영역에 손이 자꾸 가고 코드가 점점 무너지는 느낌이 들 때, deep module 후보를 찾아 작은 인터페이스 뒤로 복잡도를 모아 주는 정기 점검 도구입니다",
       when: ["며칠에 한 번씩 정기 점검", "\"여러 작은 모듈을 자꾸 튕겨다닌다\"는 느낌", "큰 기능 추가 직전, 코드 준비 상태 확인"],
       howCode: ["/improve-codebase-architecture", "/improve-codebase-architecture src/checkout"],
-      howNote: "전체 또는 특정 영역. 후보 목록을 보여주면 하나를 골라 깊이 들어갑니다.",
+      howNote: "전체 or 특정 영역. 후보 목록을 보여주면 하나를 골라 깊이 들어갑니다.",
       what: [
         { type: "p", html: "<em>deep module</em>은 작은 인터페이스 뒤에 큰 동작이 숨은 모듈입니다 (예: <code class='inline'>db.query()</code>). 반대로 <em>shallow</em>는 인터페이스가 내부 코드만큼 복잡한 모듈이고, 코드베이스가 부패하는 큰 원인이 됩니다." },
         { type: "p", html: "판정 질문: <span class='pop'>\"이 모듈을 지우면 복잡도가 사라지나, 호출자들로 흩어지나?\"</span>" },
@@ -897,7 +902,7 @@ matt: {
       heroSummary: "이슈는 쌓이는데 라벨은 들쭉날쭉해서 우선순위가 보이지 않을 때, <em>카테고리 1개와 상태 1개</em>만 붙는 라벨 머신으로 흘려 보내 백로그의 다음 행동을 분명하게 만듭니다",
       when: ["한 주 동안 쌓인 이슈 더미가 있을 때", "라벨이 들쭉날쭉해서 \"지금 봐야 할 것\"이 안 보일 때", "정기 백로그 정리"],
       howCode: ["/triage", "/triage #123"],
-      howNote: "전체 보기, 또는 특정 이슈만. <em>\"#123을 wontfix로 옮겨\"</em> 같은 자연어 지시도 OK.",
+      howNote: "전체 보기, or 특정 이슈만. <em>\"#123을 wontfix로 옮겨\"</em> 같은 자연어 지시도 OK.",
       what: [
         { type: "p", html: "\"트리아지\"는 응급실 환자 분류와 같은 어원입니다. 들어오는 것을 *누구를 먼저 볼지* 정해 흐름을 만듭니다." },
         { type: "ul", items: ["카테고리: <code class='inline'>bug</code> / <code class='inline'>enhancement</code>", "상태 5개: <em>needs-triage / needs-info / ready-for-agent / ready-for-human / wontfix</em>"] },
@@ -933,7 +938,7 @@ matt: {
       heroSummary: "에이전트 응답이 장황해 토큰과 시간이 낭비될 때, 관사·필러·인사말을 잘라내고 화살표와 약어를 적극 써서 응답 토큰을 75% 가까이 줄여 줍니다",
       when: ["긴 디버깅 루프, 토큰이 빨리 차고 있을 때", "화면을 빠르게 스캔하고 싶을 때", "에이전트의 장황함이 거슬릴 때"],
       howCode: ["/caveman", "\"be brief\"  /  \"less tokens\""],
-      howNote: "한 번 켜지면 모든 응답에 적용. 끄려면 <em>\"stop caveman\"</em> 또는 <em>\"normal mode\"</em>.",
+      howNote: "한 번 켜지면 모든 응답에 적용. 끄려면 <em>\"stop caveman\"</em> or <em>\"normal mode\"</em>.",
       what: [
         { type: "p", html: "제거: 관사 / 필러(just, really) / 인사말 / 헷지 / 가능한 한 접속사. 화살표(X→Y), 약어(DB, fn)." },
         { type: "p", html: "예시 변환:" },
@@ -1010,7 +1015,7 @@ matt: {
         { skill: "to-prd", why: "<strong>왜?</strong> 인터뷰로 합의된 내용이 트래커에 안 남으면 다시 휘발되니까, PRD로 승급해 작업 흐름에 태우려고" },
         { skill: "to-issues", why: "<strong>왜?</strong> PRD가 통째라 머지 단위로 자르려고, vertical slice로 분할" }
       ],
-      arrows: [null, "또는"]  // 기본 "→"는 생략 (렌더러가 fallback)
+      arrows: [null, "or"]  // 기본 "→"는 생략 (렌더러가 fallback)
     }
   ]
 },
@@ -1104,7 +1109,7 @@ superpowers: {
         { type: "p", html: "각 단계는 <em>하나의 행동</em>(2~5분): RED 테스트 작성 → 실패 확인 → 최소 구현 → 통과 확인 → 커밋." },
         { type: "p", html: "<span class='pop'>플레이스홀더 절대 금지</span>: TBD/TODO/\"적절한 에러 처리\"/\"엣지 케이스 처리\" 같은 모호한 표현은 *plan failure*. 정확한 파일 경로, 완전한 코드 블록, 정확한 명령과 예상 출력 모두 포함." },
         { type: "p", html: "자기 검토 체크: spec 커버리지 / 플레이스홀더 스캔 / 타입 일관성 (Task 3에서 <code class='inline'>clearLayers()</code>인데 Task 7에서 <code class='inline'>clearFullLayers()</code> 같은 불일치는 버그)." },
-        { type: "p", html: "최종 핸드오프: <em>subagent-driven-development(권장)</em> 또는 <em>executing-plans</em> 중 사용자 선택." }
+        { type: "p", html: "최종 핸드오프: <em>subagent-driven-development(권장)</em> or <em>executing-plans</em> 중 사용자 선택." }
       ],
       output: ["미니 작업 단위로 나뉜 plan.md", "다음 실행 스킬 선택지 제시"],
       combos: ["subagent-driven-development", "executing-plans", "using-git-worktrees"],
@@ -1213,7 +1218,7 @@ superpowers: {
         ]},
         { type: "p", html: "<span class='pop'>회귀 테스트 검증의 red-green 사이클</span>: 작성 → 통과 → 픽스 되돌리기 → *반드시 실패* → 픽스 복원 → 통과. 사이클을 본 적 없으면 검증 안 된 것." }
       ],
-      output: ["증거에 기반한 클레임", "또는 솔직한 미완료 보고"],
+      output: ["증거에 기반한 클레임", "or 솔직한 미완료 보고"],
       combos: ["systematic-debugging", "test-driven-development"],
       meta: "✅ 자동 트리거 · 모든 클레임 직전"
     },
@@ -1266,7 +1271,7 @@ superpowers: {
       cmd: "receiving-code-review",
       emoji: "🥋", role: "리뷰 수신자", roleEn: "RECEIVER",
       tileSummary: "리뷰가 와도 무조건 동의하지 말고, 코드베이스에 비춰 검증한 뒤 기술적 근거가 있으면 푸시백하라고 가르칩니다",
-      heroSummary: "코드 리뷰 피드백을 받았을 때, <em>수행적 동의</em>(\"You're absolutely right!\")와 <em>맹목적 구현</em>을 모두 금지하고 — 읽기 → 이해 → 코드베이스 검증 → 기술적 평가 → 합리적 응답(또는 근거 있는 푸시백) → 한 항목씩 구현 — 순서를 강제합니다",
+      heroSummary: "코드 리뷰 피드백을 받았을 때, <em>수행적 동의</em>(\"You're absolutely right!\")와 <em>맹목적 구현</em>을 모두 금지하고 — 읽기 → 이해 → 코드베이스 검증 → 기술적 평가 → 합리적 응답(or 근거 있는 푸시백) → 한 항목씩 구현 — 순서를 강제합니다",
       when: ["리뷰 피드백을 받았을 때 (사람·외부 모두)", "어떤 항목이라도 불명확할 때 (전부 명료해질 때까지 *아무것도 구현 X*)"],
       howCode: ["(자동 트리거 — 리뷰 수신 시)"],
       howNote: "외부 리뷰는 의심부터, 사람 파트너 리뷰는 신뢰부터 — 단 *수행적 동의 어구*는 금지.",
@@ -1276,7 +1281,7 @@ superpowers: {
         { type: "p", html: "<span class='pop'>YAGNI 점검</span>: 리뷰어가 \"제대로 구현하라\"고 하면 *grep으로 사용 여부 확인* — 안 쓰이면 제거 제안." },
         { type: "p", html: "구현 순서: 불명확 항목 *전부* 명료화 → 차단 이슈(보안/깨짐) → 단순 픽스 → 복잡한 픽스 → 항목별 테스트." }
       ],
-      output: ["검증된 변경", "또는 명료해진 의견 충돌"],
+      output: ["검증된 변경", "or 명료해진 의견 충돌"],
       combos: ["test-driven-development", "verification-before-completion"],
       meta: "🥋 자동 트리거 · 수행적 동의 금지"
     },
@@ -1310,7 +1315,7 @@ superpowers: {
       emoji: "🛠️", role: "메타 장인", roleEn: "SMITH",
       tileSummary: "새 스킬을 만들거나 수정해야 할 때, *문서판 TDD*로 검증되지 않은 스킬은 절대 배포 못 하게 막습니다",
       heroSummary: "새 스킬 작성·기존 스킬 수정·배포 전 검증이 필요할 때, <em>문서판 TDD</em> 방법론(서브에이전트 압박 시나리오로 RED → 스킬 작성 GREEN → 합리화 빈틈 메우는 REFACTOR)으로 베이스라인 실패를 본 적 없는 스킬은 배포 못 하게 강제합니다",
-      when: ["새 스킬 작성 또는 기존 스킬 수정", "배포 전 검증이 필요할 때", "\"이건 너무 단순하니 테스트 생략\" 충동이 들 때"],
+      when: ["새 스킬 작성 or 기존 스킬 수정", "배포 전 검증이 필요할 때", "\"이건 너무 단순하니 테스트 생략\" 충동이 들 때"],
       howCode: ["(스킬 작성 시)"],
       howNote: "<span class='pop'>Iron Law</span>: 실패하는 테스트(서브에이전트 압박 시나리오) 없이 스킬 배포 X.",
       what: [
@@ -2143,7 +2148,8 @@ function renderCombo(c) {
     let html = renderMini(item);
     if (i < c.flow.length - 1) {
       const arrow = arrows[i] || '→';
-      html += `<div class="arrow">${escapeHtml(arrow)}</div>`;
+      const isSymbol = /^[→←↑↓⇒⇐⇔↔]$/.test(arrow);
+      html += `<div class="arrow ${isSymbol ? 'arrow-symbol' : 'arrow-text'}">${escapeHtml(arrow)}</div>`;
     }
     return html;
   }).join('');
