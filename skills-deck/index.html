@@ -732,13 +732,13 @@ matt: {
       howCode: ["/grill-me 신규 회원에게 첫 결제 50% 할인"],
       howNote: "한 번에 하나씩 질문이 옵니다. 추천 답이 같이 와서 막히지 않음.",
       what: [
-        { type: "p", html: "<em>SKILL.md 단 10줄</em>, 본문 사실상 3문장:" },
+        { type: "p", html: "<em>SKILL.md 단 11줄</em>, 본문 사실상 3문장:" },
         { type: "blockquote", html: "\"이 계획을 가차 없이 인터뷰하라. 결정 트리의 각 가지를 따라가며 의존성을 하나씩 해소하라. 모든 질문마다 추천 답을 함께. 한 번에 하나씩. 코드로 답할 수 있으면 코드를 본다.\"" },
         { type: "p", html: "<code class='inline'>/grill-with-docs</code>는 정확히 이 코어에 <em>CONTEXT.md / ADR 갱신 디시플린</em>을 얹은 확장판." }
       ],
       output: ["검증된 계획 / 해소된 결정 가지", "사용자-에이전트 간 공유 이해"],
       combos: ["prototype", "grill-with-docs", "to-prd"],
-      meta: "📜 SKILL.md 단 10줄 · 13개 중 두 번째로 짧음"
+      meta: "📜 SKILL.md 단 11줄 · 13개 중 두 번째로 짧음"
     },
 
     "grill-with-docs": {
@@ -838,7 +838,7 @@ matt: {
       cmd: "/diagnose",
       emoji: "🔍", role: "탐정", roleEn: "DETECTIVE",
       tileSummary: "코드를 아무리 노려봐도 원인이 안 잡히는 버그가 있을 때, 피드백 루프부터 만들고 가설을 좁혀 회귀 테스트로 확정합니다",
-      heroSummary: "코드를 아무리 노려봐도 원인이 안 잡히는 버그가 있을 때, 결정론적 피드백 루프부터 만들고 가설 3~5개를 좁혀 가며 마지막에는 회귀 테스트 한 개로 확정해 주는 6단계 프레임워크입니다",
+      heroSummary: "코드를 아무리 노려봐도 원인이 안 잡히는 버그가 있을 때, 결정론적 피드백 루프부터 만들고 가설 3~5개를 좁혀 가며 마지막에는 회귀 테스트 한 개로 확정해 주는 6단계 프로세스입니다 (*Phase 1의 피드백 루프 구축*에 절반의 노력을 쏟고 나머지는 기계적으로 진행)",
       when: ["버그 리포트가 들어왔을 때", "성능이 갑자기 느려졌을 때", "\"왜 이게 안 되지?\"라는 질문 앞에서 막막할 때"],
       howCode: ["/diagnose 결제 금액이 가끔 0원으로 찍힙니다…"],
       howNote: "증상을 같이 던지면 됩니다. 6단계 중 추가 정보를 물을 단계마다 멈춥니다.",
@@ -881,7 +881,7 @@ matt: {
       cmd: "/improve-codebase-architecture",
       emoji: "🏗️", role: "건축가", roleEn: "ARCHITECT",
       tileSummary: "같은 영역에 손이 자꾸 가고 코드가 점점 무너지는 느낌이 들 때, deep module 후보를 찾아 인터페이스 뒤로 복잡도를 모아 줍니다",
-      heroSummary: "같은 영역에 손이 자꾸 가고 코드가 점점 무너지는 느낌이 들 때, deep module 후보를 찾아 작은 인터페이스 뒤로 복잡도를 모아 주는 정기 점검 도구입니다",
+      heroSummary: "같은 영역에 손이 자꾸 가고 코드가 점점 무너지는 느낌이 들 때, deep module 후보를 찾아 작은 인터페이스 뒤로 복잡도를 모으도록 *grilling 루프*로 함께 설계해 가는 리팩터 대화입니다",
       when: ["며칠에 한 번씩 정기 점검", "\"여러 작은 모듈을 자꾸 튕겨다닌다\"는 느낌", "큰 기능 추가 직전, 코드 준비 상태 확인"],
       howCode: ["/improve-codebase-architecture", "/improve-codebase-architecture src/checkout"],
       howNote: "전체 or 특정 영역. 후보 목록을 보여주면 하나를 골라 깊이 들어갑니다.",
@@ -970,7 +970,7 @@ matt: {
       flow: [
         { skill: "grill-with-docs", why: "<strong>왜?</strong> 용어가 흔들리고 결정 이유가 휘발될 위험을, 인터뷰하며 그 자리에서 <em>CONTEXT.md·ADR</em>에 기록해 막으려고" },
         { skill: "to-prd", why: "<strong>왜?</strong> 합의는 끝났는데 PRD 옮겨 적기 귀찮은 단계를, 대화를 그대로 7섹션 PRD로 합성해 풀려고" },
-        { skill: "to-issues", why: "<strong>왜?</strong> PRD가 통째라 작업 분배가 막막한 문제를, vertical slice로 쪼개 의존성 순으로 풀려고" },
+        { skill: "to-issues", why: "<strong>왜?</strong> PRD가 통째라 작업 분배가 막막한 문제를, vertical slice로 쪼개 의존성 순으로 *가능하면 AFK로* 머지 가능한 이슈로 풀려고" },
         { skill: "tdd", why: "<strong>왜?</strong> 구현 중 의도가 흐려질 위험을, 각 슬라이스를 한 행동씩 RED→GREEN으로 검증하며 막으려고" }
       ]
     },
@@ -1121,7 +1121,7 @@ superpowers: {
       emoji: "🤖", role: "작전 사령관", roleEn: "COMMANDER",
       tileSummary: "독립적인 작업들이 있는 plan을 빠르게 실행하고 싶을 때, 작업마다 fresh subagent를 띄우고 spec→quality 두 단계 리뷰로 진행합니다",
       heroSummary: "독립적인 작업들이 있는 plan을 <em>같은 세션에서 빠르게</em> 실행해야 할 때, 작업마다 fresh subagent를 띄우고 끝나면 spec compliance reviewer + code quality reviewer 두 단계 리뷰를 거치는 컨트롤러 역할을 합니다 (사람 개입 없이 연속 실행)",
-      when: ["plan이 있고 작업들이 대체로 독립적일 때", "같은 세션에서 빠르게 진행하고 싶을 때", "두 단계 품질 게이트가 필요할 때"],
+      when: ["plan이 있고 작업들이 *명확히* 독립적일 때 (tightly coupled하면 executing-plans로)", "같은 세션에서 빠르게 진행하고 싶을 때", "두 단계 품질 게이트가 필요할 때"],
       howCode: ["(자동 트리거 — writing-plans 핸드오프)"],
       howNote: "executing-plans보다 권장. 사람-in-the-loop 없이 연속 실행이 핵심.",
       what: [
@@ -1159,7 +1159,7 @@ superpowers: {
     "test-driven-development": {
       cmd: "test-driven-development",
       emoji: "🔴", role: "레드 가드", roleEn: "RED-GUARD",
-      tileSummary: "테스트가 *실패하는 걸 보지 않으면* 그게 옳은 걸 검증하는지 모를 때, RED → GREEN → REFACTOR을 무조건 강제합니다",
+      tileSummary: "기능·버그·리팩터 어느 작업이든, 실패하는 테스트를 *먼저* 보지 않으면 *무엇을* 검증하는지 알 수 없을 때, RED → GREEN → REFACTOR을 무조건 강제합니다",
       heroSummary: "어떤 기능이든 버그 수정이든 구현 코드를 짜기 전, <em>실패하는 테스트를 보지 못하면 그 테스트가 진짜를 검증하는지 알 수 없다</em>는 원칙으로 RED → 실패 확인 → GREEN(최소 코드) → 통과 확인 → REFACTOR을 강제합니다",
       when: ["새 기능, 버그 수정, 리팩터, 동작 변경 *항상*", "\"이번 한 번만 건너뛰자\"고 합리화가 보일 때"],
       howCode: ["(자동 트리거 — 구현 직전)"],
@@ -1340,8 +1340,8 @@ superpowers: {
         { skill: "using-git-worktrees", why: "<strong>왜?</strong> 메인 브랜치를 더럽힐 위험을, 격리된 worktree와 깨끗한 baseline 검증으로 막으려고" },
         { skill: "writing-plans", why: "<strong>왜?</strong> 구현이 막연한 막막함을, 컨텍스트 0인 후속 엔지니어도 따라할 수 있는 미니 작업으로 쪼개 풀려고" },
         { skill: "subagent-driven-development", why: "<strong>왜?</strong> 작업당 사람 개입의 느림을, fresh subagent + 두 단계 리뷰로 빠르게 풀려고" },
-        { skill: "test-driven-development", why: "<strong>왜?</strong> 구현 정확도가 흔들리지 않게, 각 작업을 RED → GREEN 사이클로 자연스럽게 강제" },
-        { skill: "requesting-code-review", why: "<strong>왜?</strong> 이슈가 누적되면 잡기 어려운 위험을, 작업 단위마다 reviewer subagent로 차단해 막으려고" },
+        { skill: "test-driven-development", why: "<strong>왜?</strong> 구현 정확도가 흔들리지 않게, 각 작업을 RED → GREEN → REFACTOR 사이클로 *엄격히* 강제" },
+        { skill: "requesting-code-review", why: "<strong>왜?</strong> 이슈가 누적되면 잡기 어려운 위험을, 각 작업 완료 후 *필수적으로* reviewer subagent를 디스패치해 차단" },
         { skill: "finishing-a-development-branch", why: "<strong>왜?</strong> 통합 옵션이 모호한 막막함을, 머지/PR/유지/폐기 4가지 구조적 옵션으로 풀려고" }
       ]
     },
@@ -1806,7 +1806,7 @@ gstack: {
     {
       n: "①",
       title: "공식 풀 라이프사이클: 백지부터 production 검증까지",
-      scenario: "한 기능을 zero에서 production 모니터링까지 끌고 갈 때, 문제 재정의 → 4단계 plan 리뷰 → 편집증 점검 → QA → ship → 배포 → canary 모니터링까지 한 흐름으로 흘려보냅니다 (gstack의 핵심 워크플로우).",
+      scenario: "한 기능을 zero에서 production 모니터링까지 끌고 갈 때, 문제 재정의(office-hours) → 3단계 plan 리뷰(CEO·design·eng) → 편집증 점검(review) → QA → ship → 배포 → canary 모니터링까지 9단계 풀 라이프사이클로 흘려보냅니다 (gstack의 핵심 워크플로우).",
       flow: [
         { skill: "office-hours", why: "<strong>왜?</strong> 검증 안 된 문제를 풀 위험을, YC식 재정의로 *문제부터* 다시 잡아 막으려고" },
         { skill: "plan-ceo-review", why: "<strong>왜?</strong> 80% 솔루션이 10점 버전을 놓칠 위험을, 4가지 모드로 scope 재검토해 막으려고" },
