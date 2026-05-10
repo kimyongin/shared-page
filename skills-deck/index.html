@@ -417,6 +417,59 @@
     transform: scale(1.08);
   }
 
+  /* ───── Modal nav (이전/다음) ───── */
+  .modal-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 4;
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(160deg, rgba(29, 37, 65, 0.85) 0%, rgba(20, 26, 48, 0.85) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--text-dim);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 8px 24px -6px rgba(0,0,0,0.5);
+    transition: transform 0.18s var(--ease-pop),
+                border-color 0.18s, color 0.18s,
+                box-shadow 0.18s, opacity 0.18s;
+    font-family: inherit;
+    padding: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .modal-nav svg { width: 22px; height: 22px; }
+  .modal.open .modal-nav { opacity: 1; pointer-events: auto; }
+  .modal-nav-prev { left: clamp(8px, 3vw, 32px); }
+  .modal-nav-next { right: clamp(8px, 3vw, 32px); }
+  .modal-nav:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+    box-shadow: 0 8px 28px -6px var(--gold-glow), 0 0 0 1px var(--gold-deep) inset;
+    transform: translateY(-50%) scale(1.06);
+  }
+  .modal-nav:active { transform: translateY(-50%) scale(0.96); }
+  .modal-nav:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 4px;
+  }
+  .modal-nav-prev:hover { transform: translateY(-50%) translateX(-2px) scale(1.06); }
+  .modal-nav-next:hover { transform: translateY(-50%) translateX(2px) scale(1.06); }
+  .modal-nav[disabled] {
+    opacity: 0.25;
+    pointer-events: none;
+    cursor: default;
+  }
+  /* 모달 폭이 좁을 땐 backdrop이 부족해 카드와 겹치므로 화면 끝에 더 붙임 */
+  @media (max-width: 720px) {
+    .modal-nav { width: 44px; height: 44px; }
+    .modal-nav svg { width: 18px; height: 18px; }
+    .modal-nav-prev { left: 6px; }
+    .modal-nav-next { right: 6px; }
+  }
+
   /* ───── Combos ───── */
   .combos {
     padding: 0 clamp(20px, 6vw, 60px) 80px;
@@ -669,9 +722,15 @@
 <p class="footer-note" id="footer-note"></p>
 
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-hidden="true">
+  <button class="modal-nav modal-nav-prev" id="modal-prev" type="button" aria-label="이전 카드 (←)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
   <div class="modal-stage" id="modal-stage">
     <button class="modal-close" id="modal-close" type="button" aria-label="닫기 (Esc)"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3.5" y1="3.5" x2="10.5" y2="10.5"/><line x1="10.5" y1="3.5" x2="3.5" y2="10.5"/></svg></button>
   </div>
+  <button class="modal-nav modal-nav-next" id="modal-next" type="button" aria-label="다음 카드 (→)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
 </div>
 
 <!-- ─────── MD Export Modal ─────── -->
@@ -2221,6 +2280,8 @@ renderAll();
   const modal      = document.getElementById('modal');
   const stage      = document.getElementById('modal-stage');
   const closeBtn   = document.getElementById('modal-close');
+  const prevBtn    = document.getElementById('modal-prev');
+  const nextBtn    = document.getElementById('modal-next');
 
   let lastSourceEl = null;
   let isAnimating  = false;
@@ -2323,20 +2384,66 @@ renderAll();
     isAnimating  = false;
   }
 
+  // ──── prev/next 네비게이션 ────
+  // 메인 그리드의 카드만 순회 (콤보 미니카드는 중복이라 제외)
+  function getNavOrder() {
+    return Array.from(document.querySelectorAll('#skill-grid [data-skill]'));
+  }
+  function navIndex() {
+    if (!lastSourceEl) return -1;
+    const all = getNavOrder();
+    const id = lastSourceEl.dataset.skill;
+    return all.findIndex(el => el.dataset.skill === id);
+  }
+  function updateNavState() {
+    const all = getNavOrder();
+    const i = navIndex();
+    prevBtn.disabled = (i <= 0);
+    nextBtn.disabled = (i < 0 || i >= all.length - 1);
+  }
+  function switchTo(srcEl) {
+    if (!srcEl) return;
+    const id = srcEl.dataset.skill;
+    const card = renderDetailCard(id);
+    if (!card) return;
+    stage.querySelectorAll('.card').forEach(c => c.remove());
+    stage.insertBefore(card, closeBtn);
+    stage.scrollTop = 0;            // 새 카드는 위에서부터 보이게
+    lastSourceEl = srcEl;
+    updateNavState();
+  }
+  function navigateBy(offset) {
+    if (!modal.classList.contains('open')) return;
+    if (isAnimating) return;
+    const all = getNavOrder();
+    const i = navIndex();
+    const target = all[i + offset];
+    if (!target) return;
+    switchTo(target);
+  }
+
   document.addEventListener('click', function (e) {
     const opener = e.target.closest('[data-skill]');
     if (opener) {
       e.preventDefault();
       openSkill(opener);
+      updateNavState();   // 그리드 카드 인덱스 기준으로 disabled 갱신
       return;
     }
     if (e.target === modal) closeSkill();
   });
 
   closeBtn.addEventListener('click', closeSkill);
+  prevBtn.addEventListener('click', () => navigateBy(-1));
+  nextBtn.addEventListener('click', () => navigateBy(1));
 
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') closeSkill();
+    if (e.key === 'Escape') { closeSkill(); return; }
+    if (!modal.classList.contains('open')) return;
+    const tag = (e.target && e.target.tagName) || '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); navigateBy(-1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); navigateBy(1); }
   });
 })();
 
