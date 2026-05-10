@@ -409,14 +409,11 @@
   .modal-scroll {
     max-height: 92vh;
     overflow-y: auto; overflow-x: hidden;
-    padding-right: 6px;
     border-radius: var(--radius-card);
-    scrollbar-width: thin;
-    scrollbar-color: var(--line) transparent;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
-  .modal-scroll::-webkit-scrollbar { width: 8px; }
-  .modal-scroll::-webkit-scrollbar-track { background: transparent; margin: 14px 0; }
-  .modal-scroll::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+  .modal-scroll::-webkit-scrollbar { display: none; width: 0; height: 0; }
   .modal-close {
     position: absolute;
     top: 19px;
@@ -746,13 +743,11 @@
   }
   .cmod-body {
     max-height: 92vh; overflow-y: auto; overflow-x: hidden;
-    padding-right: 6px;
     border-radius: var(--radius-card);
-    scrollbar-width: thin; scrollbar-color: var(--line) transparent;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
-  .cmod-body::-webkit-scrollbar { width: 8px; }
-  .cmod-body::-webkit-scrollbar-track { background: transparent; margin: 14px 0; }
-  .cmod-body::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+  .cmod-body::-webkit-scrollbar { display: none; width: 0; height: 0; }
   @keyframes modalIn { from { opacity:0; transform: scale(0.95) translateY(12px); } }
   .cmod-close {
     position: absolute; top: 19px; right: 16px;
