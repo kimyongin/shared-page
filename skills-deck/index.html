@@ -764,7 +764,7 @@ matt: {
       what: [
         { type: "p", html: "두 가지 핵심 도구를 다룹니다:" },
         { type: "ul", items: ["<em>CONTEXT.md</em>: 팀의 도메인 용어집", "<em>ADR</em>: \"왜 이렇게 결정했나\"를 남겨 두는 기록"] },
-        { type: "p", html: "한 질문씩 추천 답과 함께 → 용어 충돌 즉시 짚기 → 모호함 정밀화 → 엣지 케이스를 구체 시나리오로. 결정 시 즉시 갱신. ADR은 <span class='pop'>3조건 모두 만족</span>(되돌리기 어려움 + 비자명 + 진짜 트레이드오프)할 때만." }
+        { type: "p", html: "한 질문씩 추천 답과 함께 → 용어 충돌 즉시 짚기 → 모호함 정밀화 → 엣지 케이스를 구체 시나리오로. 결정 시 즉시 갱신. ADR은 <span class='pop'>3조건 모두 만족</span>(되돌리기 어려움 + 코드만 봐선 이유가 안 드러남 + 진짜 트레이드오프)할 때만." }
       ],
       output: ["업데이트된 <code class='inline'>CONTEXT.md</code>", "필요시 새 ADR 1~2개", "합의 끝난 계획 (다음 <code class='inline'>/to-prd</code> 입력)"],
       combos: ["to-prd", "tdd", "improve"],
@@ -798,10 +798,10 @@ matt: {
       howCode: ["/to-issues #142 PRD를 작업 단위로"],
       howNote: "대화에 PRD 컨텍스트가 있으면 그대로, 없으면 이슈 번호/링크 함께.",
       what: [
-        { type: "p", html: "핵심 개념은 <em>vertical slice</em>입니다. 가로(스키마/API/UI)로 자르면 셋 다 끝나야 데모가 가능해서, 중간에 멈추면 보여 줄 게 없습니다. 반면 세로로 자르면 한 슬라이스가 *끝에서 끝까지* 닿아, 좁지만 *완결된* 단위가 됩니다." },
-        { type: "p", html: "각 슬라이스에 타입:" },
-        { type: "ul", items: ["<span class='pop'>HITL</span>: 사람 결정 필요", "<span class='pop'>AFK</span>: 에이전트가 끝까지 머지 가능. 가급적 이쪽을 <em>선호</em>"] },
-        { type: "p", html: "의존성 순서로 발행. <em>부모 이슈는 안 건드림</em>." }
+        { type: "p", html: "핵심 개념은 <em>vertical slice</em>(세로 자르기)입니다. 가로(스키마 → API → UI 순)로 자르면 셋 다 끝나야 데모가 가능해서, 중간에 멈추면 보여 줄 게 없습니다. 세로로 자르면 한 슬라이스가 *화면 → 로직 → DB까지 끝에서 끝까지* 닿아, 좁지만 *완결된* 단위가 됩니다." },
+        { type: "p", html: "각 슬라이스마다 처리 방식이 두 종류입니다:" },
+        { type: "ul", items: ["<span class='pop'>HITL</span>(Human-in-the-loop): 중간에 사람의 결정이 꼭 필요한 작업 — 예: 카피 톤, 가격 정책", "<span class='pop'>AFK</span>(Away-from-keyboard): 에이전트가 사람 개입 없이 끝까지 머지할 수 있는 작업. *가능하면 이쪽으로* 잘게 쪼개기"] },
+        { type: "p", html: "의존성 순서로 차례차례 이슈 발행. <em>원본 PRD(부모 이슈)는 손대지 않습니다</em>." }
       ],
       output: ["의존성 순서로 발행된 이슈들", "표준 템플릿 (What to build / Acceptance criteria / Blocked by)"],
       combos: ["to-prd", "tdd", "triage"],
@@ -811,18 +811,18 @@ matt: {
     "tdd": {
       cmd: "/tdd",
       emoji: "🎯", role: "트레이서 사수", roleEn: "TRACER",
-      tileSummary: "리팩터마다 테스트는 깨지는데 버그는 새는 모순이 반복될 때, 한 행동씩 RED→GREEN으로 짜며 행동 자체를 검증해 풉니다",
-      heroSummary: "리팩터할 때마다 테스트는 깨지는데 버그는 또 새는 모순이 반복될 때, 한 행동씩 RED→GREEN으로 짜며 <em>행동</em> 자체를 검증해 리팩터에서도 살아남는 안전망을 만듭니다",
-      when: ["새 행동을 코드로 옮길 때", "<code class='inline'>/diagnose</code>의 5단계 회귀 테스트", "리팩터 직후 안전망"],
+      tileSummary: "리팩터해도 버그가 또 새는 모순이 반복될 때. 동작 하나마다 *실패하는 테스트를 먼저 본 뒤 → 그걸 통과시키는 최소 코드만* 더하는 사이클로, 동작 자체를 코드보다 먼저 명세로 남깁니다",
+      heroSummary: "리팩터할 때마다 테스트는 깨지는데 정작 버그는 또 새는 모순이 반복될 때. <em>RED</em>는 *실패하는 테스트*, <em>GREEN</em>은 *그걸 통과시키는 최소 코드*를 뜻합니다. 동작 하나마다 RED → GREEN을 한 사이클씩 돌며 명세부터 남겨 두면, 리팩터 후에도 살아남는 안전망이 됩니다",
+      when: ["새 동작을 코드로 옮길 때", "<code class='inline'>/diagnose</code> 마지막 단계의 회귀 테스트", "리팩터 직후 안전망 만들 때"],
       howCode: ["/tdd 쿠폰 적용 함수. 만료 거절, 1회 사용 후 비활성"],
-      howNote: "계획 단계에서 <em>명시적 사용자 승인</em> 없이는 진행하지 않습니다.",
+      howNote: "계획 단계에서 \"이 동작을 이렇게 검증할게요\"를 사용자에게 확인받은 뒤에야 코드로 들어갑니다.",
       what: [
-        { type: "p", html: "<em>트레이서 불릿</em>은 군에서 야간 사격 시 인광 발사체로 *어디로 날아가는지 보이게* 한 한 발. 마찬가지로 한 *얇은* 길이 시스템 끝에서 끝까지 통하는지 한 발 쏴보는 비유." },
-        { type: "p", html: "<span class='pop'>금지: 가로 슬라이싱</span> (테스트 5개 먼저 → 코드 5개) → 상상 속 명세를 박제." },
-        { type: "p", html: "<span class='pop'>권장: 세로 슬라이싱</span> → test1→impl1→test2→impl2…" },
-        { type: "p", html: "GREEN 상태에서만 리팩터 (RED 중에는 어디서 깨졌는지 알 수 없음)." }
+        { type: "p", html: "<em>트레이서 불릿</em>은 야간 사격 때 인광이 들어가 탄도가 눈에 보이게 한 한 발입니다. TDD도 같은 발상이라, *얇은* 동작 하나가 시스템 끝에서 끝까지 정말 통하는지를 먼저 한 발 쏴 봅니다." },
+        { type: "p", html: "<span class='pop'>피해야 할 것 — 가로로 자르기</span>: 테스트 5개를 한꺼번에 쓰고, 그 다음에 코드 5개를 한꺼번에 짜는 방식. 아직 짜 보지도 않은 코드의 명세를 머릿속 상상만으로 굳히는 셈이라, 막상 구현해 보면 어긋나기 일쑤입니다." },
+        { type: "p", html: "<span class='pop'>권장 — 세로로 자르기</span>: test1 → impl1 → test2 → impl2 … 한 동작을 RED → GREEN으로 끝낸 뒤에야 다음 동작으로 넘어갑니다. 직전 사이클에서 배운 걸 다음 테스트에 반영할 수 있습니다." },
+        { type: "p", html: "리팩터(코드 정리)는 *테스트가 모두 통과 중일 때(GREEN)*만 합니다. 테스트가 깨진 상태(RED)에서 코드를 정리하면, 어디서부터 어긋났는지 추적할 수가 없습니다." }
       ],
-      output: ["행동 단위 테스트 (각 테스트가 명세)", "최소 구현", "리팩터 후에도 살아남는 안전망"],
+      output: ["동작 단위 테스트 (각 테스트가 명세 역할)", "최소 구현 코드", "리팩터 후에도 살아남는 안전망"],
       combos: ["diagnose", "to-issues", "grill-with-docs"],
       meta: "📜 SKILL.md 109줄 · 보조 파일 5개"
     },
@@ -831,15 +831,15 @@ matt: {
       cmd: "/prototype",
       emoji: "🧪", role: "시제품 장인", roleEn: "TINKERER",
       tileSummary: "본 코드에 곧장 짜긴 위험한 가설일 때, 일회용 코드로 먼저 두드려 본 뒤 답만 흡수하고 나머지는 버립니다",
-      heroSummary: "본 코드에 곧장 짜기엔 위험한 설계 가설이 있을 때, <em>일회용</em> LOGIC or UI 코드로 먼저 두드려 본 뒤 답만 본 코드에 흡수하고 나머지는 모두 버립니다",
+      heroSummary: "본 코드에 곧장 짜기엔 위험한 설계 가설이 있을 때. *버릴 셈치고 만든 일회용 코드*(로직 검증용 or UI 시안용)로 먼저 두드려 본 뒤, 답만 본 코드에 흡수하고 나머지는 통째로 버립니다",
       when: ["답이 안 나오는 설계/UI 가설", "본 코드에 곧장 짜기엔 위험할 때", "PRD 쓰기 전 손으로 만져 봐야 할 때"],
       howCode: ["/prototype 마지막 동기화 시점에서 충돌이 어떻게 나는지"],
-      howNote: "추상 말고 <em>구체적인 질문</em> 하나로. 스킬이 LOGIC/UI 분기를 묻습니다.",
+      howNote: "추상적인 주제 말고 <em>구체적인 질문 하나</em>로 호출하세요. 스킬이 \"로직 검증용인가, UI 시안용인가?\"를 먼저 물어 분기를 정합니다.",
       what: [
-        { type: "p", html: "<em>PoC</em>(Proof of Concept) = *증명을 위한 시연*. 본 코드를 더럽히지 않으면서 빠르게 학습." },
-        { type: "p", html: "두 분기:" },
-        { type: "ul", items: ["<em>LOGIC</em>: 터미널 인터랙티브 앱 (상태 모델/충돌)", "<em>UI</em>: 한 라우트에 변형 여러 개 (URL 토글)"] },
-        { type: "p", html: "6 규칙: throwaway 표기 / 단일 명령 실행 / 메모리 보관 / 폴리시 생략 / 상태 노출 / <span class='pop'>끝나면 반드시 처분</span>. 저장소에 썩히면 부채." }
+        { type: "p", html: "<em>PoC</em>(Proof of Concept) = \"이게 가능은 한지\" 증명을 위해 만드는 시연용 코드. 본 코드를 더럽히지 않으면서 빠르게 학습하는 게 목표입니다." },
+        { type: "p", html: "두 가지 분기:" },
+        { type: "ul", items: ["<em>로직 검증</em>: 터미널에서 돌리는 인터랙티브 앱. 상태 모델·충돌 같은 *동작*이 정말 통하는지 확인", "<em>UI 시안</em>: 한 라우트에 변형 여러 개를 두고 URL 파라미터로 토글하면서 비교"] },
+        { type: "p", html: "여섯 가지 규칙: ① 파일명에 *throwaway* 표시 ② 단일 명령으로 실행 가능 ③ DB 대신 메모리 보관 ④ 에러 처리·검증 같은 *폴리시는 일부러 생략* ⑤ 상태를 화면에 그대로 노출 ⑥ <span class='pop'>끝나면 반드시 처분</span>. 저장소에 남겨 두면 그 자체로 부채가 됩니다." }
       ],
       output: ["질문에 대한 답 (커밋 메시지, ADR, 이슈 어딘가에 기록됨)", "그리고 텅 빈 자리. 프로토타입은 사라집니다"],
       combos: ["grill-me", "to-prd", "improve"],
@@ -850,19 +850,19 @@ matt: {
       cmd: "/diagnose",
       emoji: "🔍", role: "탐정", roleEn: "DETECTIVE",
       tileSummary: "코드를 아무리 노려봐도 원인이 안 잡히는 버그가 있을 때, 피드백 루프부터 만들고 가설을 좁혀 회귀 테스트로 확정합니다",
-      heroSummary: "코드를 아무리 노려봐도 원인이 안 잡히는 버그가 있을 때, 결정론적 피드백 루프부터 만들고 가설 3~5개를 좁혀 가며 마지막에는 회귀 테스트 한 개로 확정해 주는 6단계 프로세스입니다 (*Phase 1의 피드백 루프 구축*에 절반의 노력을 쏟고 나머지는 기계적으로 진행)",
+      heroSummary: "코드를 아무리 노려봐도 원인이 안 잡히는 버그가 있을 때. \"같은 입력이면 항상 같은 결과\"가 나오는 *재현 환경(피드백 루프)*부터 만들고, 가설 3~5개로 좁혀 가다가 마지막에 회귀 테스트 하나로 못 박는 6단계 프로세스입니다 (*Phase 1의 피드백 루프 구축*에 노력의 절반을 쏟고, 나머지는 거의 기계적으로 진행)",
       when: ["버그 리포트가 들어왔을 때", "성능이 갑자기 느려졌을 때", "\"왜 이게 안 되지?\"라는 질문 앞에서 막막할 때"],
       howCode: ["/diagnose 결제 금액이 가끔 0원으로 찍힙니다…"],
-      howNote: "증상을 같이 던지면 됩니다. 6단계 중 추가 정보를 물을 단계마다 멈춥니다.",
+      howNote: "증상을 같이 던지면 됩니다. 6단계 중 추가 정보가 필요한 지점마다 멈춰서 물어 봅니다.",
       what: [
-        { type: "p", html: "핵심 통찰: <em>피드백 루프 없이는 코드를 노려봐도 답이 안 나온다</em>. 그래서 1단계에 노력의 절반을 쏟습니다." },
+        { type: "p", html: "핵심 통찰: *재현이 안 되면 코드를 아무리 노려봐도 답이 안 나옵니다*. 그래서 1단계에 노력의 절반을 쏟아 \"같은 입력 → 항상 같은 결과\"가 나오는 환경을 먼저 만듭니다." },
         { type: "ol", items: [
-          "<span class='pop'>피드백 루프</span> (10가지 옵션 우선순위 순)",
-          "재현: 진짜 그 버그인지 확인",
-          "가설 3~5개: 반증 가능하게",
-          "계측: 가설을 가르는 지점에만",
-          "수정 + 회귀 테스트 (수정 전에 테스트 먼저)",
-          "정리 + 포스트모템"
+          "<span class='pop'>피드백 루프 만들기</span> — 같은 결과를 반복해서 재현할 수 있는 환경 (10가지 방법 중 우선순위 순으로 시도)",
+          "재현 확인 — 보고된 그 버그가 정말 같은 버그인지 확인",
+          "가설 세우기 — 반증 가능한 형태로 3~5개",
+          "<em>계측(instrumentation)</em> — 가설을 *가를 수 있는* 지점에만 로그·중단점 추가",
+          "수정 + 회귀 테스트 — 단, 수정 *전에* 실패하는 테스트부터 작성",
+          "정리 + <em>포스트모템</em>(postmortem, 사후 점검 메모)"
         ]}
       ],
       output: ["빨강 → 초록으로 바뀐 회귀 테스트 1개", "정리된 코드 (계측 흔적 X)", "\"구조가 어떻게 막을 수 있었나\" 한 줄"],
@@ -893,14 +893,14 @@ matt: {
       cmd: "/improve-codebase-architecture",
       emoji: "🏗️", role: "건축가", roleEn: "ARCHITECT",
       tileSummary: "같은 영역에 손이 자꾸 가고 코드가 점점 무너지는 느낌이 들 때, deep module 후보를 찾아 인터페이스 뒤로 복잡도를 모아 줍니다",
-      heroSummary: "같은 영역에 손이 자꾸 가고 코드가 점점 무너지는 느낌이 들 때, deep module 후보를 찾아 작은 인터페이스 뒤로 복잡도를 모으도록 *grilling 루프*로 함께 설계해 가는 리팩터 대화입니다",
+      heroSummary: "같은 영역에 손이 자꾸 가고 코드가 점점 무너지는 느낌이 들 때. <em>deep module</em>(겉은 단순·속은 복잡한 모듈) 후보를 찾아, *질문 → 답 → 다음 질문*으로 한 가지씩 좁혀 가며 함께 설계해 주는 리팩터 대화입니다",
       when: ["며칠에 한 번씩 정기 점검", "\"여러 작은 모듈을 자꾸 튕겨다닌다\"는 느낌", "큰 기능 추가 직전, 코드 준비 상태 확인"],
       howCode: ["/improve-codebase-architecture", "/improve-codebase-architecture src/checkout"],
-      howNote: "전체 or 특정 영역. 후보 목록을 보여주면 하나를 골라 깊이 들어갑니다.",
+      howNote: "전체 or 특정 영역. 후보 목록을 보여 주면 하나를 골라 깊이 들어갑니다.",
       what: [
-        { type: "p", html: "<em>deep module</em>은 작은 인터페이스 뒤에 큰 동작이 숨은 모듈입니다 (예: <code class='inline'>db.query()</code>). 반대로 <em>shallow</em>는 인터페이스가 내부 코드만큼 복잡한 모듈이고, 코드베이스가 부패하는 큰 원인이 됩니다." },
-        { type: "p", html: "판정 질문: <span class='pop'>\"이 모듈을 지우면 복잡도가 사라지나, 호출자들로 흩어지나?\"</span>" },
-        { type: "ol", items: ["탐색: 서브에이전트에 위임해 코드베이스를 훑게 합니다", "후보 번호 매겨 제시", "그릴링 루프: 사용자가 하나 고르면 같이 설계해 갑니다"] }
+        { type: "p", html: "<em>deep module</em>은 *작은 인터페이스 뒤에 큰 동작이 숨어 있는* 모듈입니다 (예: <code class='inline'>db.query()</code>처럼 한 줄 호출 뒤에 복잡한 처리가 숨음). 반대로 <em>shallow</em>는 인터페이스가 내부 코드만큼 복잡해서 *호출자가 내부를 알아야 하는* 모듈이고, 코드베이스가 부패하는 큰 원인입니다." },
+        { type: "p", html: "deep 후보 판정 질문: <span class='pop'>\"이 모듈을 지운다면 복잡도가 사라질까, 아니면 호출자들로 흩어질까?\"</span> (흩어진다면 = deep — 그 모듈이 진짜로 복잡도를 흡수하고 있던 셈)" },
+        { type: "ol", items: ["탐색 — 별도 *서브에이전트*(보조 에이전트)에게 코드베이스 훑기를 맡겨 후보 수집", "후보를 번호 매겨 제시", "*질문 → 답 → 다음 질문* 루프로, 사용자가 하나 고르면 함께 설계해 갑니다"] }
       ],
       output: ["우선순위 매겨진 리팩터 후보", "새 도메인 개념이 추가된 <code class='inline'>CONTEXT.md</code>", "거절된 옵션의 ADR (재거론 방지)"],
       combos: ["zoom-out", "grill-with-docs", "prototype"],
@@ -934,9 +934,9 @@ matt: {
       howCode: ["/write-a-skill 우리 팀 배포 체크리스트 자동화. /deploy로 트리거."],
       howNote: "만들 스킬의 트리거와 작업 도메인을 짧게 설명.",
       what: [
-        { type: "p", html: "가장 중요한 가르침은 <span class='pop'>description 필드의 무게</span>입니다. 에이전트는 사용자 요청을 받으면 모든 스킬의 *description만* 훑어보고 어느 걸 부를지 결정하며, 본문은 보지 않습니다. 그래서 모호한 description은 영원히 호출되지 않습니다." },
-        { type: "p", html: "규칙: 1024자 이내, 3인칭, 첫 문장에 \"무엇\" + 둘째 문장에 <code class='inline'>Use when [트리거]</code>." },
-        { type: "p", html: "<em>Progressive disclosure</em>: SKILL.md 100줄 이내 / 디테일은 별도 파일 / 본문은 링크만." }
+        { type: "p", html: "가장 중요한 가르침은 <span class='pop'>description 필드의 무게</span>입니다. 에이전트는 사용자 요청을 받으면 모든 스킬의 *description만* 훑어보고 어느 스킬을 부를지 결정합니다 (본문은 그 시점에 안 봅니다). 그래서 description이 모호하면 그 스킬은 *영원히 호출되지 않을 수도* 있습니다." },
+        { type: "p", html: "description 작성 규칙: 1024자 이내, 3인칭, 첫 문장에 \"무엇을 하는 스킬인지\" + 둘째 문장에 <code class='inline'>Use when [트리거 조건]</code>." },
+        { type: "p", html: "<em>Progressive disclosure</em>(점진적 공개) — *처음엔 핵심만 보이고, 필요할 때 디테일이 드러나도록* 짜는 방식. 적용: SKILL.md는 100줄 이내로 *왜·언제* 만 적기 / 어떻게의 디테일은 별도 파일로 분리 / 본문에는 \"자세한 건 X.md 참고\" 링크만." }
       ],
       output: ["새 스킬 폴더 (SKILL.md + 보조 파일)", "다른 사람도 트리거만 보고 호출 가능한 description"],
       combos: ["setup"],
@@ -1045,20 +1045,20 @@ superpowers: {
     "using-superpowers": {
       cmd: "using-superpowers",
       emoji: "🚀", role: "부트로더", roleEn: "BOOTLOADER",
-      tileSummary: "에이전트가 적용 가능한 스킬을 놓치고 그냥 답변할 위험을 막기 위해, 어떤 응답이든 보내기 전 스킬 도구를 먼저 invoke하도록 강제합니다",
-      heroSummary: "에이전트가 적용 가능한 스킬을 놓치고 그냥 답변하는 사고를 막기 위해, 모든 세션 시작 시 자동 로드되어 <em>어떤 응답·명료화 질문보다 먼저</em> Skill 도구를 invoke하도록 강제하는 부트스트랩입니다",
+      tileSummary: "에이전트가 적용할 수 있는 스킬을 놓치고 일반 답변만 하고 끝낼 위험. 어떤 응답이든 보내기 전, 스킬 목록을 먼저 호출하도록 강제합니다",
+      heroSummary: "에이전트가 적용할 수 있는 스킬을 놓치고 일반 답변만 하고 끝나는 사고를 막기 위한 <em>부트스트랩</em>(세션 시작에 자동으로 로드되는 진입점)입니다. 어떤 응답·명료화 질문보다 *먼저* Skill 도구를 호출하도록 강제합니다",
       when: ["모든 세션 시작 시 (자동)", "사용자 메시지를 받자마자", "심지어 명료화 질문에 답하기 전"],
       howCode: ["(자동 트리거 — 직접 호출 불필요)"],
-      howNote: "Claude Code의 <code class='inline'>Skill</code> 도구, Copilot CLI의 skill 도구, Gemini CLI의 activate_skill로 작동.",
+      howNote: "Claude Code의 <code class='inline'>Skill</code> 도구, Copilot CLI의 skill 도구, Gemini CLI의 activate_skill로 작동합니다.",
       what: [
-        { type: "p", html: "<span class='pop'>1% 룰</span>: 적용 가능성이 *1%라도 있으면* 무조건 invoke. 협상 불가." },
-        { type: "p", html: "스킬 우선순위: <em>프로세스 스킬 먼저</em>(brainstorming, debugging) → 구현 스킬 다음. \"X를 만들자\" → brainstorming부터." },
+        { type: "p", html: "<span class='pop'>1% 룰</span>: 어느 스킬이라도 *적용 가능성이 1%만 있어도* 무조건 호출합니다. 협상 불가." },
+        { type: "p", html: "스킬 우선순위는 <em>프로세스 스킬이 먼저</em>(brainstorming·debugging처럼 *작업 흐름을 정하는* 스킬), *구현 스킬은 그 다음*. 사용자가 \"X를 만들자\"고 하면 brainstorming부터 호출합니다." },
         { type: "p", html: "지시 우선순위: <strong>사용자 명시 지시</strong>(CLAUDE.md/AGENTS.md) > Superpowers 스킬 > 기본 시스템 프롬프트." },
         { type: "p", html: "Red Flags 자기 점검표 — 합리화 신호:" },
         { type: "ul", items: [
-          "\"이건 그냥 간단한 질문이야\" → 질문도 작업이다",
-          "\"먼저 컨텍스트 더 모아야지\" → 스킬이 *어떻게* 모을지 알려준다",
-          "\"이건 스킬 쓸 정도는 아닌데\" → 스킬이 있으면 써라"
+          "\"이건 그냥 간단한 질문이야\" → 질문도 작업입니다",
+          "\"먼저 컨텍스트를 더 모아야지\" → 스킬이 *어떻게* 모을지 알려 줍니다",
+          "\"이건 스킬 쓸 정도는 아닌데\" → 스킬이 있으면 무조건 씁니다"
         ]}
       ],
       output: ["다른 모든 스킬이 적절한 순간에 자동 트리거되는 환경"],
@@ -1069,15 +1069,15 @@ superpowers: {
     "brainstorming": {
       cmd: "brainstorming",
       emoji: "🧠", role: "탐험가", roleEn: "EXPLORER",
-      tileSummary: "어떤 코드든 짜기 전 \"뭘 만들지\"가 막연할 때, 한 질문씩 소크라테스식 대화로 spec을 뽑아내고 사용자 승인을 받습니다",
-      heroSummary: "기능·구성요소·동작 변경 어떤 작업이든 *코드를 쓰기 전* 의도와 요구사항을 명확히 해야 할 때, 한 질문씩 소크라테스식 대화로 다듬어 design.md를 작성하고 섹션별 승인을 받은 뒤 writing-plans로 넘기는 정합성 게이트입니다",
+      tileSummary: "어떤 코드든 짜기 전 \"뭘 만들지\"가 막연할 때. 한 번에 한 질문씩 던지며 *spec*(요구사항 명세)을 함께 다듬고, 단계마다 사용자 승인을 받습니다",
+      heroSummary: "기능·구성요소·동작 변경 어떤 작업이든 *코드를 쓰기 전* 의도와 요구사항을 명확히 해야 할 때. 한 번에 한 질문씩 던지면서 design.md(설계 문서)를 함께 다듬고 섹션마다 승인을 받은 뒤 writing-plans로 넘기는 <em>정합성 게이트</em>(코드 진입을 막는 검문소) 역할을 합니다",
       when: ["새 기능을 만들기 전", "구성요소·기능 추가·동작 수정 직전", "\"이건 너무 단순해\" 싶어도 *항상*"],
       howCode: ["(자동 트리거 — 무언가를 만들겠다고 하면 즉시)"],
-      howNote: "<span class='pop'>HARD-GATE</span>: 디자인 승인 전엔 어떤 구현 스킬도 invoke 못 합니다.",
+      howNote: "<span class='pop'>HARD-GATE</span>: 디자인 승인 전에는 어떤 구현 스킬도 호출하지 못합니다.",
       what: [
-        { type: "p", html: "흐름: 프로젝트 컨텍스트 탐색 → 한 번에 한 질문 (multiple choice 선호) → 2~3가지 접근안 + 추천 제시 → 디자인 섹션별 승인 → <code class='inline'>docs/superpowers/specs/&lt;날짜&gt;-design.md</code> 저장 → 자기 검토 → 사용자 검토 → writing-plans 호출" },
-        { type: "p", html: "단일 책임 원칙: 각 단위는 *하나의* 명확한 목적, 잘 정의된 인터페이스, 독립 테스트 가능. 외부에서 내부를 모르고 쓸 수 있어야 함." },
-        { type: "p", html: "<span class='pop'>YAGNI</span>: 불필요한 기능은 디자인에서 제거. 스코프가 너무 크면 *서브 프로젝트*로 분해 제안." },
+        { type: "p", html: "흐름: 프로젝트 컨텍스트 탐색 → 한 번에 한 질문 (가능하면 *객관식*으로 — 사용자가 답하기 쉬움) → 2~3가지 접근안과 추천을 함께 제시 → 디자인 섹션별 승인 → <code class='inline'>docs/superpowers/specs/&lt;날짜&gt;-design.md</code>에 저장 → 자기 검토 → 사용자 검토 → writing-plans 호출" },
+        { type: "p", html: "단일 책임 원칙: 각 단위는 *하나의* 명확한 목적과 잘 정의된 인터페이스를 가져야 하고, 독립적으로 테스트 가능해야 합니다. 외부에서 내부 구현을 몰라도 쓸 수 있어야 함." },
+        { type: "p", html: "<span class='pop'>YAGNI</span>(You Aren't Gonna Need It, \"필요해질 때 만들면 돼\"): 지금 당장 필요 없는 기능은 디자인에서 빼냅니다. 스코프가 너무 크면 *서브 프로젝트로 분리*를 제안합니다." },
         { type: "p", html: "종착지는 <em>writing-plans</em>입니다. 다른 어떤 구현 스킬도 호출하지 않습니다." }
       ],
       output: ["사용자 승인된 design.md (커밋됨)", "writing-plans 호출 가능 상태"],
@@ -1130,16 +1130,16 @@ superpowers: {
     "subagent-driven-development": {
       cmd: "subagent-driven-development",
       emoji: "🤖", role: "작전 사령관", roleEn: "COMMANDER",
-      tileSummary: "독립적인 작업들이 있는 plan을 빠르게 실행하고 싶을 때, 작업마다 fresh subagent를 띄우고 spec→quality 두 단계 리뷰로 진행합니다",
-      heroSummary: "독립적인 작업들이 있는 plan을 <em>같은 세션에서 빠르게</em> 실행해야 할 때, 작업마다 fresh subagent를 띄우고 끝나면 spec compliance reviewer + code quality reviewer 두 단계 리뷰를 거치는 컨트롤러 역할을 합니다 (사람 개입 없이 연속 실행)",
-      when: ["plan이 있고 작업들이 *명확히* 독립적일 때 (tightly coupled하면 executing-plans로)", "같은 세션에서 빠르게 진행하고 싶을 때", "두 단계 품질 게이트가 필요할 때"],
+      tileSummary: "독립적인 작업들이 있는 plan을 빠르게 실행하고 싶을 때. 작업마다 매번 새로 시작하는 보조 에이전트(subagent)를 띄우고, *사양 일치 → 품질* 두 단계 리뷰를 거칩니다",
+      heroSummary: "독립적인 작업들이 있는 plan을 *같은 세션 안에서 빠르게* 실행해야 할 때. 작업마다 *매번 새로 시작하는 보조 에이전트(subagent)*를 띄우고, 끝나면 *사양 일치 검토*(spec compliance reviewer) + *품질 검토*(code quality reviewer) 두 단계를 거치는 사령탑 역할입니다 (사람의 중간 개입 없이 연속 실행)",
+      when: ["plan이 있고 작업들이 *명확히* 독립적일 때 (서로 얽혀 있다면 executing-plans로)", "같은 세션에서 빠르게 진행하고 싶을 때", "두 단계 품질 게이트가 필요할 때"],
       howCode: ["(자동 트리거 — writing-plans 핸드오프)"],
-      howNote: "executing-plans보다 권장. 사람-in-the-loop 없이 연속 실행이 핵심.",
+      howNote: "executing-plans보다 권장합니다. 사람의 중간 개입 없이 연속 실행하는 게 핵심.",
       what: [
-        { type: "p", html: "작업당 흐름: implementer subagent(fresh) → 구현·테스트·커밋·자가 리뷰 → spec reviewer가 사양 일치 확인 → 이슈 있으면 implementer가 수정 → code quality reviewer 검토 → 통과하면 다음 작업" },
-        { type: "p", html: "모델 선택: 단순 구현은 cheap, 통합은 standard, 설계·리뷰는 most capable." },
-        { type: "p", html: "Implementer 상태 4가지 — <strong>DONE</strong>(리뷰 진입) / <strong>DONE_WITH_CONCERNS</strong>(우려 읽고 처리) / <strong>NEEDS_CONTEXT</strong>(컨텍스트 보강 후 재dispatch) / <strong>BLOCKED</strong>(원인 따라 모델 업그레이드·작업 분해·사용자 에스컬레이션)" },
-        { type: "p", html: "<span class='pop'>Red Flags</span>: spec compliance 끝나기 전 quality review 시작 X, 두 리뷰 중 하나라도 미해결인데 다음 작업으로 넘어가기 X." }
+        { type: "p", html: "작업 한 개의 흐름: ① <em>구현 담당 subagent</em>(매번 새로 시작) → 구현·테스트·커밋·자가 리뷰 → ② <em>사양 일치 reviewer</em>가 plan과 어긋난 점이 없는지 확인 → 어긋났으면 구현 담당이 수정 → ③ <em>품질 reviewer</em> 검토 → 모두 통과해야 다음 작업으로 넘어갑니다." },
+        { type: "p", html: "비용·역할별 모델 선택: 단순 구현은 *가벼운 모델*, 통합 작업은 *표준 모델*, 설계·리뷰는 *가장 강한 모델*." },
+        { type: "p", html: "구현 담당이 보고하는 4가지 상태 — <strong>DONE</strong>(완료, 리뷰 진입) / <strong>DONE_WITH_CONCERNS</strong>(완료했지만 우려 사항 있음 → 사령탑이 읽고 처리) / <strong>NEEDS_CONTEXT</strong>(컨텍스트 부족 → 보강 후 다시 dispatch) / <strong>BLOCKED</strong>(막힘 → 원인에 따라 모델 업그레이드, 작업 분해, 사용자 에스컬레이션)." },
+        { type: "p", html: "<span class='pop'>Red Flags</span>: 사양 일치 검토 끝나기 전에 품질 검토 시작 X, 두 리뷰 중 하나라도 미해결인데 다음 작업으로 넘어가기 X." }
       ],
       output: ["완료된 코드 + 두 단계 리뷰 통과", "finishing-a-development-branch 호출 준비"],
       combos: ["test-driven-development", "requesting-code-review", "finishing-a-development-branch"],
@@ -1324,16 +1324,16 @@ superpowers: {
     "writing-skills": {
       cmd: "writing-skills",
       emoji: "🛠️", role: "메타 장인", roleEn: "SMITH",
-      tileSummary: "새 스킬을 만들거나 수정해야 할 때, *문서판 TDD*로 검증되지 않은 스킬은 절대 배포 못 하게 막습니다",
-      heroSummary: "새 스킬 작성·기존 스킬 수정·배포 전 검증이 필요할 때, <em>문서판 TDD</em> 방법론(서브에이전트 압박 시나리오로 RED → 스킬 작성 GREEN → 합리화 빈틈 메우는 REFACTOR)으로 베이스라인 실패를 본 적 없는 스킬은 배포 못 하게 강제합니다",
+      tileSummary: "새 스킬을 만들거나 수정해야 할 때. *문서판 TDD*를 적용해, 검증되지 않은 스킬은 절대 배포할 수 없게 막습니다",
+      heroSummary: "새 스킬을 만들거나 기존 스킬을 수정·검증해야 할 때. <em>문서판 TDD</em>를 적용합니다 — *압박 시나리오*(에이전트가 합리화로 우회할 만한 상황)로 RED를 보고, 스킬을 작성해 GREEN, 합리화 빈틈을 메우는 REFACTOR. *베이스라인 실패를 본 적 없는 스킬은 배포 못 하게* 강제합니다",
       when: ["새 스킬 작성 or 기존 스킬 수정", "배포 전 검증이 필요할 때", "\"이건 너무 단순하니 테스트 생략\" 충동이 들 때"],
       howCode: ["(스킬 작성 시)"],
-      howNote: "<span class='pop'>Iron Law</span>: 실패하는 테스트(서브에이전트 압박 시나리오) 없이 스킬 배포 X.",
+      howNote: "<span class='pop'>Iron Law</span>: 실패하는 테스트(서브에이전트 압박 시나리오) 없이 스킬 배포 금지.",
       what: [
-        { type: "p", html: "TDD 매핑: 테스트 케이스 = 압박 시나리오 / production code = SKILL.md / RED = 스킬 없을 때 베이스라인 위반 / GREEN = 스킬과 함께 준수 / REFACTOR = 합리화 빈틈 메우기." },
-        { type: "p", html: "<span class='pop'>Description은 *언제* 쓰는지만, *무엇을 하는지*는 X</span>. 워크플로우를 description에 요약하면 에이전트가 본문을 *건너뛰고* description만 따른다는 게 실측됨. 두 단계 리뷰 워크플로우인데 description에 \"리뷰 진행\"이라고 적었더니 한 단계만 했음." },
-        { type: "p", html: "Claude Search Optimization (CSO): 풍부한 description, 키워드 커버리지, 동사형 이름 (<code class='inline'>creating-skills</code> > <code class='inline'>skill-creation</code>), 토큰 효율 (자주 로드되는 스킬은 &lt;200 단어)." },
-        { type: "p", html: "Bulletproofing: 모든 합리화를 *명시적으로 차단*, Red Flags 표, \"문자가 곧 정신\" 원칙 명문화." }
+        { type: "p", html: "TDD를 문서 작성에 그대로 옮긴 매핑입니다: <em>테스트 케이스</em> = 압박 시나리오 / <em>프로덕션 코드</em> = SKILL.md / <em>RED</em> = 스킬이 없을 때 에이전트가 베이스라인을 어김 / <em>GREEN</em> = 스킬을 추가했을 때 준수 / <em>REFACTOR</em> = 합리화 빈틈을 더 막기." },
+        { type: "p", html: "<span class='pop'>Description은 *언제* 쓰는지만, *무엇을 하는지*는 X</span>. 워크플로우를 description에 요약하면 에이전트가 본문을 *건너뛰고* description만 따른다는 게 실측됐습니다. 두 단계 리뷰 워크플로우인데 description에 \"리뷰 진행\"이라고 적었더니 한 단계만 하고 끝낸 사례." },
+        { type: "p", html: "<em>Claude Search Optimization</em>(CSO, 검색 엔진 최적화의 스킬판): description을 풍부하게, 키워드를 충분히 깔고, 동사형 이름을 선호 (<code class='inline'>creating-skills</code>가 <code class='inline'>skill-creation</code>보다 검색에 잘 잡힘), 토큰 효율 — 자주 로드되는 스킬은 200단어 이하로." },
+        { type: "p", html: "<em>Bulletproofing</em>(빈틈 차단): 에이전트가 할 만한 모든 합리화를 *명시적으로 막아 두기*, Red Flags 표, \"문자가 곧 정신\"(원문 그대로 따르라) 원칙 명문화." }
       ],
       output: ["압박 시나리오를 통과한 스킬", "배포 가능 상태"],
       combos: ["test-driven-development", "verification-before-completion"],
@@ -1423,9 +1423,9 @@ gstack: {
     "office-hours": {
       cmd: "/office-hours",
       emoji: "🛋️", role: "문제 재정의자", roleEn: "REFRAMER",
-      tileSummary: "기능 요청을 바로 코딩하면 잘못된 걸 만들 위험일 때, YC 스타일로 *문제부터* 다시 정의해 디자인 문서로 굳혀 줍니다",
-      heroSummary: "검증된 *문제* 없이 기능 요청만으로 코드를 짜기 시작하면 잘못된 걸 만들 위험이 클 때, YC식 '오피스 아워'로 문제를 재정의하고 검증된 전제와 2~3가지 구현 접근안을 디자인 문서로 굳혀 줍니다",
-      when: ["어떤 기획·코드 작업을 시작하기 *직전*", "스타트업 모드: PMF 검증이 필요할 때", "빌더 모드: 해커톤·프로토타입"],
+      tileSummary: "기능 요청을 그대로 받아 코드부터 짜면 잘못된 걸 만들 위험. YC 스타일 면담(\"진짜 풀어야 할 문제는 뭐죠?\" 식 6가지 질문)으로 *문제부터* 다시 정의해 디자인 문서로 굳혀 줍니다",
+      heroSummary: "검증된 *문제* 없이 기능 요청만으로 코드를 짜기 시작하면 잘못된 걸 만들 위험이 큽니다. YC 파트너의 *오피스 아워*(스타트업 면담) 톤으로 문제를 재정의하고, 검증된 전제와 2~3가지 구현 접근안을 디자인 문서에 굳혀 줍니다",
+      when: ["어떤 기획·코드 작업을 시작하기 *직전*", "스타트업 모드: <em>PMF</em>(Product-Market Fit, 제품-시장 적합성) 검증이 필요할 때", "빌더 모드: 해커톤·프로토타입"],
       howCode: ["/office-hours"],
       howNote: "다른 plan·코드 스킬을 호출하기 전에 가장 먼저 돌립니다.",
       what: [
@@ -1440,33 +1440,33 @@ gstack: {
     "plan-ceo-review": {
       cmd: "/plan-ceo-review",
       emoji: "👑", role: "비전 검증관", roleEn: "VISIONARY",
-      tileSummary: "80% 솔루션이 출시되기 직전 *10점짜리 버전*이 가능한지 묻고 싶을 때, 4가지 모드로 scope를 첫 원칙부터 다시 잡습니다",
-      heroSummary: "Plan이 실현 가능성에 최적화되어 *10점 버전*을 놓칠 위험이 있을 때, 사용자 공감을 근거로 scope를 다시 결정합니다 (확장 / 선택 확장 / 유지 / 축소 4가지 모드)",
+      tileSummary: "80% 솔루션이 출시 직전인데 *고객이 진짜 원하는 10점짜리 버전*을 놓칠 위험. CEO 시각으로 4가지 모드를 동원해 scope를 첫 원칙부터 다시 잡습니다",
+      heroSummary: "Plan이 \"실현 가능성\"에만 최적화되어 *10점짜리 버전*(고객이 진짜 원하는 모양)을 놓칠 위험이 있을 때. CEO 시각에서 \"사용자에게 어떤 가치를 주는가\"를 근거로 scope를 다시 결정합니다 (확장 / 선택 확장 / 유지 / 축소 — 4가지 모드)",
       when: ["/office-hours 직후 첫 원칙 재검토", "\"이 제품이 진짜 무엇을 위한 건지\" 다시 묻고 싶을 때"],
       howCode: ["/plan-ceo-review"],
-      howNote: "각 scope 결정에 사용자 공감 추론을 강제로 붙임.",
+      howNote: "각 scope 결정마다 \"사용자에게 어떤 가치를 주는가\"를 강제로 따져 봅니다.",
       what: [
-        { type: "p", html: "예시 변환: \"사진 업로드 기능\" → <em>\"판매자가 전환률 높은 리스팅을 만들도록 돕는 기능\"</em>. 표면적 기능에서 *사용자 가치*로 재정의." },
-        { type: "p", html: "<span class='pop'>4가지 모드</span>: 확장(더 야심차게) / 선택 확장(일부만) / 유지 / 축소(YAGNI)." }
+        { type: "p", html: "예시 변환: \"사진 업로드 기능\" → <em>\"판매자가 전환률 높은 리스팅을 만들도록 돕는 기능\"</em>. *표면적 기능*에서 *사용자 가치*로 재정의합니다." },
+        { type: "p", html: "<span class='pop'>4가지 모드</span>: 확장(더 야심차게) / 선택 확장(일부만 야심차게) / 유지(그대로) / 축소(<em>YAGNI</em>: 지금 필요 없는 건 빼기)." }
       ],
-      output: ["scope 결정이 박힌 제품 비전 문서"],
+      output: ["scope 결정이 명확히 박힌 제품 비전 문서"],
       combos: ["plan-design-review", "plan-eng-review", "autoplan"],
-      meta: "👑 founder mode · 첫 원칙 검토"
+      meta: "👑 CEO/창업자 시각 · 첫 원칙 검토"
     },
 
     "plan-design-review": {
       cmd: "/plan-design-review",
       emoji: "🎨", role: "UI 상태 감독관", roleEn: "UI-AUDITOR",
-      tileSummary: "Plan이 백엔드 로직만 다루고 빈 상태·에러·로딩이 통째로 빠져 있을 때, 차원별로 0~10 점수와 10점 예시로 plan을 인터랙티브 보강합니다",
-      heroSummary: "Plan이 backend 로직만 적혀 있고 빈/에러/로딩 같은 인터랙션 상태가 미정의일 때, UI 차원별로 0~10 점수와 10점 예시를 제시하며 정보 계층·5+ 상태 커버리지·모바일 동작·AI 슬롭 위험을 함께 plan에 채워 넣습니다",
+      tileSummary: "Plan이 백엔드 로직만 적혀 있고 빈 화면·에러·로딩 같은 UI 상태가 통째로 빠져 있을 때. UI 차원마다 0~10 점수와 \"10점이 어떤 모습인지\" 예시를 보여 주며 plan을 인터랙티브하게 보강합니다",
+      heroSummary: "Plan에 backend 로직만 적혀 있고 빈/에러/로딩 같은 인터랙션 상태가 미정의일 때. UI 차원마다 0~10 점수와 *10점 예시*를 직접 제시하며, 정보 계층 / 5+ 상태 커버리지 / 모바일 동작 / <em>AI 슬롭</em>(slop, 무난·획일적인 AI풍 디자인) 위험을 plan에 함께 채워 넣습니다",
       when: ["plan-eng-review 전 UI 상태 점검", "기능마다 5+ 인터랙션 상태가 누락됐을 때"],
       howCode: ["/plan-design-review"],
-      howNote: "코드 짜기 *전에* UI 상태를 plan에 미리 박는 게 핵심.",
+      howNote: "코드 짜기 *전에* UI 상태를 plan에 미리 굳혀 두는 게 핵심입니다.",
       what: [
-        { type: "p", html: "각 UI 차원에 0~10 점수 매기고 *10점이 어떤 모습인지* 직접 보여 줍니다." },
-        { type: "p", html: "기능당 5+ 상태 커버리지 강제: 빈 / 로딩 / 에러 / 부분 / 성공." }
+        { type: "p", html: "각 UI 차원마다 0~10 점수를 매기고 *10점이 어떤 모습인지* 직접 보여 줍니다." },
+        { type: "p", html: "기능당 *5가지 이상의 상태*를 강제로 정의: 빈 / 로딩 / 에러 / 부분 / 성공." }
       ],
-      output: ["UI 상태가 채워진 plan", "AI-slop 위험 완화"],
+      output: ["UI 상태가 채워진 plan", "AI 슬롭(획일적 디자인) 위험 완화"],
       combos: ["plan-eng-review", "design-consultation", "autoplan"],
       meta: "🎨 plan 단계 · 5+ 상태 커버리지"
     },
@@ -1601,18 +1601,18 @@ gstack: {
     "qa": {
       cmd: "/qa",
       emoji: "🧪", role: "테스터", roleEn: "QA",
-      tileSummary: "수동 테스트는 edge case를 놓치고 자동 테스트는 짠 것만 잡을 때, diff-aware(feature 브랜치)·systematic(main) 모드로 자동 회귀 테스트까지 만들어 줍니다",
-      heroSummary: "코딩 후 수동/자동 테스트의 빈틈을 메우기 위해, 브랜치에 따라 diff-aware(feature)나 systematic(main) 모드로 테스트하고 *발견된 버그마다 회귀 테스트를 자동 생성*합니다",
+      tileSummary: "수동 테스트는 edge case를 놓치고, 자동 테스트는 짠 것만 잡습니다. 브랜치에 따라 모드를 나눠 — feature는 *변경분 위주*, main은 *전체 체계 점검* — 발견한 버그마다 회귀 테스트까지 자동 생성합니다",
+      heroSummary: "코딩 후 수동/자동 테스트의 빈틈을 메워야 할 때. 브랜치에 따라 모드가 달라집니다 — feature 브랜치는 *변경된 부분 위주*(diff-aware), main 브랜치는 *전체를 체계적으로*(systematic). *발견된 버그마다 회귀 테스트(같은 버그가 다시 들어올 길을 막는 테스트)를 자동 생성*합니다",
       when: ["코딩 직후, /ship 전", "정기 systematic 검증"],
       howCode: ["/qa"],
-      howNote: "발견 버그를 그 자리에서 픽스하고 회귀 테스트로 굳힘. (보고만 원하면 /qa-only)",
+      howNote: "발견한 버그를 그 자리에서 픽스하고 회귀 테스트로 굳힙니다 (보고만 원하면 /qa-only).",
       what: [
-        { type: "p", html: "QA 리포트: 스크린샷 + severity 정렬 버그 목록." },
-        { type: "p", html: "각 픽스마다 <span class='pop'>회귀 테스트 자동 생성</span> — 같은 버그 재발 방지." }
+        { type: "p", html: "QA 리포트 출력: 스크린샷 + *심각도(severity) 정렬* 버그 목록." },
+        { type: "p", html: "각 픽스마다 <span class='pop'>회귀 테스트 자동 생성</span> — 같은 버그가 다시 들어올 길을 코드 차원에서 막습니다." }
       ],
       output: ["QA 리포트", "버그 픽스 + 자동 회귀 테스트"],
       combos: ["review", "investigate", "ship"],
-      meta: "🧪 자동 회귀 테스트 생성 · diff-aware"
+      meta: "🧪 자동 회귀 테스트 생성 · 변경분 위주"
     },
 
     "codex": {
@@ -1677,14 +1677,14 @@ gstack: {
     "canary": {
       cmd: "/canary",
       emoji: "🐤", role: "모니터", roleEn: "MONITOR",
-      tileSummary: "배포 끝나고 노트북 닫는 사이 사용자가 console error·404·성능 추락을 보는 사고를 막기 위해, 핵심 페이지를 루프하며 trouble을 감지합니다",
-      heroSummary: "배포 직후나 위험한 릴리스 후 사용자가 console error·Core Web Vitals 추락·페이지 404를 먼저 보는 사고를 막기 위해, 핵심 페이지를 루프 모니터링하며 이상치 발생 시 알림을 띄웁니다",
+      tileSummary: "배포가 끝나고 노트북을 닫는 사이 사용자가 콘솔 에러·404·성능 추락을 먼저 보는 사고. 핵심 페이지를 자동 루프 모니터링하며 이상치를 감지합니다",
+      heroSummary: "배포 직후나 위험한 릴리스 후, 사용자가 콘솔 에러·*Core Web Vitals*(구글이 정의한 사용자 체감 성능 지표)의 추락·페이지 404를 먼저 발견하는 사고를 막기 위해. 핵심 페이지를 루프 모니터링하다가 이상치가 잡히면 즉시 알림을 띄웁니다",
       when: ["/land-and-deploy 직후", "위험한 배포 후 정기 모니터링"],
       howCode: ["/canary"],
-      howNote: "스케줄링 가능 — 위험한 배포는 더 오래.",
+      howNote: "스케줄링 가능합니다 — 위험한 배포는 더 오래 돌립니다.",
       what: [
-        { type: "p", html: "실시간 감시 대상: 콘솔 에러 / Core Web Vitals (LCP·CLS·INP) / 페이지 실패 (404·5xx)." },
-        { type: "p", html: "이상 탐지 시 즉시 알림 — 사용자가 보기 전에 잡음." }
+        { type: "p", html: "실시간 감시 대상: 콘솔 에러 / Core Web Vitals (<em>LCP</em>=주요 콘텐츠 로딩 속도 / <em>CLS</em>=레이아웃 흔들림 / <em>INP</em>=인터랙션 반응 속도) / 페이지 실패 (404·5xx)." },
+        { type: "p", html: "이상이 탐지되면 즉시 알림 — 사용자가 보기 *전에* 잡습니다." }
       ],
       output: ["실시간 모니터링 + 이상 탐지 알림"],
       combos: ["land-and-deploy", "ship"],
@@ -1694,14 +1694,14 @@ gstack: {
     "autoplan": {
       cmd: "/autoplan",
       emoji: "🤖", role: "자동 파이프라인", roleEn: "AUTOPILOT",
-      tileSummary: "CEO → Design → Eng 리뷰를 순차로 돌리면 15~30개 중간 질문이 폭격일 때, 완성도·일관성·되돌릴 수 있는 결정은 자동 해결, *취향 결정만* 승인 게이트로 띄웁니다",
-      heroSummary: "/plan-* 리뷰들을 사람 개입을 최소화하면서 한 번에 돌리고 싶을 때, 완성도·일관성·되돌릴 수 있는 결정은 자동 해결하고 *취향 결정만* 사용자 승인 게이트로 띄우는 자동화 파이프라인입니다",
+      tileSummary: "CEO → Design → Eng 리뷰를 순차로 돌리면 15~30개 중간 질문이 사용자에게 폭격이 됩니다. 완성도·일관성·되돌릴 수 있는 결정은 자동으로 해결하고, *취향 결정만* 승인 게이트로 띄웁니다",
+      heroSummary: "/plan-* 리뷰들을 사람의 개입을 최소화하면서 한 번에 돌리고 싶을 때. 완성도·일관성·되돌릴 수 있는 결정은 자동으로 해결하고, *취향 결정만* 사용자 승인 게이트로 모아 띄우는 자동화 파이프라인입니다",
       when: ["plan-* 리뷰 3개를 한 번에 돌리고 싶을 때", "중간 질문 폭격을 피하고 취향 결정에만 집중하고 싶을 때"],
       howCode: ["/autoplan"],
-      howNote: "사용자에게 묻는 빈도가 줄지만 취향 결정은 여전히 인간이.",
+      howNote: "사용자에게 묻는 빈도가 줄지만, 취향 결정은 여전히 사람의 몫입니다.",
       what: [
-        { type: "p", html: "자동 해결: 완성도 / 일관성 / 되돌릴 수 있는 결정." },
-        { type: "p", html: "에스컬레이션: <span class='pop'>취향 결정만</span> 한 번에 모아 사용자 승인 게이트." }
+        { type: "p", html: "자동 해결되는 항목: 완성도 / 일관성 / *되돌릴 수 있는 결정*(잘못 가도 다시 바꾸기 쉬운 것들)." },
+        { type: "p", html: "에스컬레이션: <span class='pop'>취향 결정만</span> 한 번에 모아 사용자 승인 게이트로 띄웁니다." }
       ],
       output: ["한 번에 리뷰된 plan", "취향 결정 승인 게이트"],
       combos: ["office-hours", "plan-ceo-review", "plan-eng-review"],
@@ -1728,15 +1728,15 @@ gstack: {
     "learn": {
       cmd: "/learn",
       emoji: "🧠", role: "기관 기억", roleEn: "ARCHIVIST",
-      tileSummary: "프로젝트마다 학습한 패턴·함정·선호가 세션 종료와 함께 사라질 때, 학습을 누적하고 다른 스킬이 자동으로 참조하게 만들어 팀 플레이북으로 export합니다",
-      heroSummary: "각 프로젝트가 가르쳐 주는 gstack 패턴·함정·선호가 세션 종료와 함께 사라지는 문제를 막기 위해, 학습을 confidence 등급(high/medium/low)으로 누적하고 *다른 스킬이 자동으로 참조*하게 만듭니다",
+      tileSummary: "프로젝트마다 학습한 패턴·함정·선호가 세션 종료와 함께 사라지는 문제. 학습을 누적해 두고 다른 스킬이 자동으로 참조하게 만들며, 팀 플레이북으로 export까지 제공합니다",
+      heroSummary: "각 프로젝트가 가르쳐 주는 gstack 패턴·함정·선호가 세션 종료와 함께 사라지는 걸 막기 위해. 학습을 *확신 등급*(high / medium / low)으로 누적하고, *다른 스킬이 자동으로 참조*하게 만듭니다",
       when: ["진행 중 학습이 발생할 때", "팀 노하우를 export하고 싶을 때"],
       howCode: ["/learn"],
-      howNote: "다른 스킬이 \"Prior learning applied\" 주석으로 자동 활용.",
+      howNote: "다른 스킬이 적용 시 \"Prior learning applied\" 주석으로 자동 활용 표시합니다.",
       what: [
-        { type: "p", html: "23+ 학습 누적 (high / medium / low confidence)." },
-        { type: "p", html: "검색 / 프루닝(stale 학습 제거) / 팀 플레이북 export." },
-        { type: "p", html: "다른 스킬이 자동 consult — <em>\"Prior learning applied\"</em> 주석으로 표시." }
+        { type: "p", html: "23개 이상의 학습이 누적됩니다 (high / medium / low <em>확신 등급</em>으로 분류)." },
+        { type: "p", html: "검색 / 프루닝(낡은 학습 제거) / 팀 플레이북으로 export 가능." },
+        { type: "p", html: "다른 스킬이 자동으로 참조 — 적용 시 <em>\"Prior learning applied\"</em> 주석으로 표시해 줍니다." }
       ],
       output: ["누적 학습 + 검색 가능", "팀 플레이북 export"],
       combos: ["retro", "health"],
