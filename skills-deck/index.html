@@ -284,8 +284,9 @@
   }
   .card-hero .summary {
     font-size: 15px; color: var(--text-dim);
-    max-width: 480px; margin: 0 auto;
-    line-height: 1.5;
+    max-width: 560px; margin: 0 auto;
+    line-height: 1.6;
+    text-align: left;
   }
 
   .stats {
@@ -739,7 +740,7 @@ matt: {
       cmd: "/grill-me",
       emoji: "❓", role: "질문자", roleEn: "INQUIRER",
       tileSummary: "계획 어디가 빈틈인지 모르겠어 막막할 때, 한 질문씩 인터뷰하며 결정 트리의 빈 가지를 함께 채워 갑니다",
-      heroSummary: "내 계획 어디가 빈틈인지 모르겠어 막막할 때, 한 질문씩 추천 답과 함께 던지며 결정 트리의 모든 가지를 함께 채워 갑니다 (본문이 단 3줄인 미니멀 코어)",
+      heroSummary: "\"내 계획에 빈틈이 있는데 어디인지를 모르겠다\" 싶을 때. 머릿속의 결정 트리는 가지가 많아 추적이 어렵습니다. 한 질문씩 추천 답과 함께 짚어 가면, *가장 싼 매체(대화)*에서 결정을 좁힐 수 있어 본 코드를 짜기 전에 답이 모이는 게 핵심입니다 (본문이 단 3줄인 미니멀 코어)",
       when: ["\"내 계획을 깨봐 줘\" 라고 말하고 싶을 때", "디자인/전략에 비판적 피드백 필요", "코드는 안 짜는 결정 (가격/메시지 톤 등)"],
       howCode: ["/grill-me 신규 회원에게 첫 결제 50% 할인"],
       howNote: "한 번에 하나씩 질문이 옵니다. 추천 답이 같이 와서 막히지 않음.",
@@ -812,7 +813,7 @@ matt: {
       cmd: "/tdd",
       emoji: "🎯", role: "트레이서 사수", roleEn: "TRACER",
       tileSummary: "리팩터해도 버그가 또 새는 모순이 반복될 때. 동작 하나마다 *실패하는 테스트를 먼저 본 뒤 → 그걸 통과시키는 최소 코드만* 더하는 사이클로, 동작 자체를 코드보다 먼저 명세로 남깁니다",
-      heroSummary: "리팩터할 때마다 테스트는 깨지는데 정작 버그는 또 새는 모순이 반복될 때. <em>RED</em>는 *실패하는 테스트*, <em>GREEN</em>은 *그걸 통과시키는 최소 코드*를 뜻합니다. 동작 하나마다 RED → GREEN을 한 사이클씩 돌며 명세부터 남겨 두면, 리팩터 후에도 살아남는 안전망이 됩니다",
+      heroSummary: "코드를 정리(리팩터)하다 보면 *\"테스트는 다 통과하는데 버그는 또 나오네\"* 하는 일이 종종 생깁니다. 코드를 *짠 뒤에* 테스트를 쓰면, *내가 짠 그 코드*만 검증할 뿐 *원래 의도했던 동작*은 빠진 채로 남기 때문이죠. TDD는 순서를 뒤집습니다. 동작 하나마다 *실패하는 테스트(<em>RED</em>)*를 먼저 보고, *그걸 통과시키는 최소 코드(<em>GREEN</em>)*만 더하는 사이클을 돕니다. 결과적으로 코드가 아니라 *의도한 동작*을 검증하는 테스트가 남아서, 리팩터 후에도 살아남는 안전망이 됩니다",
       when: ["새 동작을 코드로 옮길 때", "<code class='inline'>/diagnose</code> 마지막 단계의 회귀 테스트", "리팩터 직후 안전망 만들 때"],
       howCode: ["/tdd 쿠폰 적용 함수. 만료 거절, 1회 사용 후 비활성"],
       howNote: "계획 단계에서 \"이 동작을 이렇게 검증할게요\"를 사용자에게 확인받은 뒤에야 코드로 들어갑니다.",
@@ -893,7 +894,7 @@ matt: {
       cmd: "/improve-codebase-architecture",
       emoji: "🏗️", role: "건축가", roleEn: "ARCHITECT",
       tileSummary: "같은 영역에 손이 자꾸 가고 코드가 점점 무너지는 느낌이 들 때, deep module 후보를 찾아 인터페이스 뒤로 복잡도를 모아 줍니다",
-      heroSummary: "같은 영역에 손이 자꾸 가고 코드가 점점 무너지는 느낌이 들 때. <em>deep module</em>(겉은 단순·속은 복잡한 모듈) 후보를 찾아, *질문 → 답 → 다음 질문*으로 한 가지씩 좁혀 가며 함께 설계해 주는 리팩터 대화입니다",
+      heroSummary: "같은 영역에 손이 자꾸 가고 코드가 점점 무너지는 느낌이 들 때. 그 느낌의 원인은 보통 *복잡도가 여러 곳에 흩어져 있기 때문*입니다. 흩어진 복잡도를 <em>deep module</em>(겉은 단순·속은 복잡한 모듈) 뒤로 모으는 후보를 함께 찾고, *질문 → 답 → 다음 질문* 루프로 한 가지씩 좁혀 갑니다. 코드를 직접 만지지 않고 *대화*인 이유는, 후보 선정과 인터페이스 설계가 사람의 판단을 요구하기 때문입니다",
       when: ["며칠에 한 번씩 정기 점검", "\"여러 작은 모듈을 자꾸 튕겨다닌다\"는 느낌", "큰 기능 추가 직전, 코드 준비 상태 확인"],
       howCode: ["/improve-codebase-architecture", "/improve-codebase-architecture src/checkout"],
       howNote: "전체 or 특정 영역. 후보 목록을 보여 주면 하나를 골라 깊이 들어갑니다.",
@@ -929,7 +930,7 @@ matt: {
       cmd: "/write-a-skill",
       emoji: "🛠️", role: "메타 장인", roleEn: "SMITH",
       tileSummary: "같은 작업이 반복되고 팀 노하우가 사람에게만 묶여 있을 때, SKILL.md 구조와 description으로 누구나 호출 가능한 스킬로 묶어 줍니다",
-      heroSummary: "같은 작업이 반복되고 팀 노하우가 사람에게만 묶여 있을 때, SKILL.md 구조와 정확한 <em>description</em>으로 누구나 호출할 수 있는 스킬로 묶어 줍니다",
+      heroSummary: "같은 작업이 반복되는데 *팀 노하우가 사람의 머릿속에만* 묶여 있을 때. 단순히 위키 문서로 적어 두면 \"이걸 *언제* 써야 하는지\"가 안 보여서, 결국 아는 사람이 그때그때 알려 주는 식으로 돌아갑니다. SKILL.md 구조와 정확한 <em>description</em>(스킬을 *언제* 쓰는지를 1024자 이내로 적은 짧은 안내)으로 묶어 두면, 에이전트가 사용자 요청을 받을 때 description만 훑어보고 자동으로 적합한 스킬을 골라 호출합니다",
       when: ["팀 고유 워크플로우(자체 배포 등)를 패키징", "같은 작업을 여러 번 반복하다가 자동화 욕구", "기존 스킬을 우리 팀에 맞게 변형"],
       howCode: ["/write-a-skill 우리 팀 배포 체크리스트 자동화. /deploy로 트리거."],
       howNote: "만들 스킬의 트리거와 작업 도메인을 짧게 설명.",
@@ -1070,7 +1071,7 @@ superpowers: {
       cmd: "brainstorming",
       emoji: "🧠", role: "탐험가", roleEn: "EXPLORER",
       tileSummary: "어떤 코드든 짜기 전 \"뭘 만들지\"가 막연할 때. 한 번에 한 질문씩 던지며 *spec*(요구사항 명세)을 함께 다듬고, 단계마다 사용자 승인을 받습니다",
-      heroSummary: "기능·구성요소·동작 변경 어떤 작업이든 *코드를 쓰기 전* 의도와 요구사항을 명확히 해야 할 때. 한 번에 한 질문씩 던지면서 design.md(설계 문서)를 함께 다듬고 섹션마다 승인을 받은 뒤 writing-plans로 넘기는 <em>정합성 게이트</em>(코드 진입을 막는 검문소) 역할을 합니다",
+      heroSummary: "기능·구성요소·동작 변경 어떤 작업이든 *코드를 쓰기 전* 의도와 요구사항을 명확히 해야 할 때. 사용자에게 \"무엇을 만들지\"를 한꺼번에 묻거나 추측으로 채우면, *어긋난 합의*가 그대로 코드까지 흘러갑니다. 한 번에 한 질문씩 던지면서 design.md(설계 문서)를 섹션 단위로 승인받고, 끝나면 writing-plans로 넘기는 <em>정합성 게이트</em>(코드 진입을 막는 검문소) 역할입니다. 한 질문 단위로 끊는 이유는, 모호한 답이 다음 결정을 흐리지 않게 *각 결정을 그 자리에서 굳히기* 위해서입니다",
       when: ["새 기능을 만들기 전", "구성요소·기능 추가·동작 수정 직전", "\"이건 너무 단순해\" 싶어도 *항상*"],
       howCode: ["(자동 트리거 — 무언가를 만들겠다고 하면 즉시)"],
       howNote: "<span class='pop'>HARD-GATE</span>: 디자인 승인 전에는 어떤 구현 스킬도 호출하지 못합니다.",
@@ -1112,7 +1113,7 @@ superpowers: {
       cmd: "writing-plans",
       emoji: "📋", role: "도면 설계사", roleEn: "PLANNER",
       tileSummary: "design.md는 있는데 정작 누가 어떻게 구현할지 막막할 때, 2~5분짜리 미니 작업으로 쪼갠 상세 계획을 만들어 줍니다",
-      heroSummary: "spec이 있는데 다단계 구현이 필요할 때, <em>컨텍스트 0인 후속 엔지니어</em>가 그대로 따라할 수 있을 만큼 상세한 계획을 만듭니다 (정확한 파일 경로 / 완전한 코드 / 검증 명령 / 2~5분짜리 단계)",
+      heroSummary: "spec이 있는데 다단계 구현이 필요할 때. 막연한 plan(\"적절히 처리\", \"엣지 케이스 고려\")으로 들어가면 구현 단계마다 사람이 \"이걸 어떻게?\" 결정해야 해서 흐름이 자주 끊깁니다. *컨텍스트 0인 후속 엔지니어가 그대로 따라할 수 있을 만큼* 상세한 계획(정확한 파일 경로 / 완전한 코드 / 검증 명령 / 2~5분짜리 단계)을 미리 만들어 둡니다. 이렇게 짜 두면 구현 단계는 *판단 없이 실행만* 하면 되어, 자동화나 다른 사람에게 위임이 훨씬 쉬워집니다",
       when: ["brainstorming 후 spec이 승인됐을 때", "다단계 작업을 코드로 옮기기 전", "\"어디부터 손대야 하지\" 막막할 때"],
       howCode: ["(자동 트리거 — brainstorming 종료 시점)"],
       howNote: "<code class='inline'>docs/superpowers/plans/&lt;날짜&gt;-&lt;feature&gt;.md</code>에 저장.",
@@ -1475,7 +1476,7 @@ gstack: {
       cmd: "/plan-eng-review",
       emoji: "⚙️", role: "기술 척추", roleEn: "ARCHITECT",
       tileSummary: "야심찬 plan에 기술적 척추가 없어 race condition·N+1·edge case가 production에서 터지기 *전에*, 가설을 다이어그램으로 강제로 끄집어내 락인합니다",
-      heroSummary: "야심찬 plan에 기술적 척추가 없어 race condition·N+1·edge case가 *production에서* 발견될 위험이 클 때, 시스템·데이터플로우·상태 머신 다이어그램과 컴포넌트 경계, 실패 모드, edge case 매트릭스, 테스트 커버리지 스켈레톤으로 가설을 강제 락인합니다",
+      heroSummary: "야심찬 plan에 *기술적 척추*가 없어 race condition·N+1·edge case가 production에서 터질 위험이 클 때. 코드 짜는 동안 \"이건 나중에 생각하자\"로 미뤄 둔 가정들이, 운영 환경의 동시 요청·대량 데이터를 만나면 한꺼번에 깨지거든요. 시스템·데이터 흐름·상태 머신을 다이어그램으로 그리고 edge case를 표로 정리해 가설을 코드 전에 굳혀 둡니다. 다이어그램·표가 *말로는 빠뜨려도 그림에서는 빠뜨릴 수 없는* 빈자리를 보여 주기 때문에, 숨은 가정이 자연스럽게 드러나는 게 핵심입니다",
       when: ["CEO 리뷰 후, 코딩 *전*", "race condition·N+1·edge case 미정의 의심"],
       howCode: ["/plan-eng-review"],
       howNote: "숨은 기술 가정을 다이어그램으로 강제 추출.",
@@ -1496,7 +1497,7 @@ gstack: {
       cmd: "/design-consultation",
       emoji: "🎨", role: "디자인 시스템 빌더", roleEn: "BUILDER",
       tileSummary: "디자인 시스템·미학·타이포가 모두 0에서 시작이라 generic하고 잊히기 쉬운 UI를 만들 위험일 때, 카테고리를 리서치해 안전한 선택과 의도된 위험을 함께 제안합니다",
-      heroSummary: "시작점이 zero (디자인 시스템·미학·타이포 결정 안 됨)라 generic 한 UI 위험이 클 때, 카테고리를 리서치해 안전한 선택과 의도된 창의적 위험을 함께 제안하고 완전한 디자인 시스템을 한 번에 마련해 줍니다",
+      heroSummary: "디자인 시스템·미학·타이포가 *모두 zero*인 새 프로젝트에서 generic AI 패턴 UI를 만들 위험이 클 때. 빈 캔버스에서 직접 디자인을 짜라고 하면 익숙한 패턴이 무의식적으로 반복되거든요. 같은 카테고리(예: 개발자 툴) 안의 *좋은 사례*를 먼저 리서치한 뒤, 안전한 제안과 의도된 창의적 위험을 함께 들고 와 완전한 디자인 시스템을 한 번에 마련합니다. 무의식이 아니라 *외부 사례라는 비교점*을 먼저 두기 때문에 generic을 피할 수 있습니다",
       when: ["새 프로젝트 디자인 시작점", "어떤 visual 구현보다 *먼저*"],
       howCode: ["/design-consultation"],
       howNote: "DESIGN.md와 CLAUDE.md를 함께 갱신해 미래 세션이 자동 참조.",
@@ -1564,7 +1565,7 @@ gstack: {
       cmd: "/review",
       emoji: "🧐", role: "스태프 엔지니어", roleEn: "STAFF-AUDITOR",
       tileSummary: "테스트 통과·CI 그린인데 production은 깨지는 사고를 막고 싶을 때, 스타일 잔소리가 아닌 *편집증적 구조 점검*을 수행합니다",
-      heroSummary: "ship 전, 테스트 통과·CI 그린인데도 production에서 N+1·race condition·잊힌 enum 핸들러가 살아남는 사고를 막기 위해, 스타일이 아닌 *구조* 차원의 편집증적 감사를 합니다",
+      heroSummary: "테스트도 통과하고 CI도 그린인데, production에서 N+1·race condition·잊힌 enum 핸들러 같은 버그가 살아남는 사고. 자동화된 테스트는 *짠 코드의 동작*은 검증해도, *짜지 않은 코드의 빈자리*(놓친 분기·잘못된 가정)는 보지 못하거든요. ship 직전에 들여쓰기·이름 같은 스타일이 아니라 *구조 차원*의 편집증적 감사로 이 빈자리를 잡습니다. 사람의 시야가 자동 검사가 못 보는 곳을 메우는 게 핵심입니다",
       when: ["/ship 직전", "production 사고 위험 의심"],
       howCode: ["/review"],
       howNote: "obvious 픽스는 자동 적용, 모호한 건 사용자 결정.",
@@ -1901,6 +1902,13 @@ function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+// **text** → <strong>, *text* → <em> (마크다운식 강조 변환)
+function emph(str) {
+  return String(str)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+?)\*/g, '<em>$1</em>');
+}
+
 //
 // ─── HTML → Markdown 변환 헬퍼 ──────────────────────────────────
 //
@@ -2058,18 +2066,18 @@ function renderTile(id, s) {
     <div class="tile-emoji">${s.emoji}</div>
     <div class="tile-cmd">${escapeHtml(s.cmd)}</div>
     <div class="tile-role">${escapeHtml(s.role)}</div>
-    <div class="tile-summary">${escapeHtml(s.tileSummary)}</div>
+    <div class="tile-summary">${emph(s.tileSummary)}</div>
   `;
   return btn;
 }
 
 function renderWhatBlock(b) {
-  if (b.type === 'p')          return `<p>${b.html}</p>`;
-  if (b.type === 'blockquote') return `<blockquote>${b.html}</blockquote>`;
+  if (b.type === 'p')          return `<p>${emph(b.html)}</p>`;
+  if (b.type === 'blockquote') return `<blockquote>${emph(b.html)}</blockquote>`;
   if (b.type === 'ol' || b.type === 'ul') {
     const tag = b.type;
     const styleAttr = b.style ? ` style="${b.style}"` : '';
-    const items = b.items.map(i => `<li>${i}</li>`).join('');
+    const items = b.items.map(i => `<li>${emph(i)}</li>`).join('');
     return `<${tag}${styleAttr}>${items}</${tag}>`;
   }
   return '';
@@ -2082,10 +2090,10 @@ function renderDetailCard(id) {
   card.className = 'card';
 
   const whatHtml   = s.what.map(renderWhatBlock).join('');
-  const whenHtml   = s.when.map(w => `<li>${w}</li>`).join('');
-  const outputHtml = s.output.map(o => `<li>${o}</li>`).join('');
+  const whenHtml   = s.when.map(w => `<li>${emph(w)}</li>`).join('');
+  const outputHtml = s.output.map(o => `<li>${emph(o)}</li>`).join('');
   const codeHtml   = s.howCode.map(c => `<code>${escapeHtml(c)}</code>`).join('');
-  const noteHtml   = s.howNote ? `<p>${s.howNote}</p>` : '';
+  const noteHtml   = s.howNote ? `<p>${emph(s.howNote)}</p>` : '';
   const chipsHtml  = s.combos
     .map(cid => ds().skills[cid] ? `<span class="chip">${escapeHtml(ds().skills[cid].cmd)}</span>` : '')
     .join(' ');
@@ -2099,7 +2107,7 @@ function renderDetailCard(id) {
     <div class="card-hero">
       <div class="emoji">${s.emoji}</div>
       <div class="role">${escapeHtml(s.role)} · ${escapeHtml(s.roleEn)}</div>
-      <div class="summary">${s.heroSummary}</div>
+      <div class="summary">${emph(s.heroSummary)}</div>
     </div>
     <div class="stats">
       <div class="stat-block">
@@ -2138,7 +2146,7 @@ function renderMini(item, index) {
       <div class="mini cli" aria-disabled="true">
         <div class="mini-top"><span class="mini-emoji">${item.emoji}</span><span class="mini-role">${escapeHtml(item.role)}</span>${badge}</div>
         <div class="mini-cmd">${escapeHtml(item.cmd)}</div>
-        <div class="mini-why">${item.why}</div>
+        <div class="mini-why">${emph(item.why)}</div>
       </div>
     `;
   }
@@ -2148,7 +2156,7 @@ function renderMini(item, index) {
     <button class="mini" data-skill="${item.skill}" type="button">
       <div class="mini-top"><span class="mini-emoji">${s.emoji}</span><span class="mini-role">${escapeHtml(s.role)}</span>${badge}</div>
       <div class="mini-cmd">${escapeHtml(s.cmd)}</div>
-      <div class="mini-why">${item.why}</div>
+      <div class="mini-why">${emph(item.why)}</div>
     </button>
   `;
 }
@@ -2160,7 +2168,7 @@ function renderCombo(c) {
       <header>
         <span class="combo-num">${c.n}</span>
         <h3>${escapeHtml(c.title)}</h3>
-        <p class="scenario">${escapeHtml(c.scenario)}</p>
+        <p class="scenario">${emph(c.scenario)}</p>
       </header>
       <div class="combo-flow">${flowHtml}</div>
     </article>
