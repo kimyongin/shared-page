@@ -252,7 +252,7 @@
   }
   .card { border-color: rgba(92, 208, 255, 0.4); box-shadow: 0 30px 60px -20px rgba(0,0,0,0.7), 0 0 50px -8px var(--eng-glow); }
 
-  #modal-stage > .card { overflow: visible; }
+  #modal-scroll > .card { overflow: visible; }
   .card-head {
     display: flex;
     align-items: center;
@@ -401,18 +401,22 @@
     position: relative;
     width: min(620px, 100%);
     max-height: 92vh;
-    overflow-y: auto; overflow-x: hidden;
+    overflow: hidden;
     border-radius: var(--radius-card);
     will-change: transform, opacity;
+    background: #141a30;
+  }
+  .modal-scroll {
+    max-height: 92vh;
+    overflow-y: auto; overflow-x: hidden;
+    padding-right: 6px;
+    border-radius: var(--radius-card);
     scrollbar-width: thin;
     scrollbar-color: var(--line) transparent;
   }
-  .modal-stage::-webkit-scrollbar { width: 14px; }
-  .modal-stage::-webkit-scrollbar-track { background: transparent; margin: 12px 0; }
-  .modal-stage::-webkit-scrollbar-thumb {
-    background: var(--line); border-radius: 8px;
-    border: 4px solid transparent; background-clip: padding-box;
-  }
+  .modal-scroll::-webkit-scrollbar { width: 8px; }
+  .modal-scroll::-webkit-scrollbar-track { background: transparent; margin: 14px 0; }
+  .modal-scroll::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
   .modal-close {
     position: absolute;
     top: 19px;
@@ -736,18 +740,19 @@
     border-radius: var(--radius-card);
     border: 1px solid rgba(92,208,255,0.4);
     box-shadow: 0 30px 60px -20px rgba(0,0,0,0.7), 0 0 50px -8px var(--eng-glow);
-    width: min(620px, 100%); max-height: 92vh; overflow-y: auto;
+    width: min(620px, 100%); max-height: 92vh; overflow: hidden;
     padding: 0; position: relative;
     animation: modalIn 0.22s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .cmod-body {
+    max-height: 92vh; overflow-y: auto; overflow-x: hidden;
+    padding-right: 6px;
+    border-radius: var(--radius-card);
     scrollbar-width: thin; scrollbar-color: var(--line) transparent;
   }
-  .cmod-body { padding: 0; }
-  .cmod-box::-webkit-scrollbar { width: 14px; }
-  .cmod-box::-webkit-scrollbar-track { background: transparent; margin: 12px 0; }
-  .cmod-box::-webkit-scrollbar-thumb {
-    background: var(--line); border-radius: 8px;
-    border: 4px solid transparent; background-clip: padding-box;
-  }
+  .cmod-body::-webkit-scrollbar { width: 8px; }
+  .cmod-body::-webkit-scrollbar-track { background: transparent; margin: 14px 0; }
+  .cmod-body::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
   @keyframes modalIn { from { opacity:0; transform: scale(0.95) translateY(12px); } }
   .cmod-close {
     position: absolute; top: 19px; right: 16px;
@@ -1134,7 +1139,9 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
   </button>
   <div class="modal-stage" id="modal-stage">
-    <button class="modal-close" id="modal-close" type="button" aria-label="닫기 (Esc)"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3.5" y1="3.5" x2="10.5" y2="10.5"/><line x1="10.5" y1="3.5" x2="3.5" y2="10.5"/></svg></button>
+    <div class="modal-scroll" id="modal-scroll">
+      <button class="modal-close" id="modal-close" type="button" aria-label="닫기 (Esc)"><svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3.5" y1="3.5" x2="10.5" y2="10.5"/><line x1="10.5" y1="3.5" x2="3.5" y2="10.5"/></svg></button>
+    </div>
   </div>
   <button class="modal-nav modal-nav-next" id="modal-next" type="button" aria-label="다음 카드 (→)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -3092,6 +3099,7 @@ function initCompareModal() {
 (function () {
   const modal      = document.getElementById('modal');
   const stage      = document.getElementById('modal-stage');
+  const scroll     = document.getElementById('modal-scroll');
   const closeBtn   = document.getElementById('modal-close');
   const prevBtn    = document.getElementById('modal-prev');
   const nextBtn    = document.getElementById('modal-next');
@@ -3113,11 +3121,9 @@ function initCompareModal() {
     isAnimating = true;
     lastSourceEl = srcEl;
 
-    // 닫기 버튼을 카드 안에 넣기 전에, 이전 카드에서 빼서 stage에 다시 두고 카드를 제거
-    if (closeBtn.parentElement && closeBtn.parentElement !== stage) stage.appendChild(closeBtn);
-    stage.querySelectorAll('.card').forEach(c => c.remove());
-    stage.insertBefore(card, closeBtn);
-    // 닫기 버튼을 sticky card-head 안으로 이동시켜 스크롤 시 함께 고정되게 함
+    if (closeBtn.parentElement && closeBtn.parentElement !== scroll) scroll.appendChild(closeBtn);
+    scroll.querySelectorAll('.card').forEach(c => c.remove());
+    scroll.insertBefore(card, closeBtn);
     const cardHead = card.querySelector('.card-head');
     if (cardHead) cardHead.appendChild(closeBtn);
 
@@ -3190,9 +3196,8 @@ function initCompareModal() {
     modal.classList.remove('open');
     modal.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('modal-open');
-    // 닫기 버튼을 카드에서 빼서 stage에 보존한 뒤 카드를 제거
-    if (closeBtn.parentElement && closeBtn.parentElement !== stage) stage.appendChild(closeBtn);
-    stage.querySelectorAll('.card').forEach(c => c.remove());
+    if (closeBtn.parentElement && closeBtn.parentElement !== scroll) scroll.appendChild(closeBtn);
+    scroll.querySelectorAll('.card').forEach(c => c.remove());
     stage.style.transform       = '';
     stage.style.transformOrigin = '';
     stage.style.transition      = '';
@@ -3228,12 +3233,12 @@ function initCompareModal() {
     const id = srcEl.dataset.skill;
     const card = renderDetailCard(id);
     if (!card) return;
-    if (closeBtn.parentElement && closeBtn.parentElement !== stage) stage.appendChild(closeBtn);
-    stage.querySelectorAll('.card').forEach(c => c.remove());
-    stage.insertBefore(card, closeBtn);
+    if (closeBtn.parentElement && closeBtn.parentElement !== scroll) scroll.appendChild(closeBtn);
+    scroll.querySelectorAll('.card').forEach(c => c.remove());
+    scroll.insertBefore(card, closeBtn);
     const switchHead = card.querySelector('.card-head');
     if (switchHead) switchHead.appendChild(closeBtn);
-    stage.scrollTop = 0;            // 새 카드는 위에서부터 보이게
+    scroll.scrollTop = 0;
     lastSourceEl = srcEl;
     updateNavState();
   }
