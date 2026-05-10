@@ -2385,15 +2385,20 @@ renderAll();
   }
 
   // ──── prev/next 네비게이션 ────
-  // 메인 그리드의 카드만 순회 (콤보 미니카드는 중복이라 제외)
+  // 진입 컨텍스트에 따라 순회 범위가 다름:
+  //   - 콤보 미니카드에서 진입 → 그 콤보의 flow 순서로 순회
+  //   - 그 외(메인 그리드 등) → 메인 그리드 순서로 순회
   function getNavOrder() {
+    if (!lastSourceEl) return [];
+    const combo = lastSourceEl.closest('.combo-card');
+    if (combo) {
+      return Array.from(combo.querySelectorAll('[data-skill]'));
+    }
     return Array.from(document.querySelectorAll('#skill-grid [data-skill]'));
   }
   function navIndex() {
     if (!lastSourceEl) return -1;
-    const all = getNavOrder();
-    const id = lastSourceEl.dataset.skill;
-    return all.findIndex(el => el.dataset.skill === id);
+    return getNavOrder().indexOf(lastSourceEl);
   }
   function updateNavState() {
     const all = getNavOrder();
