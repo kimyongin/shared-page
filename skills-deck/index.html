@@ -222,14 +222,14 @@
   }
   .skill-tile .tile-cmd { color: var(--eng); }
   .tile-role {
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: 0.2em;
     color: var(--text-mute);
     text-transform: uppercase;
     font-weight: 700;
   }
   .tile-summary {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-dim);
     line-height: 1.45;
     border-top: 1px solid var(--line);
@@ -301,7 +301,7 @@
     padding: 14px 16px;
   }
   .stat-block h4 {
-    font-size: 12px; letter-spacing: 0.18em;
+    font-size: 11px; letter-spacing: 0.18em;
     text-transform: uppercase; margin: 0 0 8px;
     color: var(--text-dim);
     display: flex; align-items: center; gap: 6px;
@@ -319,7 +319,7 @@
     font-family: ui-monospace, 'SF Mono', Menlo, monospace;
     background: rgba(0,0,0,0.45);
     padding: 8px 10px; border-radius: 6px;
-    font-size: 12.5px; color: var(--text);
+    font-size: 13px; color: var(--text);
     border: 1px solid var(--line);
     margin-bottom: 8px;
     white-space: pre-wrap; word-break: break-word;
@@ -335,7 +335,7 @@
     padding: 6px 0 6px 12px;
     border-left: 2px solid var(--gold);
     color: var(--text);
-    font-size: 13.5px;
+    font-size: 14px;
   }
 
   .card-foot {
@@ -352,7 +352,7 @@
     margin-right: 4px; text-transform: uppercase; font-weight: 700;
   }
   .combo .chip {
-    font-family: ui-monospace, monospace; font-size: 12px;
+    font-family: ui-monospace, monospace; font-size: 13px;
     padding: 3px 8px; border-radius: 4px;
     border: 1px solid var(--line); background: rgba(0,0,0,0.3);
   }
@@ -546,17 +546,17 @@
   .mini .mini-emoji { font-size: 24px; line-height: 1; }
   .mini .mini-cmd {
     font-family: ui-monospace, monospace;
-    font-size: 12px; font-weight: 600;
+    font-size: 13px; font-weight: 600;
     word-break: break-all;
   }
   .mini .mini-cmd { color: var(--eng); }
   .mini.cli .mini-cmd { color: var(--gold); }
   .mini-role {
-    font-size: 10px; letter-spacing: 0.18em;
+    font-size: 11px; letter-spacing: 0.18em;
     color: var(--text-mute); text-transform: uppercase; font-weight: 700;
   }
   .mini-why {
-    font-size: 12px; line-height: 1.45; color: var(--text-dim);
+    font-size: 13px; line-height: 1.45; color: var(--text-dim);
     border-top: 1px solid var(--line);
     padding-top: 6px; margin-top: 2px;
   }
@@ -567,7 +567,7 @@
     max-width: 720px; margin: 24px auto 60px;
     padding: 0 24px;
     color: var(--text-mute);
-    font-size: 13px;
+    font-size: 14px;
     text-align: center;
   }
   .footer-note a { color: var(--gold); border-bottom: 1px dotted var(--gold-deep); }
@@ -679,14 +679,388 @@
     color: var(--text-dim);
   }
 
+  /* ───── Compare View ───── */
+  #compare-view { display: none; padding: 0 clamp(16px, 4vw, 48px) 80px; max-width: 1080px; margin: 0 auto; }
+  .compare-overview {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 32px 0 52px;
+  }
+  .cov-card {
+    background: linear-gradient(160deg, var(--bg-2) 0%, var(--bg-1) 100%);
+    border-radius: 16px; padding: 24px; border: 1.5px solid var(--line);
+    position: relative; overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.18s, border-color 0.18s;
+  }
+  .cov-card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px -6px rgba(0,0,0,0.4); }
+  .cov-card.matt:hover { border-color: rgba(255,217,107,0.6); }
+  .cov-card.sp:hover   { border-color: rgba(92,208,255,0.6); }
+  .cov-card.gs:hover   { border-color: rgba(126,232,162,0.6); }
+  .cov-hint {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.05em;
+    margin-top: 16px; opacity: 0.5;
+    transition: opacity 0.15s;
+  }
+  .cov-card:hover .cov-hint { opacity: 1; }
+  .cov-card.matt .cov-hint { color: var(--gold); }
+  .cov-card.sp   .cov-hint { color: var(--eng); }
+  .cov-card.gs   .cov-hint { color: #7ee8a2; }
+  /* compare detail modal — mirrors skill modal look */
+  .cmod-overlay {
+    position: fixed; inset: 0; z-index: 300;
+    background: rgba(5,8,18,0.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    display: flex; align-items: center; justify-content: center;
+    padding: clamp(16px, 4vh, 40px);
+  }
+  .cmod-box {
+    background: linear-gradient(160deg, #1d2541 0%, #141a30 100%);
+    border-radius: var(--radius-card);
+    border: 1px solid rgba(92,208,255,0.4);
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.7), 0 0 50px -8px var(--eng-glow);
+    width: min(620px, 100%); max-height: 92vh; overflow-y: auto;
+    padding: 36px 36px 32px; position: relative;
+    animation: modalIn 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    scrollbar-width: thin; scrollbar-color: var(--line) transparent;
+  }
+  .cmod-box::-webkit-scrollbar { width: 6px; }
+  .cmod-box::-webkit-scrollbar-track { background: transparent; }
+  .cmod-box::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+  @keyframes modalIn { from { opacity:0; transform: scale(0.95) translateY(12px); } }
+  .cmod-close {
+    position: absolute; top: 19px; right: 16px;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-mute); font-size: 13px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0; transition: all 0.15s ease; font-family: inherit;
+  }
+  .cmod-close:hover {
+    background: rgba(255,255,255,0.1); border-color: var(--gold);
+    color: var(--gold); transform: scale(1.08);
+  }
+  .cmod-body .phil-card { background: none; border: none; padding: 0; border-radius: 0; }
+  .cmod-body .phil-card h4 { font-size: 13px; margin-bottom: 16px; }
+  .cov-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .cov-card.matt::before { background: linear-gradient(90deg, var(--gold), var(--eng)); }
+  .cov-card.sp::before   { background: linear-gradient(90deg, var(--eng), #7ee8a2); }
+  .cov-card.gs::before   { background: linear-gradient(90deg, #7ee8a2, #2db870); }
+  .cov-name { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+  .cov-card.matt .cov-name { color: var(--gold); }
+  .cov-card.sp   .cov-name { color: var(--eng); }
+  .cov-card.gs   .cov-name { color: #7ee8a2; }
+  .cov-count { font-size: 40px; font-weight: 800; line-height: 1; margin-bottom: 8px; color: var(--text); }
+  .cov-tagline { font-size: 14px; color: var(--text-dim); line-height: 1.6; margin-bottom: 16px; }
+  .cov-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .cov-tag { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px; border: 1px solid; }
+  .cov-card.matt .cov-tag { border-color: rgba(255,217,107,0.5); color: var(--gold);  background: rgba(255,217,107,0.08); }
+  .cov-card.sp   .cov-tag { border-color: rgba(92,208,255,0.5);  color: var(--eng); background: rgba(92,208,255,0.08); }
+  .cov-card.gs   .cov-tag { border-color: rgba(126,232,162,0.5); color: #7ee8a2;       background: rgba(126,232,162,0.08); }
+
+  .compare-h { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-mute); margin: 0 0 18px; }
+  .theme-grid {
+    display: grid; grid-template-columns: 140px 1fr 1fr 1fr; gap: 6px; margin-bottom: 52px;
+  }
+  .theme-header { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 6px 10px; color: var(--text-mute); }
+  .theme-header.matt { color: var(--gold); }
+  .theme-header.sp   { color: var(--eng); }
+  .theme-header.gs   { color: #7ee8a2; }
+  .theme-label {
+    font-size: 11px; font-weight: 700; color: var(--text-dim);
+    padding: 8px 12px; background: rgba(255,255,255,0.02); border-radius: 8px;
+    border-left: 2px solid var(--line); display: flex; align-items: center;
+  }
+  .theme-cell {
+    padding: 7px 9px; background: rgba(255,255,255,0.02); border-radius: 8px;
+    display: flex; flex-wrap: wrap; gap: 4px; align-items: center; min-height: 36px;
+  }
+  .chip {
+    font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 6px; white-space: nowrap;
+  }
+  .chip.matt { background: rgba(255,217,107,0.12); color: #ffd96b; border: 1px solid rgba(255,217,107,0.3); }
+  .chip.sp   { background: rgba(92,208,255,0.12);  color: #5cd0ff; border: 1px solid rgba(92,208,255,0.3); }
+  .chip.gs   { background: rgba(126,232,162,0.12); color: #7ee8a2; border: 1px solid rgba(126,232,162,0.3); }
+  .chip.none { background: rgba(255,255,255,0.03); color: var(--text-mute); border: 1px solid var(--line); font-style: italic; }
+
+  .compare-three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 52px; }
+  .phil-card {
+    background: rgba(255,255,255,0.025); border-radius: 12px; padding: 20px; border: 1px solid var(--line);
+  }
+  .phil-card h4 { margin: 0 0 12px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  .phil-card.matt h4 { color: var(--gold); }
+  .phil-card.sp   h4 { color: var(--eng); }
+  .phil-card.gs   h4 { color: #7ee8a2; }
+  .phil-card ul { margin: 0; padding: 0 0 0 14px; }
+  .phil-card ul li { font-size: 14px; color: var(--text-dim); line-height: 1.65; margin-bottom: 6px; }
+  .phil-card ul li strong { color: var(--text); }
+  .pros-cons { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .pc-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 6px; }
+  .pros .pc-label { color: #7ee8a2; }
+  .cons .pc-label { color: #ff7b7b; }
+  .pros-cons ul { margin: 0; padding: 0; list-style: none; }
+  .pros-cons ul li { font-size: 14px; color: var(--text-dim); line-height: 1.6; margin-bottom: 6px; padding-left: 16px; position: relative; }
+  .pros ul li::before { content: '+'; position: absolute; left: 0; color: #7ee8a2; font-weight: 700; }
+  .cons ul li::before { content: '-'; position: absolute; left: 0; color: #ff7b7b; font-weight: 700; }
+  .pros-cons ul li .fix {
+    display: block;
+    margin-top: 5px;
+    padding-left: 16px;
+    font-size: 13px;
+    color: var(--text-mute);
+    line-height: 1.55;
+    position: relative;
+  }
+  .pros-cons ul li .fix::before {
+    content: '↳';
+    position: absolute;
+    left: 0;
+    color: var(--gold);
+    font-weight: 700;
+  }
+  .pros-cons ul li .fix strong { color: var(--text-dim); font-weight: 600; }
+
+  /* ─── 도입 단계별 가이드 (HITL → AFK 사다리) ─── */
+  .guide-intro { font-size: 13px; color: var(--text-dim); max-width: 780px; margin: -4px 0 12px; line-height: 1.7; }
+  .guide-intro strong { color: var(--text); }
+
+  .afk-axis {
+    display: flex; align-items: center; gap: 16px;
+    background: rgba(255,255,255,0.025); border: 1px solid var(--line);
+    border-radius: 10px; padding: 14px 20px; margin: 0 0 24px;
+  }
+  .afk-axis-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-mute); flex-shrink: 0; }
+  .afk-axis-label.lo { color: var(--gold); }
+  .afk-axis-label.hi { color: #7ee8a2; }
+  .afk-axis-bar {
+    flex: 1; height: 6px; border-radius: 3px;
+    background: linear-gradient(90deg, rgba(255,217,107,0.5) 0%, rgba(92,208,255,0.5) 50%, rgba(126,232,162,0.5) 100%);
+    position: relative;
+  }
+  .afk-axis-bar::before, .afk-axis-bar::after {
+    content: ''; position: absolute; top: 50%;
+    width: 8px; height: 8px; border-radius: 50%;
+    transform: translateY(-50%); background: var(--text-mute);
+  }
+  .afk-axis-bar::before { left: -4px; }
+  .afk-axis-bar::after  { right: -4px; }
+
+  .journey-wrap { display: flex; flex-direction: column; gap: 18px; margin-bottom: 18px; }
+  .journey-step {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px 26px;
+    position: relative;
+    overflow: hidden;
+  }
+  .journey-step::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  }
+  .journey-step.matt::before { background: linear-gradient(180deg, var(--gold), var(--eng)); }
+  .journey-step.sp::before   { background: linear-gradient(180deg, var(--eng), #7ee8a2); }
+  .journey-step.gs::before   { background: linear-gradient(180deg, #7ee8a2, #2db870); }
+
+  .step-head {
+    display: grid; grid-template-columns: auto 1fr auto;
+    align-items: center; gap: 16px; margin-bottom: 14px;
+  }
+  .step-num {
+    width: 40px; height: 40px; border-radius: 12px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 800; flex-shrink: 0;
+  }
+  .step-num.matt { background: rgba(255,217,107,0.15); color: var(--gold);  border: 1px solid rgba(255,217,107,0.4); }
+  .step-num.sp   { background: rgba(92,208,255,0.15);  color: var(--eng); border: 1px solid rgba(92,208,255,0.4); }
+  .step-num.gs   { background: rgba(126,232,162,0.15); color: #7ee8a2;       border: 1px solid rgba(126,232,162,0.4); }
+
+  .step-title-block { min-width: 0; }
+  .step-title { font-size: 19px; font-weight: 700; letter-spacing: -0.01em; }
+  .step-meter { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+  .step-meter-bar {
+    flex: 1; max-width: 220px; height: 5px; border-radius: 3px;
+    background: rgba(255,255,255,0.08); position: relative; overflow: hidden;
+  }
+  .step-meter-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; }
+  .step-meter-fill.matt { background: var(--gold); width: 12%; }
+  .step-meter-fill.sp   { background: var(--eng); width: 55%; }
+  .step-meter-fill.gs   { background: #7ee8a2; width: 92%; }
+  .step-meter-label { font-size: 11px; color: var(--text-mute); letter-spacing: 0.04em; }
+
+  .step-badge {
+    font-size: 11px; font-weight: 700; padding: 6px 14px; border-radius: 999px;
+    white-space: nowrap; align-self: center;
+  }
+  .step-badge.matt { background: rgba(255,217,107,0.15); color: var(--gold);  border: 1px solid rgba(255,217,107,0.4); }
+  .step-badge.sp   { background: rgba(92,208,255,0.15);  color: var(--eng); border: 1px solid rgba(92,208,255,0.4); }
+  .step-badge.gs   { background: rgba(126,232,162,0.15); color: #7ee8a2;       border: 1px solid rgba(126,232,162,0.4); }
+
+  .step-tagline { font-size: 13.5px; color: var(--text-dim); line-height: 1.7; margin: 0 0 14px; padding: 0; }
+  .step-tagline strong { color: var(--text); }
+
+  .step-points {
+    list-style: none; padding: 0; margin: 0 0 16px;
+    display: flex; flex-direction: column; gap: 7px;
+  }
+  .step-points li {
+    font-size: 13px; color: var(--text-dim); line-height: 1.65;
+    padding-left: 18px; position: relative;
+  }
+  .step-points li::before {
+    content: '+'; position: absolute; left: 0; top: 0;
+    font-weight: 700; font-family: monospace;
+  }
+  .journey-step.matt .step-points li::before { color: var(--gold); }
+  .journey-step.sp   .step-points li::before { color: var(--eng); }
+  .journey-step.gs   .step-points li::before { color: #7ee8a2; }
+  .step-points li strong { color: var(--text); font-weight: 600; }
+  .step-points li .inline {
+    background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 4px;
+    font-family: 'JetBrains Mono','Fira Code','Consolas',monospace; font-size: 11.5px;
+    color: var(--text-dim);
+  }
+
+  .step-callouts {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    margin-top: 14px;
+  }
+  .step-callout {
+    padding: 12px 14px; border-radius: 8px;
+    background: rgba(0,0,0,0.22); border: 1px solid var(--line);
+    font-size: 12.5px; line-height: 1.65;
+  }
+  .step-callout-h {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--text-mute); margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .step-callout-h .ico { font-size: 12px; }
+  .step-callout p { color: var(--text-dim); margin: 0; }
+  .step-callout p strong { color: var(--text); }
+  .step-callout p .inline {
+    background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;
+    font-family: 'JetBrains Mono','Fira Code','Consolas',monospace; font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  .mix-note {
+    margin-top: 22px; padding: 18px 22px;
+    background: linear-gradient(135deg, rgba(255,217,107,0.06) 0%, rgba(92,208,255,0.06) 50%, rgba(126,232,162,0.06) 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+  }
+  .mix-note-h {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text); margin-bottom: 8px;
+  }
+  .mix-note p { font-size: 13px; color: var(--text-dim); line-height: 1.7; margin: 0; }
+  .mix-note p strong { color: var(--text); }
+  .mix-note p .inline {
+    background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;
+    font-family: 'JetBrains Mono','Fira Code','Consolas',monospace; font-size: 11.5px;
+    color: var(--text-dim);
+  }
+
+  @media (max-width: 720px) {
+    .step-callouts { grid-template-columns: 1fr; }
+    .step-head { grid-template-columns: auto 1fr; }
+    .step-head .step-badge { grid-column: 1 / -1; justify-self: start; margin-top: 4px; }
+  }
+
+  /* ─── Skeleton tree: 각 시스템이 프로젝트에 만드는 파일 구조 ─── */
+  #skeleton-host {
+    padding: 0 clamp(20px, 6vw, 60px);
+  }
+  .skeleton {
+    background: rgba(0,0,0,0.28);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 16px 0 8px;
+    overflow-x: auto;
+    text-align: left;
+  }
+  .skeleton .sk-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--text-mute); margin-bottom: 10px;
+  }
+  .skeleton .sk-row {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0 6px;
+    line-height: 1.85;
+  }
+  .skeleton .sk-row code {
+    font-family: 'JetBrains Mono','Fira Code','Consolas',monospace;
+    font-size: 12.5px;
+    color: var(--text);
+    background: transparent;
+    padding: 0;
+    white-space: pre;
+    flex-shrink: 0;
+  }
+  .skeleton .sk-row .sk-note {
+    font-size: 11px;
+    color: var(--text-mute);
+    line-height: 1.85;
+  }
+  .skeleton .sk-row .sk-note:not(:empty)::before {
+    content: '← ';
+    opacity: 0.5;
+  }
+  .skeleton .sk-row .sk-note .skill {
+    color: var(--text-mute);
+    font-family: 'JetBrains Mono','Fira Code','Consolas',monospace;
+    font-size: 11px;
+  }
+  .skeleton .sk-foot {
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--text-mute);
+    line-height: 1.6;
+    font-style: italic;
+  }
+  @media (max-width: 720px) {
+    .compare-overview { grid-template-columns: 1fr; }
+    .compare-three { grid-template-columns: 1fr; }
+    .theme-grid { grid-template-columns: 100px 1fr 1fr 1fr; }
+  }
+
+  .combo-flow .arrow-symbol {
+    display: none; /* number badges convey order on desktop */
+    align-self: center;
+    text-align: center;
+    color: var(--gold);
+    font-size: 22px;
+  }
+  .combo-flow .arrow-text {
+    align-self: center;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-mute);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition: none !important; animation: none !important; }
   }
   @media (max-width: 540px) {
     .skill-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
 
-    /* 콤보 흐름: grid 1열로 세로 스택 (번호 배지가 흐름 표시) */
+    /* 콤보 흐름: grid 1열로 세로 스택 */
     .combo-flow { grid-template-columns: 1fr; gap: 8px; }
+    .combo-flow .arrow-symbol {
+      display: block;
+      text-align: center;
+      color: var(--gold);
+      font-size: 22px;
+      text-shadow: 0 0 8px var(--gold-glow);
+      transform: rotate(90deg);
+      padding: 2px 0;
+    }
+    .combo-flow .arrow-text { padding: 4px 0; }
   }
 </style>
 </head>
@@ -706,20 +1080,37 @@
   <button class="tab active" data-dataset="matt" type="button">Matt Pocock</button>
   <button class="tab" data-dataset="superpowers" type="button">Superpowers</button>
   <button class="tab" data-dataset="gstack" type="button">GStack</button>
+  <button class="tab" data-dataset="compare" type="button">비교하기</button>
 </div>
 
-<!-- ─────── Dataset Hero (탭별로 바뀜) ─────── -->
-<section class="hero">
-  <p class="lead" id="lead"></p>
-</section>
+<div id="deck-view">
+  <!-- ─────── Dataset Hero (탭별로 바뀜) ─────── -->
+  <section class="hero">
+    <p class="lead" id="lead"></p>
+  </section>
 
-<h2 class="section-h">▸ 덱 둘러보기 <small>카드 클릭 → 펼쳐보기</small><button class="md-button" id="md-button" type="button" aria-label="현재 덱을 Markdown으로 다운로드" title="현재 덱을 Markdown으로 보기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></h2>
-<section class="skill-grid" id="skill-grid"></section>
+  <h2 class="section-h">덱 둘러보기 <small>카드 클릭 → 펼쳐보기</small><button class="md-button" id="md-button" type="button" aria-label="현재 덱을 Markdown으로 다운로드" title="현재 덱을 Markdown으로 보기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></h2>
+  <section class="skill-grid" id="skill-grid"></section>
 
-<h2 class="section-h">▸ 콤보 시나리오</h2>
-<section class="combos" id="combos"></section>
+  <h2 class="section-h">프로젝트에 남기는 파일</h2>
+  <div id="skeleton-host"></div>
 
-<p class="footer-note" id="footer-note"></p>
+  <h2 class="section-h">콤보 시나리오</h2>
+  <section class="combos" id="combos"></section>
+
+  <p class="footer-note" id="footer-note"></p>
+</div>
+
+<!-- ─────── Compare View ─────── -->
+<div id="compare-view"></div>
+
+<!-- ─────── Compare Detail Modal ─────── -->
+<div class="cmod-overlay" id="compare-modal" style="display:none;" role="dialog" aria-modal="true">
+  <div class="cmod-box">
+    <button class="cmod-close" id="cmod-close" aria-label="닫기">✕</button>
+    <div class="cmod-body" id="cmod-body"></div>
+  </div>
+</div>
 
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-hidden="true">
   <button class="modal-nav modal-nav-prev" id="modal-prev" type="button" aria-label="이전 카드 (←)">
@@ -752,6 +1143,161 @@
 <script>
 //
 // ════════════════════════════════════════════════════════════════
+//   COMPARE DATA — 비교하기 탭 콘텐츠
+// ════════════════════════════════════════════════════════════════
+//
+
+const COMPARE_DATA = {
+  header: {
+    eyebrow: 'SIDE-BY-SIDE ANALYSIS',
+    title: '세 스킬 시스템 비교',
+    desc: 'Matt Pocock · Superpowers · GStack의 설계 철학과 강·약점을 사실 기반으로 정리합니다.'
+  },
+
+  overview: [
+    {
+      key: 'matt', name: 'Matt Pocock', count: 13,
+      tagline: '<strong style="color:var(--text)">Total TypeScript 창립자</strong>가 매일 쓰는 작고 조합 가능한 13개 도구. AI 코딩의 4가지 실패 모드(의도 어긋남, 장황함, 깨진 코드, 아키텍처 부패)에 각각 대응합니다.',
+      tags: ['4가지 실패 모드 대응', '직접 호출', '언어 무관', '개인 워크플로우']
+    },
+    {
+      key: 'sp', name: 'Superpowers', count: 14,
+      tagline: '<strong style="color:var(--text)">7-step 공식 워크플로우</strong>(brainstorming → worktree → planning → ...)가 자동 진입되고, 리뷰·실행을 별도 subagent(매번 새로 시작하는 보조 에이전트)로 분리합니다.',
+      tags: ['자동 트리거', 'subagent 분리', 'TDD Iron Law', 'verification 게이트']
+    },
+    {
+      key: 'gs', name: 'GStack', count: 22,
+      tagline: 'ideation부터 canary 배포·회고까지 <strong style="color:var(--text)">스타트업 풀 라이프사이클</strong>을 22개 스킬로 분담합니다.',
+      tags: ['디자인 4종', '배포 3종', '3관점 리뷰', '배포 안전망']
+    }
+  ],
+
+  phil: [
+    {
+      key: 'matt', title: 'Matt Pocock',
+      philosophy: [
+        '<strong>LLM에게 먼저 코드를 흡수시킨다.</strong> grill-me는 LLM이 코드베이스를 탐색하며 계획의 빈틈을 캐묻고, grill-with-docs는 거기에 CONTEXT.md·ADR 갱신을 얹어 합의된 용어와 결정을 그 자리에서 문서로 굳힙니다. 이 단계 없이 시작하면 LLM은 <em>기억나는 패턴</em>으로 추정해 의도 어긋남이 쌓입니다.',
+        '<strong>실패 모드별 작은 도구.</strong> 4가지 실패 모드(의도 어긋남, 장황함, 깨진 코드, 아키텍처 부패)에 각각 1~3개 스킬이 1:1로 대응합니다. 워크플로우로 묶지 않아, 지금 어떤 모드에 빠졌는지만 판단하면 곧장 해당 스킬을 호출할 수 있습니다.',
+        '<strong>호출은 개발자 책임.</strong> 자동 트리거나 description 매칭이 없습니다. 어떤 스킬을 언제 쓸지는 개발자가 안다는 전제입니다. 대신 각 스킬이 "언제 쓰나"를 카드 첫 줄에 박아 학습 비용을 낮춥니다.'
+      ],
+      pros: [
+        '13개로 학습 부담이 가장 작습니다 (Superpowers 14개 / GStack 22개 대비). 각 스킬이 한 화면에 담겨 <em>훑어보기</em>만으로 도입 결정이 가능합니다',
+        '각 스킬이 단일 명령(<code>/tdd</code>, <code>/diagnose</code> 등)으로 호출되어 1개씩 골라 쓸 수 있습니다 (Superpowers의 7-step, GStack의 라이프사이클 파이프라인은 워크플로우 단위로 묶여 부분 도입이 어렵습니다). 기존 흐름을 갈아엎지 않고 문제가 생긴 시점에 즉시 적용할 수 있습니다',
+'언어·런타임 종속이 없고 도입이 가장 가볍습니다 — <code>npx skills@latest add mattpocock/skills</code> 한 줄로 끝 (Superpowers는 플러그인 + git worktree 환경 필요, GStack은 Postgres·Bun·디자인 시스템 같은 스택 전제). TypeScript뿐 아니라 Python·Go·Rust 등 어느 스택에서도 그대로 작동합니다'
+      ],
+      cons: [
+        { text: '자동 진입 메커니즘이 없어 어떤 스킬을 언제 쓸지 매번 개발자가 판단해야 합니다 (Superpowers는 description 매칭으로 brainstorming 자동 진입, GStack은 autoplan으로 계획 단계 자동 호출)', fix: '작업 시작 시 어떤 스킬을 쓸지 체크리스트로 정하거나, <strong>CLAUDE.md</strong>에 호출 규칙을 미리 명시합니다' },
+        { text: '코드 리뷰·배포 영역, 그리고 <em>세션 간 학습/메트릭 누적</em>에 해당하는 스킬이 없습니다 (Superpowers는 requesting/receiving 2단계 리뷰 + finishing-a-development-branch, GStack은 review + ship·land-and-deploy·canary와 더불어 learn·retro·health로 학습·메트릭을 누적해 다음 사이클에 자동 반영)', fix: 'Superpowers의 <strong>requesting/receiving-code-review</strong>를 함께 도입하거나, GitHub Actions로 외부 자동화를 붙입니다' },
+        { text: '다중 에이전트 협업 구조가 없습니다 — 모든 작업은 메인 세션에서 직접 호출되고, to-issues로 깃허브 이슈를 잘게 쪼개는 정도가 협업 자동화의 전부입니다 (Superpowers는 dispatching-parallel-agents·subagent-driven-development로 다중 에이전트 병렬, GStack은 plan-ceo/design/eng-review로 다관점 리뷰 자동화 제공)', fix: '<strong>to-issues</strong>로 이슈 동기화 + 팀 컨벤션을 별도 CLAUDE.md에 명시해 보완합니다' }
+      ]
+    },
+    {
+      key: 'sp', title: 'Superpowers',
+      philosophy: [
+        '<strong>7-step 워크플로우 자동 진입.</strong> 코드 작업 첫 메시지부터 description 매칭으로 brainstorming이 호출됩니다. 이후 worktree → writing-plans → executing-plans → TDD → 코드 리뷰 → finishing-a-development-branch 7단계가 <em>건너뛰지 않도록</em> 묶여 있습니다.',
+        '<strong>리뷰어·실행자 subagent 분리.</strong> 매번 새로 시작하는 reviewer subagent가 메인 세션의 결정 히스토리·시도 내역을 <em>받지 않은</em> 채로 결과물만 평가합니다. 메인 세션의 합리화("이건 의도된 동작")에 휘둘리지 않습니다.',
+        '<strong>TDD를 Iron Law로.</strong> RED(실패하는 테스트) → GREEN(통과시키는 최소 코드) → REFACTOR 순서가 강제됩니다. 완료 직전에는 verification-before-completion이 <em>모든 테스트 통과</em>를 다시 한 번 게이트로 잡습니다.'
+      ],
+      pros: [
+        '코드 작업 시작 시 description 매칭으로 brainstorming이 자동 진입합니다 (Matt·GStack은 모두 수동 호출이라 호출 누락 위험이 있습니다). <em>"바로 코드 짜자"</em> 같은 메시지에서도 brainstorming이 강제 진입해 의도 점검 단계를 건너뛰지 못하게 합니다',
+'코드 리뷰가 Critical·Important·Minor 3등급으로 구조화되어 있고, 별도 subagent로 메인 세션과 분리됩니다 (GStack은 review·codex 두 스킬이 있지만 등급화·역할 분리는 없음, Matt에는 코드 리뷰 스킬 자체가 없습니다). 등급별 처리 규칙(Critical 즉시 픽스, Important 진행 전 픽스, Minor 메모)이 정해져 있어 우선순위 다툼 없이 처리됩니다',
+        '리뷰·실행을 별도 subagent로 분리해 메인 세션 컨텍스트 오염을 막습니다 (Matt·GStack은 모든 작업을 메인 세션에서 처리해 긴 작업에서 컨텍스트가 누적됩니다). 리뷰어가 메인 세션의 합리화 발언을 보지 못해 결과물 자체만 평가합니다'
+      ],
+      cons: [
+        { text: '디자인·운영 단계 스킬이 없습니다 (GStack은 design-* 4종 + ship·land-and-deploy·canary로 디자인부터 배포까지 다룹니다)', fix: 'GStack의 <strong>design-*</strong> 스킬이나 <strong>ship·canary·freeze</strong>를 선택적으로 가져와 혼용합니다' },
+        { text: 'using-git-worktrees(같은 저장소를 별도 폴더로 떼어 낸 작업 공간) 같은 환경 종속 스킬이 있어 적용 환경 제약이 있습니다 (Matt는 환경 종속 스킬이 없어 어디든 동일하게 적용됩니다)', fix: 'worktree 미지원 환경에서는 해당 스킬을 비활성화하고 일반 브랜치 워크플로우로 대체합니다' },
+{ text: '혼자 하는 짧은 작업에는 진입 단계가 부담됩니다. brainstorming → writing-plans → executing-plans 3단계가 사실상 필수 절차입니다 (Matt는 단일 명령 호출 1회로 끝납니다)', fix: '단순 작업에는 brainstorming 단계를 짧게(spec 1줄 합의 후 진행) 끝내거나, 명시적으로 <strong>test-driven-development·requesting-code-review</strong>만 호출해 우회 패턴으로 사용합니다' }
+      ]
+    },
+    {
+      key: 'gs', title: 'GStack',
+      philosophy: [
+        '<strong>풀 라이프사이클 22개로 분담.</strong> ideation → planning → design → build → ship → maintain 6단계로 나누고 각 단계에 전용 스킬을 둡니다. 지금 어느 단계에 있는지가 항상 <em>스킬 이름</em>에서 드러나, 작업이 어디까지 왔는지 추적이 쉽습니다.',
+        '<strong>3관점 리뷰가 계획 단계에 내장.</strong> 같은 plan을 plan-ceo-review(비즈니스), plan-design-review(사용자), plan-eng-review(기술)가 각각 검토합니다. 한 관점에서 놓치는 리스크를 세 관점이 교차로 잡습니다.',
+        '<strong>배포 안전망 별도 스킬화.</strong> canary(점진 롤아웃), freeze(배포 동결 윈도우), guard(배포 가드레일)가 ship과 <em>별도</em> 스킬입니다. 배포 위험 관리가 ship 절차에 묻히지 않고 명시적 결정으로 떠오릅니다.'
+      ],
+      pros: [
+        '디자인 4종(design-consultation·shotgun·html·review) + 배포 3종(ship·land-and-deploy·canary)을 한 시스템에서 일관된 명령 체계로 관리합니다 (Matt·Superpowers는 디자인·배포 영역 스킬이 없습니다). Figma → 코드 → 배포 사이의 <em>손에서 손으로 넘기는 단계</em>를 한 명령 체계 안에서 처리합니다',
+        'canary·freeze·guard 등 배포 안전망이 별도 스킬로 분리되어 있습니다 (Matt·Superpowers에는 배포 안전망 개념 자체가 없습니다). 위험한 배포(예: DB 마이그레이션)는 canary로 일부 트래픽만 받게, 코드 프리즈 기간엔 freeze로 모든 머지를 차단할 수 있습니다',
+        '3관점 리뷰(plan-ceo-review·plan-design-review·plan-eng-review)가 계획 단계에 내장되어 있습니다 (Matt·Superpowers는 단일 관점 리뷰만 지원합니다). 예를 들어 "결제 화면 리디자인" 계획을 CEO 관점(매출 영향) · 디자인 관점(UX 일관성) · 엔지니어링 관점(구현 복잡도)으로 <em>각각</em> 검토합니다'
+      ],
+      cons: [
+{ text: '22개 스킬로 학습 곡선이 가장 가파르고, Postgres·Bun·디자인 시스템 같은 <em>스택 전제</em>가 있어 도입 비용도 가장 큽니다 (Matt 13개 + npx 한 줄 / Superpowers 14개 + git worktree 환경 대비)', fix: '한 번에 다 배우지 말고 라이프사이클 단계별(<strong>plan → design → build → ship</strong>)로 1주씩 도입합니다' },
+        { text: '혼자 하거나 소규모 팀일 때는 조직 리뷰 스킬을 쓸 일이 적습니다. CEO·디자인 관점 리뷰는 별도 의사결정자가 있을 때 가치가 살아납니다', fix: '<strong>plan-ceo-review·plan-design-review</strong>를 비활성화하고 plan-eng-review만 유지합니다' },
+{ text: '코드 리뷰는 review와 codex(OpenAI 교차검증) 두 스킬이 있지만, 요청자/수신자 역할 분리나 등급화는 없습니다 (Superpowers는 requesting/receiving 2단계로 메인 세션과 별도의 reviewer subagent를 명시적으로 분리합니다)', fix: 'Superpowers의 <strong>requesting/receiving-code-review</strong>를 추가 도입하거나, review 호출 시 요청자/수신자 역할을 명시적으로 분리합니다' }
+      ]
+    }
+  ],
+
+  guide: {
+    intro: '세 시스템 중 무엇부터 도입할지 결정하는 핵심 질문 하나 — <strong>얼마나 자리를 비울 것인가(AFK)</strong>. 처음에는 매 단계를 옆에서 지켜보며 (HITL · Human-in-the-Loop) 매커니즘을 익히는 게 안전합니다. <strong>암시적 자동 트리거보다 명시적 호출이 학습에 유리</strong>합니다 — 매커니즘을 이해해야 결과를 통제할 수 있기 때문입니다. 익숙해진 뒤에 자동 트리거 → 긴 자동 실행 순으로 단계를 올려도 늦지 않습니다. <em>단, 풀 라이프사이클이 필요 없는 팀이라면 1·2단계에서 멈춰도 되고, 이미 TDD 문화가 익숙한 팀은 2단계부터 직접 시작해도 자연스럽습니다.</em>',
+    afkAxis: { lo: 'HITL · 옆에서 지켜보기', hi: 'AFK · 자리 비우기' },
+    steps: [
+      {
+        key: 'matt', num: 1,
+        title: '손에 익히기 — 매커니즘부터 보기',
+        meterLabel: 'HITL 거의 100% · AFK 없음',
+        badge: 'Matt Pocock',
+        tagline: '모든 스킬을 <strong>직접 호출</strong>하며 한 단계씩 결과를 보고 다음을 정합니다. 자동 트리거가 없어 <strong>매커니즘이 그대로 노출</strong>되므로 학습용으로 적합합니다.',
+        points: [
+          '모든 스킬이 <code class="inline">/명령</code> 형태 — <strong>개발자가 직접 호출</strong>해야 작동. 자동 진입 없음.',
+          '한 단계 실행 → 결과 검토 → 다음 호출. 매번 <strong>"무엇이 일어났나"가 명확</strong>해 매커니즘이 머리에 남습니다.',
+          '결과물은 모두 텍스트 파일(<code class="inline">CONTEXT.md</code> · ADR · 이슈) — 망쳐도 사고로 번지지 않습니다.',
+          '13개 스킬뿐이라 <strong>학습 부담이 가장 적습니다</strong>. 언어·스택 무관해 어디든 가져다 쓸 수 있음.',
+          '같은 흐름을 손으로 여러 번 돌려 보면, 다음 단계의 <strong>자동 가드가 "왜 필요한지"</strong>가 몸으로 이해됩니다.'
+        ],
+        callouts: [
+          { head: '<span class="ico">▶︎</span>이 단계의 모습', body: '"PRD 정리하자" 결정 → <code class="inline">/grill-with-docs</code> 직접 호출 → 인터뷰하며 결과 확인 → "이슈로 쪼개자" → <code class="inline">/to-issues</code> 직접 호출. <strong>매 단계가 사용자 결정</strong>입니다.' },
+          { head: '<span class="ico">↓</span>다음 단계로 갈 신호', body: '같은 흐름을 매일 반복하고 있다 / 매번 까먹는 가드(테스트 작성, 변경 전 verification)가 생긴다 / 빨리 가야 할 때 단계를 건너뛰는 자기 자신을 발견한다.' }
+        ]
+      },
+      {
+        key: 'sp', num: 2,
+        title: '가드레일 깔기 — 손해본 단계를 자동화',
+        meterLabel: '핵심 단계 자동 · 부분 AFK',
+        badge: 'Superpowers',
+        tagline: '1단계에서 <strong>손으로 해본 흐름이 자동으로 깔리는</strong> 단계. 자동화의 가치는 편리함이 아니라 <strong>우회 불가능한 가드</strong>에 있습니다 — 압박 상황에서도 TDD·verification을 건너뛸 수 없게.',
+        points: [
+          '14개 스킬이 <strong>description 매칭으로 자동 트리거</strong> — 코드 변경 요청 → 자동 brainstorming 진입.',
+          '핵심은 <strong>가드의 강제력</strong>: <code class="inline">test-driven-development</code> · <code class="inline">verification-before-completion</code> · <code class="inline">receiving-code-review</code>가 빠지지 않습니다.',
+          '<code class="inline">using-git-worktrees</code>로 격리된 작업 공간 생성 — 여러 작업을 동시에 돌려도 충돌 없음.',
+          'plan 비판·코드 리뷰는 별도 <strong>subagent</strong>로 분리 → 같은 컨텍스트에서 자기검열에 빠지지 않음.',
+          '1단계의 매커니즘 이해가 없으면 <strong>"왜 이게 멈췄지?"가 답답</strong>합니다. 이해 없이 자동화부터 도입하면 통제 불가.'
+        ],
+        callouts: [
+          { head: '<span class="ico">▶︎</span>이 단계의 모습', body: '"결제 버그 고쳐줘" → 자동 brainstorming → spec 파일 → plan 검토(subagent) → RED 테스트 → GREEN 코드 → REFACTOR → verification 자동. <strong>개발자는 가드 알람에만 응답</strong>합니다.' },
+          { head: '<span class="ico">↓</span>다음 단계로 갈 신호', body: '작은 흐름은 자동으로 충분 / <strong>더 긴 체인</strong>(디자인 → 구현 → 배포 → 회고)을 한 번에 돌리고 싶다 / 주간 단위 메트릭·트렌드가 필요해진다.' }
+        ]
+      },
+      {
+        key: 'gs', num: 3,
+        title: '풀 워크플로우 자동화 — 한 사이클 통째로',
+        meterLabel: '긴 AFK 가능 · 안전망 강제',
+        badge: 'GStack',
+        tagline: '22개 스킬이 <strong>풀 라이프사이클을 분담</strong> — 디자인부터 canary 배포·주간 회고까지. <code class="inline">/autoplan</code>이 작업을 step으로 분해해 개입 없이 한 사이클을 완주합니다. 2단계에서 가드를 신뢰하게 된 다음 도입해야 안전합니다.',
+        points: [
+          '<code class="inline">/autoplan</code>이 작업을 여러 step으로 분해 → 각 step이 알맞은 스킬 자동 호출 → <strong>한 사이클 자동 완주</strong>.',
+          '긴 AFK 대비 <strong>안전망이 빡빡</strong>: <code class="inline">careful</code>(rm -rf · force-push 경고) + <code class="inline">freeze</code>(스코프 외 수정 차단) + canary 점진 배포.',
+          '<code class="inline">learn</code> · <code class="inline">retro</code>가 학습·메트릭을 누적 → <strong>다음 사이클이 더 좋아집니다</strong>.',
+          '스택 종속(Postgres · Bun · 디자인 시스템) — 전제 조건이 맞을 때 효력이 큽니다.',
+          '자동화의 강도가 가장 높은 만큼, <strong>매커니즘 이해 없이 들어가면 디버깅이 가장 어렵습니다</strong>. 1·2단계를 거친 뒤 진입 권장.'
+        ],
+        callouts: [
+          { head: '<span class="ico">▶︎</span>이 단계의 모습', body: '"이번 주 결제 기능 출시" → <code class="inline">/autoplan</code> → 디자인 review → 구현 → 테스트 → canary 배포 → 회고까지 자동. <strong>개발자는 가드 경고만 응답</strong>하고 자리를 비울 수 있습니다.' },
+          { head: '<span class="ico">↓</span>다음에 할 것', body: '시스템 단위 선택을 졸업하고 <strong>스킬 단위로 골라 끼우는</strong> 단계로 — 아래 "섞어 쓰기" 참조.' }
+        ]
+      }
+    ],
+    mixNote: {
+      title: '🧩 익숙해진 다음 — 섞어 쓰기',
+      body: '세 시스템은 독립적이라 <strong>스킬 단위로 골라 끼울 수 있습니다</strong>. 시스템 전체를 교체할 필요 없이, <strong>같은 일을 자동(AFK)으로 할 스킬</strong>이 있으면 그 스킬만 교체하는 식으로 점진 진화시키세요. 예: Matt의 <code class="inline">/grill-with-docs</code>로 컨텍스트 정리 → Superpowers의 자동 TDD 흐름으로 구현 → GStack의 <code class="inline">/canary</code>로 배포. 한 시스템의 추종자가 아니라 <strong>상황별로 도구를 골라 끼우는</strong> 게 자연스러운 종착지입니다.'
+    }
+  }
+};
+
+
+//
+// ════════════════════════════════════════════════════════════════
 //   DATA — 두 데이터셋 (Matt Pocock / Superpowers)
 //   여기만 수정하면 모든 뷰가 자동 갱신됩니다.
 // ════════════════════════════════════════════════════════════════
@@ -766,6 +1312,24 @@ matt: {
   preTitle: "MATT POCOCK · AI SKILLS",
   lead: "Matt Pocock(Total TypeScript 창립자)이 매일 쓰는 <strong>13개 스킬</strong>. AI 코딩의 4가지 실패 모드 — <em>의도 어긋남 · 장황함 · 깨진 코드 · 아키텍처 부패</em> — 에 각각 대응하는 작고 조합 가능한 도구들.",
   footer: '원문 저장소: <a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener">github.com/mattpocock/skills</a><br>설치: <code>npx skills@latest add mattpocock/skills</code>',
+
+  skeleton: `
+    <div class="skeleton matt">
+
+      <div class="sk-row"><code>project/</code><span class="sk-note"></span></div>
+      <div class="sk-row"><code>├── CLAUDE.md</code><span class="sk-note"><span class="skill">setup</span> · 기존 파일에 <code>## Agent skills</code> 블록만 삽입</span></div>
+      <div class="sk-row"><code>├── CONTEXT.md</code><span class="sk-note"><span class="skill">grill-with-docs</span> · 도메인 용어집 (첫 합의 시 자동 생성)</span></div>
+      <div class="sk-row"><code>├── CONTEXT-MAP.md</code><span class="sk-note"><span class="skill">grill-with-docs</span> · 다중 컨텍스트 색인 (선택)</span></div>
+      <div class="sk-row"><code>├── docs/</code><span class="sk-note"></span></div>
+      <div class="sk-row"><code>│   ├── adr/</code><span class="sk-note"><span class="skill">grill-with-docs</span> · ADR (의사결정 기록)</span></div>
+      <div class="sk-row"><code>│   │   ├── 0001-event-sourced-orders.md</code><span class="sk-note"></span></div>
+      <div class="sk-row"><code>│   │   └── 0002-postgres-write-model.md</code><span class="sk-note"></span></div>
+      <div class="sk-row"><code>│   └── agents/</code><span class="sk-note"><span class="skill">setup</span> · 이슈 트래커·라벨 컨벤션</span></div>
+      <div class="sk-row"><code>├── prototype/&lt;name&gt;/</code><span class="sk-note"><span class="skill">prototype</span> · throwaway 코드 (정답 옮긴 뒤 폐기)</span></div>
+      <div class="sk-row"><code>└── (소스 코드)</code><span class="sk-note"></span></div>
+      <div class="sk-foot">파일은 모두 <em>lazy</em> 생성 — 첫 합의·첫 ADR이 나올 때 비로소 만들어집니다. 도메인 문서·throwaway 코드 외에는 프로젝트에 흔적을 거의 남기지 않습니다.</div>
+    </div>
+  `,
 
   skills: {
 
@@ -1100,6 +1664,23 @@ superpowers: {
   lead: "Jesse Vincent의 <strong>14개 스킬</strong>로 짜인 풀 워크플로우 시스템. 모든 세션에 <em>자동 트리거</em>되어, 코드를 짜기 전 항상 brainstorming → 격리 worktree → planning → subagent-driven TDD → 리뷰 → 머지 단계를 거치도록 강제합니다.",
   footer: '원문 저장소: <a href="https://github.com/obra/superpowers" target="_blank" rel="noopener">github.com/obra/superpowers</a> (MIT)<br>설치(Claude Code): <code>/plugin install superpowers@claude-plugins-official</code>',
 
+  skeleton: `
+    <div class="skeleton sp">
+
+      <div class="sk-row"><code>project/</code><span class="sk-note"></span></div>
+      <div class="sk-row"><code>├── docs/</code><span class="sk-note"></span></div>
+      <div class="sk-row"><code>│   └── superpowers/</code><span class="sk-note">워크플로우 산출물 모음</span></div>
+      <div class="sk-row"><code>│       ├── specs/</code><span class="sk-note"><span class="skill">brainstorming</span> · 검증된 design doc</span></div>
+      <div class="sk-row"><code>│       │   └── 2026-05-10-payment-design.md</code><span class="sk-note"></span></div>
+      <div class="sk-row"><code>│       └── plans/</code><span class="sk-note"><span class="skill">writing-plans</span> · 실행 계획</span></div>
+      <div class="sk-row"><code>│           └── 2026-05-10-add-payment.md</code><span class="sk-note"></span></div>
+      <div class="sk-row"><code>├── .worktrees/</code><span class="sk-note"><span class="skill">using-git-worktrees</span> · 격리 작업 공간 (.gitignore)</span></div>
+      <div class="sk-row"><code>│   └── feat-payment/</code><span class="sk-note">브랜치 체크아웃 (작업 끝나면 자동 정리)</span></div>
+      <div class="sk-row"><code>└── (소스 코드)</code><span class="sk-note"></span></div>
+      <div class="sk-foot">spec/plan은 <em>날짜 prefix + 주제</em> 파일명으로 시간순 보관됩니다. worktree는 finishing-a-development-branch가 머지 후 자동으로 회수합니다.</div>
+    </div>
+  `,
+
   skills: {
 
     "using-superpowers": {
@@ -1323,9 +1904,9 @@ superpowers: {
       heroSummary: "각 작업 완료, 주요 기능 마무리, 메인 머지 직전. 이슈가 머지 후에 발견되면 추적·픽스 비용이 커지고, 같은 세션의 사람 검토는 *작업 흐름을 자주 끊습니다*. 정밀하게 작성된 컨텍스트(세션 히스토리는 빼고 *결과물만*) 위에 reviewer subagent를 디스패치해 결과물을 평가받습니다. 별도 subagent라 *세션 흐름은 안 끊기고*, 컨텍스트가 결과물뿐이라 *작업 의도에 휘둘리지 않은* 평가가 나옵니다",
       when: ["subagent-driven-development의 각 작업 후 (필수)", "주요 기능 완료 후 / 메인 머지 전", "막혔을 때 신선한 시각이 필요"],
       howCode: [
-        "BASE_SHA=$(git rev-parse HEAD~1)",
-        "HEAD_SHA=$(git rev-parse HEAD)",
-        "(reviewer subagent 디스패치 — code-reviewer.md 템플릿)"
+        "BASE_SHA=$(git rev-parse HEAD~1)  # 작업 시작 커밋",
+        "HEAD_SHA=$(git rev-parse HEAD)    # 현재 커밋",
+        "# 위 범위 + 작업 설명을 code-reviewer.md 템플릿에 채워 reviewer subagent 실행"
       ],
       howNote: "리뷰어가 받는 컨텍스트는 *결과물만*. 세션 히스토리는 절대 안 줌.",
       what: [
@@ -1477,6 +2058,24 @@ gstack: {
   preTitle: "GSTACK · GARRY TAN (YC)",
   lead: "Garry Tan(YC)이 만든 <em>풀 라이프사이클 프레임워크</em>. 전체 44개 중 <strong>22개를 큐레이션</strong>해서, ideation부터 production canary 모니터링까지 한 흐름으로 관리하는 도구들.",
   footer: '원문 저장소: <a href="https://github.com/garrytan/gstack" target="_blank" rel="noopener">github.com/garrytan/gstack</a><br>스킬 색인: <a href="https://github.com/garrytan/gstack/blob/main/docs/skills.md" target="_blank" rel="noopener">docs/skills.md</a>',
+
+  skeleton: `
+    <div class="skeleton gs">
+
+      <div class="sk-row"><code>project/</code><span class="sk-note"></span></div>
+      <div class="sk-row"><code>├── CLAUDE.md</code><span class="sk-note"><span class="skill">design-consultation</span> · 디자인 결정을 미래 세션이 자동 참조</span></div>
+      <div class="sk-row"><code>├── DESIGN.md</code><span class="sk-note"><span class="skill">design-consultation</span> · 디자인 시스템 (타이포·팔레트·스페이싱)</span></div>
+      <div class="sk-row"><code>├── .context/</code><span class="sk-note">gstack 전용 메타 디렉토리</span></div>
+      <div class="sk-row"><code>│   ├── retros/</code><span class="sk-note"><span class="skill">retro</span> · 주간 메트릭 JSON 스냅샷</span></div>
+      <div class="sk-row"><code>│   │   ├── 2026-W18.json</code><span class="sk-note"></span></div>
+      <div class="sk-row"><code>│   │   └── 2026-W19.json</code><span class="sk-note"></span></div>
+      <div class="sk-row"><code>│   ├── learn/</code><span class="sk-note"><span class="skill">learn</span> · 누적 학습 (확신 등급별)</span></div>
+      <div class="sk-row"><code>│   └── health/</code><span class="sk-note"><span class="skill">health</span> · 코드 품질 0~10 점수 트렌드</span></div>
+      <div class="sk-row"><code>├── (plan 산출물)</code><span class="sk-note"><span class="skill">office-hours</span> / <span class="skill">plan-*</span> · design 문서·기술 디자인 (경로 비명시)</span></div>
+      <div class="sk-row"><code>└── (소스 코드)</code><span class="sk-note"></span></div>
+      <div class="sk-foot">3 시스템 중 가장 많은 흔적을 남깁니다. <code>.context/</code> 아래에 retro·learn·health가 누적돼 다음 세션·다음 주가 이 데이터를 자동 참조합니다.</div>
+    </div>
+  `,
 
   skills: {
 
@@ -2221,7 +2820,18 @@ function renderMini(item, index) {
 }
 
 function renderCombo(c) {
-  const flowHtml = c.flow.map((item, i) => renderMini(item, i)).join('');
+  const arrows = c.arrows || [];
+  const flowHtml = c.flow.map((item, i) => {
+    const mini = renderMini(item, i);
+    if (i < c.flow.length - 1) {
+      const customArrow = arrows[i];
+      const arrowEl = customArrow
+        ? `<div class="arrow-text">${escapeHtml(customArrow)}</div>`
+        : `<div class="arrow-symbol">→</div>`;
+      return mini + arrowEl;
+    }
+    return mini;
+  }).join('');
   return `
     <article class="combo-card">
       <header>
@@ -2239,6 +2849,7 @@ function renderAll() {
 
   // Hero
   document.getElementById('lead').innerHTML = d.lead;
+  document.getElementById('skeleton-host').innerHTML = d.skeleton || '';
   document.getElementById('footer-note').innerHTML = d.footer;
 
   // Grid
@@ -2252,16 +2863,24 @@ function renderAll() {
 
 function setActive(name) {
   if (active === name) return;
-  if (!DATASETS[name]) return;
+  if (name !== 'compare' && !DATASETS[name]) return;
   active = name;
   document.querySelectorAll('.tab').forEach(t =>
     t.classList.toggle('active', t.dataset.dataset === name)
   );
-  // 모달이 열려 있으면 즉시 닫기 (다른 데이터셋의 카드 표시 방지)
   if (document.getElementById('modal').classList.contains('open')) {
     document.getElementById('modal-close').click();
   }
-  renderAll();
+  const deckView    = document.getElementById('deck-view');
+  const compareView = document.getElementById('compare-view');
+  if (name === 'compare') {
+    deckView.style.display    = 'none';
+    compareView.style.display = 'block';
+  } else {
+    deckView.style.display    = '';
+    compareView.style.display = 'none';
+    renderAll();
+  }
 }
 
 document.querySelectorAll('.tab').forEach(t => {
@@ -2269,6 +2888,165 @@ document.querySelectorAll('.tab').forEach(t => {
 });
 
 renderAll();
+
+
+// ─── Compare View 렌더러 ─────────────────────────────────────────
+
+function renderCovCard(c) {
+  const tags = c.tags.map(t => `<span class="cov-tag">${escapeHtml(t)}</span>`).join('');
+  return `<div class="cov-card ${c.key}" data-phil="${c.key}" role="button" tabindex="0">
+    <div class="cov-name">${escapeHtml(c.name)}</div>
+    <div class="cov-count">${c.count}</div>
+    <div class="cov-tagline">${c.tagline}</div>
+    <div class="cov-tags">${tags}</div>
+    <div class="cov-hint">핵심 철학 · 장단점 상세 보기 →</div>
+  </div>`;
+}
+
+function renderPhilCard(p) {
+  const philItems = p.philosophy.map(h => `<li>${h}</li>`).join('');
+  const prosItems = p.pros.map(h => `<li>${h}</li>`).join('');
+  const consItems = p.cons.map(c => `<li>${c.text}<span class="fix">${c.fix}</span></li>`).join('');
+  return `<div class="phil-card ${p.key}">
+    <h4>${escapeHtml(p.title)}</h4>
+    <ul>${philItems}</ul>
+    <div class="pros-cons">
+      <div class="pros"><div class="pc-label">장점</div><ul>${prosItems}</ul></div>
+      <div class="cons"><div class="pc-label">단점 · 극복 방법</div><ul>${consItems}</ul></div>
+    </div>
+  </div>`;
+}
+
+function renderJourneyStep(s) {
+  const points = s.points.map(p => `<li>${p}</li>`).join('');
+  const callouts = s.callouts.map(c => `<div class="step-callout">
+    <div class="step-callout-h">${c.head}</div>
+    <p>${c.body}</p>
+  </div>`).join('');
+  return `<article class="journey-step ${s.key}">
+    <header class="step-head">
+      <span class="step-num ${s.key}">${s.num}</span>
+      <div class="step-title-block">
+        <div class="step-title">${escapeHtml(s.title)}</div>
+        <div class="step-meter">
+          <span class="step-meter-bar"><span class="step-meter-fill ${s.key}"></span></span>
+          <span class="step-meter-label">${escapeHtml(s.meterLabel)}</span>
+        </div>
+      </div>
+      <span class="step-badge ${s.key}">${escapeHtml(s.badge)}</span>
+    </header>
+    <p class="step-tagline">${s.tagline}</p>
+    <ul class="step-points">${points}</ul>
+    <div class="step-callouts">${callouts}</div>
+  </article>`;
+}
+
+function compareToMarkdown() {
+  const cd = COMPARE_DATA;
+  let md = `# ${cd.header.title}\n\n> ${cd.header.desc}\n\n`;
+
+  md += `## 한눈에 보기\n\n`;
+  cd.overview.forEach(c => {
+    md += `### ${c.name} (${c.count}개)\n\n${htmlToMd(c.tagline)}\n\n`;
+    md += c.tags.map(t => `- ${t}`).join('\n') + '\n\n';
+  });
+
+  md += `## 핵심 철학 · 장단점\n\n`;
+  cd.phil.forEach(p => {
+    md += `### ${p.title}\n\n**철학**\n\n`;
+    p.philosophy.forEach(h => { md += `- ${htmlToMd(h)}\n`; });
+    md += '\n**장점**\n\n';
+    p.pros.forEach(h => { md += `- ${htmlToMd(h)}\n`; });
+    md += '\n**단점 · 극복 방법**\n\n';
+    p.cons.forEach(c => { md += `- ${htmlToMd(c.text)}\n  - 극복: ${htmlToMd(c.fix)}\n`; });
+    md += '\n';
+  });
+
+  md += `## 선택 가이드\n\n${htmlToMd(cd.guide.intro)}\n\n`;
+  cd.guide.steps.forEach(s => {
+    md += `### 단계 ${s.num}: ${s.title}\n\n`;
+    md += `**추천 시스템**: ${s.badge} · ${s.meterLabel}\n\n${htmlToMd(s.tagline)}\n\n`;
+    s.points.forEach(p => { md += `- ${htmlToMd(p)}\n`; });
+    md += '\n';
+    s.callouts.forEach(c => { md += `**${htmlToMd(c.head)}**\n\n${htmlToMd(c.body)}\n\n`; });
+  });
+
+  md += `## ${cd.guide.mixNote.title}\n\n${htmlToMd(cd.guide.mixNote.body)}\n`;
+  return md;
+}
+
+function renderCompareView() {
+  const cd = COMPARE_DATA;
+
+  const header = `<div style="text-align:center; padding: 40px 0 8px;">
+    <div style="font-size:11px; letter-spacing:0.2em; text-transform:uppercase; color:var(--text-mute); margin-bottom:10px; font-weight:700;">${escapeHtml(cd.header.eyebrow)}</div>
+    <h2 style="font-size:clamp(24px,4vw,36px); margin:0 0 12px; font-weight:800; background:linear-gradient(90deg,var(--gold),var(--eng),#7ee8a2); -webkit-background-clip:text; background-clip:text; color:transparent; letter-spacing:-0.02em;">${escapeHtml(cd.header.title)}</h2>
+    <p style="font-size:14px; color:var(--text-dim); max-width:600px; margin:0 auto 14px; line-height:1.6;">${escapeHtml(cd.header.desc)}</p>
+    <button class="md-button" id="compare-md-button" type="button" aria-label="비교 내용을 Markdown으로 보기" title="비교 내용을 Markdown으로 보기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+  </div>`;
+
+  const overview = `<div class="compare-overview">${cd.overview.map(renderCovCard).join('')}</div>`;
+
+  const philData = `<div id="phil-data" style="display:none;"><div class="compare-three" style="margin-bottom:52px;">${cd.phil.map(renderPhilCard).join('')}</div></div>`;
+
+  const guide = `<p class="compare-h">선택 가이드</p>
+  <p class="guide-intro">${cd.guide.intro}</p>
+  <div class="afk-axis" aria-hidden="true">
+    <span class="afk-axis-label lo">${escapeHtml(cd.guide.afkAxis.lo)}</span>
+    <span class="afk-axis-bar"></span>
+    <span class="afk-axis-label hi">${escapeHtml(cd.guide.afkAxis.hi)}</span>
+  </div>
+  <div class="journey-wrap">${cd.guide.steps.map(renderJourneyStep).join('')}</div>
+  <div class="mix-note">
+    <div class="mix-note-h">${cd.guide.mixNote.title}</div>
+    <p>${cd.guide.mixNote.body}</p>
+  </div>`;
+
+  document.getElementById('compare-view').innerHTML = header + overview + philData + guide;
+
+  initCompareModal();
+
+  document.getElementById('compare-md-button').addEventListener('click', () => {
+    const mdModal  = document.getElementById('md-modal');
+    document.getElementById('md-content').textContent = compareToMarkdown();
+    document.getElementById('md-modal-title').textContent = '비교하기 — Markdown';
+    mdModal.classList.add('open');
+    mdModal.setAttribute('aria-hidden', 'false');
+  });
+}
+
+renderCompareView();
+
+
+// ─── Compare Detail Modal ───────────────────────────────────────
+
+function initCompareModal() {
+  const overlay = document.getElementById('compare-modal');
+  const body    = document.getElementById('cmod-body');
+  const closeBtn = document.getElementById('cmod-close');
+
+  function openModal(key) {
+    const src = document.querySelector(`#phil-data .phil-card.${key}`);
+    if (!src) return;
+    body.innerHTML = `<div class="phil-card ${key}">${src.innerHTML}</div>`;
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    overlay.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  document.querySelectorAll('.cov-card[data-phil]').forEach(card => {
+    card.addEventListener('click', () => openModal(card.dataset.phil));
+    card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(card.dataset.phil); } });
+  });
+
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.style.display !== 'none') closeModal(); });
+}
 
 
 //
@@ -2403,8 +3181,8 @@ renderAll();
   function updateNavState() {
     const all = getNavOrder();
     const i = navIndex();
-    prevBtn.disabled = (i <= 0);
-    nextBtn.disabled = (i < 0 || i >= all.length - 1);
+    prevBtn.style.visibility = (i <= 0) ? 'hidden' : '';
+    nextBtn.style.visibility = (i < 0 || i >= all.length - 1) ? 'hidden' : '';
   }
   function switchTo(srcEl) {
     if (!srcEl) return;
