@@ -448,16 +448,28 @@
     color: var(--text-dim); font-size: 14px;
     width: 100%; margin-top: 6px; font-style: italic;
   }
-  .combo-flow { display: flex; flex-wrap: wrap; align-items: stretch; gap: 10px; }
-  .combo-flow .arrow {
-    color: var(--gold); font-size: 22px;
-    align-self: center; padding: 0 4px;
+  .combo-flow {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    align-items: stretch;
+  }
+  /* 기본 → 화살표는 데스크톱에서 숨김 (카드 순서·번호로 흐름 표시 충분) */
+  .combo-flow .arrow-symbol { display: none; }
+  /* 텍스트 화살표("or", "+", "= 한 번에")는 의미가 있어 셀로 표시 */
+  .combo-flow .arrow-text {
+    align-self: center;
+    justify-self: center;
+    text-align: center;
+    color: var(--gold);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
     text-shadow: 0 0 8px var(--gold-glow);
-    flex-shrink: 0;
+    white-space: nowrap;
   }
 
   .mini {
-    flex: 1 1 180px; min-width: 180px;
     background: linear-gradient(160deg, #1f2740 0%, #161c30 100%);
     border: 1.5px solid var(--line);
     border-radius: 12px;
@@ -616,11 +628,19 @@
   @media (max-width: 540px) {
     .skill-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
 
-    /* 콤보 흐름: 가로 wrap 대신 세로 스택으로 — 모바일 공간 활용 극대화 */
-    .combo-flow { flex-direction: column; align-items: stretch; gap: 6px; }
-    .mini { flex: 0 0 auto; width: 100%; }
-    .combo-flow .arrow { align-self: center; padding: 2px 0; }
-    .combo-flow .arrow-symbol { transform: rotate(90deg); }  /* → 를 ↓ 로 */
+    /* 콤보 흐름: grid 1열로 세로 스택 */
+    .combo-flow { grid-template-columns: 1fr; gap: 8px; }
+    /* 기본 → 화살표를 모바일에선 다시 표시하고 ↓로 회전 */
+    .combo-flow .arrow-symbol {
+      display: block;
+      text-align: center;
+      color: var(--gold);
+      font-size: 22px;
+      text-shadow: 0 0 8px var(--gold-glow);
+      transform: rotate(90deg);
+      padding: 2px 0;
+    }
+    .combo-flow .arrow-text { padding: 4px 0; }
   }
 </style>
 </head>
