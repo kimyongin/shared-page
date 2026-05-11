@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>패스트조인 — DSL 기반 CEP 엔진 SPEC v2</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+:root {
+  --c-bg: #ffffff;
+  --c-text: #1a1a1a;
+  --c-muted: #6b7280;
+  --c-border: #e5e7eb;
+  --c-code-bg: #f6f8fa;
+  --c-t1: #2563eb;
+  --c-t1-bg: #eff6ff;
+  --c-t1-light: #dbeafe;
+  --c-t2: #16a34a;
+  --c-t2-bg: #f0fdf4;
+  --c-t2-light: #dcfce7;
+  --c-t3: #ea580c;
+  --c-t3-bg: #fff7ed;
+  --c-t3-light: #ffedd5;
+  --c-warn: #dc2626;
+  --c-warn-bg: #fef2f2;
+  --font: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--font); color: var(--c-text); background: var(--c-bg); line-height: 1.75; overflow-wrap: anywhere; }
+h1, h2, h3, h4, h5, h6 { word-break: keep-all; }
+
+/* ── Header ── */
+.site-header {
+  position: sticky; top: 0; z-index: 20;
+  background: var(--c-bg); border-bottom: 1px solid var(--c-border);
+  padding: 0.6rem 1.5rem; display: flex; align-items: baseline; gap: 0.75rem;
+}
+.site-header .title { font-size: 0.95rem; font-weight: 700; }
+.site-header .meta { font-size: 0.75rem; color: var(--c-muted); }
+
+/* ── Layout ── */
+.layout { display: flex; max-width: 1080px; margin: 0 auto; padding: 0 1rem; }
+
+/* ── TOC sidebar ── */
+.toc {
+  flex: 0 0 210px; position: sticky; top: 45px;
+  height: calc(100vh - 45px); overflow-y: auto;
+  padding: 1.25rem 0.75rem 2rem 0; border-right: 1px solid var(--c-border);
+}
+.toc-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--c-muted); margin-bottom: 0.6rem; }
+.toc ul { list-style: none; }
+.toc li { margin: 0; }
+.toc a { display: block; font-size: 0.8rem; color: var(--c-muted); text-decoration: none; padding: 0.18rem 0.5rem; border-radius: 4px; transition: color 0.12s, background 0.12s; }
+.toc a:hover { color: var(--c-text); background: var(--c-code-bg); }
+.toc a.active { color: var(--c-t1); font-weight: 600; background: var(--c-t1-bg); }
+.toc .sub { padding-left: 0.7rem; }
+.toc .sub a { font-size: 0.75rem; }
+
+/* ── Main ── */
+main { flex: 1; min-width: 0; padding: 2rem 0 5rem 2rem; }
+section { margin-bottom: 2.5rem; }
+hr { border: none; border-top: 1px solid var(--c-border); margin: 2.5rem 0; }
+
+/* ── Headings ── */
+h2 { font-size: 1.45rem; font-weight: 700; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--c-border); }
+h3 { font-size: 1.1rem; font-weight: 700; margin: 1.75rem 0 0.6rem; }
+h4 { font-size: 0.95rem; font-weight: 700; margin: 1.25rem 0 0.4rem; color: #374151; }
+p { margin-bottom: 0.85rem; }
+ul, ol { padding-left: 1.5rem; margin-bottom: 0.85rem; }
+li { margin-bottom: 0.3rem; font-size: 0.9rem; }
+strong { font-weight: 700; }
+
+/* ── Code ── */
+code { font-family: var(--mono); font-size: 0.86em; background: var(--c-code-bg); border: 1px solid var(--c-border); border-radius: 3px; padding: 0.1em 0.35em; }
+pre { background: var(--c-code-bg); border: 1px solid var(--c-border); border-radius: 6px; padding: 1rem; overflow-x: auto; margin: 0.75rem 0 1.25rem; line-height: 1.6; }
+pre code { font-size: 0.81rem; background: none; border: none; padding: 0; }
+
+/* ── Transition badges ── */
+.tb { display: inline-flex; align-items: center; justify-content: center;
+  width: 1.5em; height: 1.5em; border-radius: 50%; font-size: 0.75rem; font-weight: 700; vertical-align: middle; }
+.tb1 { background: var(--c-t1-light); color: var(--c-t1); }
+.tb2 { background: var(--c-t2-light); color: var(--c-t2); }
+.tb3 { background: var(--c-t3-light); color: var(--c-t3); }
+
+/* ── Callout ── */
+.callout { border-left: 3px solid var(--c-t1); background: var(--c-t1-bg); border-radius: 0 6px 6px 0; padding: 0.6rem 0.9rem; margin: 0.5rem 0 1rem; font-size: 0.875rem; }
+.callout.g { border-color: var(--c-t2); background: var(--c-t2-bg); }
+.callout.o { border-color: var(--c-t3); background: var(--c-t3-bg); }
+.callout.warn { border-color: var(--c-warn); background: var(--c-warn-bg); }
+.callout p { margin: 0; max-width: none; }
+
+/* ── Problem cards (1.4) ── */
+.prob-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1rem 0 1.5rem; }
+.prob-card { border: 1px solid var(--c-border); border-radius: 8px; padding: 1rem; }
+.prob-card-num { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--c-muted); margin-bottom: 0.35rem; }
+.prob-card h4 { font-size: 0.88rem; margin: 0 0 0.4rem; color: var(--c-text); }
+.prob-card p { font-size: 0.8rem; color: var(--c-muted); max-width: none; margin: 0; }
+
+/* ── Solution map (1.5) ── */
+.sol-map { margin: 1rem 0 1.5rem; }
+.sol-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+.sol-prob { flex: 0 0 120px; text-align: right; font-size: 0.83rem; color: var(--c-muted); }
+.sol-arrow { color: var(--c-t1); font-size: 1rem; }
+.sol-sol { font-size: 0.88rem; font-weight: 700; color: var(--c-t1); }
+.sol-ref { font-size: 0.75rem; color: var(--c-muted); }
+
+/* ── Flow steps (2.9) ── */
+.flow { display: flex; align-items: flex-start; gap: 0; flex-wrap: wrap; margin: 1rem 0 1.5rem; }
+.flow-step { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.flow-num { width: 2rem; height: 2rem; border-radius: 50%; background: var(--c-t1); color: white; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.flow-label { font-size: 0.72rem; color: var(--c-muted); max-width: 80px; margin-top: 0.3rem; line-height: 1.3; }
+.flow-sep { color: var(--c-border); padding: 0 0.25rem; margin-top: 0.9rem; font-size: 1.1rem; }
+
+/* ── Annotated YAML ── */
+.yaml-ann { font-family: var(--mono); font-size: 0.81rem; line-height: 1.65; border: 1px solid var(--c-border); border-radius: 6px; overflow: hidden; margin: 0.75rem 0 1.25rem; }
+.ya { white-space: pre; padding: 0.4rem 1rem; background: var(--c-code-bg); }
+.ya.t1 { background: var(--c-t1-bg); border-left: 3px solid var(--c-t1); padding-left: calc(1rem - 3px); }
+.ya.t2 { background: var(--c-t2-bg); border-left: 3px solid var(--c-t2); padding-left: calc(1rem - 3px); }
+.ya.t3 { background: var(--c-t3-bg); border-left: 3px solid var(--c-t3); padding-left: calc(1rem - 3px); }
+.yc { color: #6e7781; } /* comment */
+.yk { color: #0550ae; } /* key */
+.ys { color: #0a3069; } /* string value */
+.yn { color: #953800; } /* number */
+.yo { color: #8250df; font-weight: 600; } /* operator name */
+
+/* ── Operator cards (4.1) ── */
+.op-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 0.85rem; margin: 1rem 0 1.5rem; }
+.op-card { border: 1px solid var(--c-border); border-radius: 8px; padding: 0.9rem; }
+.op-card.bool { border-top: 3px solid var(--c-t1); }
+.op-card.val { border-top: 3px solid var(--c-t2); }
+.op-card-head { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
+.op-card-title { font-size: 0.85rem; font-weight: 700; }
+.badge { display: inline-block; font-size: 0.68rem; font-weight: 600; padding: 0.1rem 0.45rem; border-radius: 99px; }
+.badge.bool { background: var(--c-t1-light); color: var(--c-t1); }
+.badge.val { background: var(--c-t2-light); color: var(--c-t2); }
+.badge.warn { background: var(--c-warn-bg); color: var(--c-warn); }
+.op-desc { font-size: 0.77rem; color: var(--c-muted); margin-bottom: 0.5rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+.chip { font-family: var(--mono); font-size: 0.69rem; background: var(--c-code-bg); border: 1px solid var(--c-border); border-radius: 4px; padding: 0.1rem 0.35rem; white-space: nowrap; }
+
+/* ── Pattern blocks (4.2) ── */
+.pat { border: 1px solid var(--c-border); border-radius: 8px; padding: 1rem; margin-bottom: 1.25rem; }
+.pat h4 { margin-top: 0; }
+.pat-flow { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin: 0.65rem 0 0.9rem; }
+.pb { border: 1px solid var(--c-border); border-radius: 6px; padding: 0.25rem 0.6rem; font-family: var(--mono); font-size: 0.76rem; white-space: nowrap; }
+.pb.ev { border-color: #7c3aed; color: #7c3aed; background: #f5f3ff; }
+.pb.tr { border-color: var(--c-t2); color: var(--c-t2); background: var(--c-t2-bg); }
+.pb.cmp { border-color: var(--c-t1); color: var(--c-t1); background: var(--c-t1-bg); }
+.pb.ok { border-color: var(--c-t2); color: var(--c-t2); background: var(--c-t2-light); font-weight: 700; }
+.pb.no { border-color: var(--c-warn); color: var(--c-warn); background: var(--c-warn-bg); font-weight: 700; }
+.pa { color: var(--c-muted); }
+
+/* ── Verification grid (6절) ── */
+.verif-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 1rem 0; }
+.vc { border: 1px solid var(--c-border); border-radius: 8px; padding: 1rem; }
+.vc h4 { font-size: 0.88rem; margin: 0 0 0.4rem; }
+.vc p { font-size: 0.8rem; color: var(--c-muted); max-width: none; margin: 0 0 0.5rem; }
+.vc .tags { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+
+/* ── Cross-ref link ── */
+a.xr { color: var(--c-t1); text-decoration: none; border-bottom: 1px dashed var(--c-t1-light); }
+a.xr:hover { background: var(--c-t1-bg); }
+
+/* ── Responsive ── */
+@media (max-width: 800px) {
+  .toc { display: none; }
+  main { padding: 1.5rem 0; }
+  .prob-grid { grid-template-columns: 1fr; }
+  .verif-grid { grid-template-columns: 1fr; }
+  .op-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media print {
+  .toc, .site-header { display: none; }
+  main { padding: 0; }
+  .layout { display: block; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <span class="title">패스트조인 — DSL 기반 CEP 엔진 SPEC</span>
+  <span class="meta">v2 · 2026-05-08 · 상태 머신 엔진 전용 (운영 시스템 제외)</span>
+</header>
+
+<div class="layout">
+
+<!-- ───────── TOC ───────── -->
+<aside class="toc">
+  <div class="toc-label">목차</div>
+  <ul>
+    <li><a href="#s0">0. 개요</a></li>
+    <li><a href="#s1">1. 어떤 문제를</a>
+      <ul class="sub">
+        <li><a href="#s1-1">1.1 도메인</a></li>
+        <li><a href="#s1-2">1.2 CRUD의 한계</a></li>
+        <li><a href="#s1-3">1.3 Flink의 한계</a></li>
+        <li><a href="#s1-4">1.4 스트림의 어려움</a></li>
+        <li><a href="#s1-5">1.5 패스트조인의 해법</a></li>
+      </ul>
+    </li>
+    <li><a href="#s2">2. 해결 방법</a>
+      <ul class="sub">
+        <li><a href="#s2-1">2.1 이벤트</a></li>
+        <li><a href="#s2-2">2.2 상태</a></li>
+        <li><a href="#s2-3">2.3 전이</a></li>
+        <li><a href="#s2-4">2.4 Hook</a></li>
+        <li><a href="#s2-5">2.5 Event-Clock</a></li>
+        <li><a href="#s2-6">2.6 멱등성</a></li>
+        <li><a href="#s2-7">2.7 지연 허용 한도</a></li>
+        <li><a href="#s2-8">2.8 Ready 상태 패턴</a></li>
+        <li><a href="#s2-9">2.9 실행 절차</a></li>
+      </ul>
+    </li>
+    <li><a href="#s3">3. DSL 살펴보기</a>
+      <ul class="sub">
+        <li><a href="#s3-1">3.1 상태와 전이</a></li>
+        <li><a href="#s3-2">3.2 filter · operation</a></li>
+        <li><a href="#s3-3">3.3 Timeout 전이</a></li>
+        <li><a href="#s3-4">3.4 Hook</a></li>
+        <li><a href="#s3-5">3.5 Ready 패턴</a></li>
+        <li><a href="#s3-6">3.6 멱등성 선언</a></li>
+      </ul>
+    </li>
+    <li><a href="#s4">4. 연산자 카탈로그</a>
+      <ul class="sub">
+        <li><a href="#s4-1">4.1 카탈로그</a></li>
+        <li><a href="#s4-2">4.2 조합 패턴</a></li>
+      </ul>
+    </li>
+    <li><a href="#s5">5. 범위 밖</a></li>
+    <li><a href="#s6">6. 검증 기준</a></li>
+  </ul>
+</aside>
+
+<!-- ───────── Main ───────── -->
+<main>
+
+<!-- 0. 개요 -->
+<section id="s0">
+  <h2>0. 개요</h2>
+  <p>패스트조인은 이벤트 스트림에서 복합 패턴을 탐지하는 <strong>CEP(Complex Event Processing) 솔루션</strong>이다. 각 패턴을 <strong>상태 머신</strong>으로 모델링하고, 정의를 <strong>DSL 텍스트</strong>로 동적 등록한다. 따라서 엔진 재배포 없이 새 패턴이 즉시 동작한다.</p>
+</section>
+
+<hr>
+
+<!-- 1. 문제 -->
+<section id="s1">
+  <h2>1. 어떤 문제를 해결해야 하는가</h2>
+
+  <h3 id="s1-1">1.1 어떤 도메인인가</h3>
+  <p>게임 백엔드는 플레이어의 행동을 끊임없이 추적해야 한다. 진행도, 미션 카운트, 보상 조건, 출석 체인 등. 한 플레이어는 동시에 수십 개의 진행 흐름을 가질 수 있고, 어떤 행동(이벤트)이 발생하면 그 행동에 영향을 받는 모든 흐름이 한 단계 진행되거나 종료된다.</p>
+  <p>이 일을 게임 서버 안에서 직접 처리하면 곧 비용이 폭증한다. 흐름 하나마다 DB 컬럼을 더하고, 트랜잭션을 걸고, 동시성 락을 잡아야 한다. 새 이벤트 종류가 생기면 게임 서버 코드를 손대야 한다. 따라서 진행 흐름 추적을 별도 시스템으로 분리하는 것이 자연스럽다. 그것이 패스트조인의 자리다.</p>
+
+  <h3 id="s1-2">1.2 단순 CRUD가 충분치 않은 이유</h3>
+  <p>가장 흔한 시나리오는 횟수를 세거나 크기를 비교하는 단순한 조건 검사이지만, 실제 콘텐츠는 이보다 복잡한 처리 패턴을 요구한다.</p>
+  <ul>
+    <li>"회복 스킬을 쓰지 않고 자쿰을 100초 내 잡으면 성공"</li>
+    <li>"해안가에서 돼지를 50마리 잡되, 도중에 한 번이라도 스킬을 쓰면 카운트 리셋"</li>
+    <li>"던전 입장 후 보스를 잡고, 그 후 5분 내 NPC와 대화하면 추가 보상"</li>
+  </ul>
+  <p>이런 흐름은 카운트 한두 개로 표현되지 않는다. <strong>상태가 있는 절차</strong>이고, 이를 자연스럽게 다루는 모델이 <strong>상태 머신</strong>이다.</p>
+
+  <h3 id="s1-3">1.3 Flink가 충분치 않은 이유</h3>
+  <p>Apache Flink는 대표적인 CEP 엔진이지만, 게임 콘텐츠 시나리오에는 결정적인 한계가 있다.</p>
+  <p><strong>Flink는 패턴마다 별도 어플리케이션을 배포해야 한다.</strong> 새 패턴을 추가하려면 새 jar를 만들어 배포하고, 그 어플리케이션은 같은 이벤트 스트림을 처음부터 다시 컨슘한다. 패턴이 수만 개면 어플리케이션도 수만 개다. 게임이 수만 개의 동적 패턴을 다뤄야 한다면 감당할 수 없다.</p>
+
+  <h3 id="s1-4">1.4 이벤트 스트림이 까다로운 이유</h3>
+  <p>게임 이벤트는 초당 수만~수십만 건 발생할 수 있어, 게임 서버와 패스트조인 사이에 스트림 브로커(Apache Kafka 등)를 두는 비동기 모델을 쓴다. 이 모델은 처리량과 격리에는 좋지만, 본질적인 어려움 세 가지를 동반한다.</p>
+
+  <div class="prob-grid">
+    <div class="prob-card">
+      <div class="prob-card-num">첫째</div>
+      <h4>적재 지연</h4>
+      <p>이벤트 발생 시각과 시스템이 처리하는 시각 사이의 지연이 균일하지 않다. 수십 ms~수분 차이가 나며, 서버 시계(Wall-Clock)로 시간을 판정하면 오판이 발생한다.</p>
+    </div>
+    <div class="prob-card">
+      <div class="prob-card-num">둘째</div>
+      <h4>순서 섞임</h4>
+      <p>여러 파티션에 분산된 이벤트는 발생 순서와 다르게 도착할 수 있다. 인과적으로 이른 이벤트가 늦게 도착해 결과가 뒤바뀔 수 있다.</p>
+    </div>
+    <div class="prob-card">
+      <div class="prob-card-num">셋째</div>
+      <h4>전송 보장 (At Least Once)</h4>
+      <p>같은 이벤트가 두 번 이상 컨슘될 수 있다. "50마리 잡으면 보상"에서 같은 처치 이벤트가 두 번 도착하면 카운트가 51로 흘러간다.</p>
+    </div>
+  </div>
+
+  <h3 id="s1-5">1.5 패스트조인의 해법</h3>
+  <p>패스트조인은 두 층으로 해결한다.</p>
+  <p><strong>도메인의 진행도 추적</strong>(1.1~1.3)은 CEP를 상태 머신 모델로 풀고 패턴 정의를 DSL 텍스트로 동적 등록하는 엔진으로 해결한다. CRUD보다 표현력 있게, Flink보다 동적으로, 한 번의 컨슘으로 N개 패턴을 처리한다.</p>
+  <p><strong>이벤트 스트림의 어려움</strong>(1.4)은 엔진의 도구가 각각 해결한다.</p>
+
+  <div class="sol-map">
+    <div class="sol-row">
+      <span class="sol-prob">적재 지연 (1.4.1)</span>
+      <span class="sol-arrow">→</span>
+      <span class="sol-sol">Event-Clock</span>
+      <span class="sol-ref"><a href="#s2-5" class="xr">(2.5)</a></span>
+    </div>
+    <div class="sol-row">
+      <span class="sol-prob">순서 섞임 (1.4.2)</span>
+      <span class="sol-arrow">→</span>
+      <span class="sol-sol">Ready 상태 패턴</span>
+      <span class="sol-ref"><a href="#s2-8" class="xr">(2.8)</a></span>
+    </div>
+    <div class="sol-row">
+      <span class="sol-prob">전송 보장 (1.4.3)</span>
+      <span class="sol-arrow">→</span>
+      <span class="sol-sol">멱등성 정책</span>
+      <span class="sol-ref"><a href="#s2-6" class="xr">(2.6)</a></span>
+    </div>
+  </div>
+
+  <p><strong>용어</strong> — 등록된 한 패턴(=상태 머신 정의)을 <strong>Job</strong>이라 부르고, 한 액터가 한 Job을 진행하는 상태를 <strong>Job Session</strong>이라 부른다.</p>
+</section>
+
+<hr>
+
+<!-- 2. 해결 방법 -->
+<section id="s2">
+  <h2>2. 패스트조인의 해결 방법</h2>
+  <p>Job Session은 내부에 <strong>상태 머신 엔진</strong>을 두고, 이벤트가 도착할 때마다 마지막 상태를 불러와 <code>(DSL, 상태, 이벤트)</code>를 엔진에 넘기고 결과를 새 마지막 상태로 저장한다. 엔진 자체는 <strong>stateless 변환기</strong>이고, Job Session은 <strong>stateful 외피</strong>로서 마지막 상태의 보관·영속화를 책임진다.</p>
+
+  <h3 id="s2-1">2.1 이벤트(Event)</h3>
+  <p>엔진의 입력은 <strong>이벤트</strong>다. 게임에서 일어난 사실 하나로, 어떤 액터(주로 한 명의 플레이어)가 일으킨 것이다. 이벤트는 다섯 필드를 가진다: <code>id</code>(멱등성 키), <code>name</code>(종류), <code>source</code>(<code>USER</code> 또는 <code>SYSTEM</code>), <code>timestamp</code>(발생 시각, 도착·컨슘 시각이 아님), <code>content</code>(자유 페이로드).</p>
+
+  <h3 id="s2-2">2.2 상태(State)</h3>
+  <p><strong>상태</strong>(State)는 Job Session의 컨텍스트 데이터로, 상태 머신 엔진의 처리 결과가 갱신되어 누적된다. 시스템 <code>meta</code> 영역과 사용자 <code>data</code> 영역으로 나뉘어 관리된다.</p>
+
+  <h3 id="s2-3">2.3 전이(Transition)</h3>
+  <p><strong>전이</strong>(Transition)는 한 상태에서 다른 상태로 이동하는 규칙이며 두 종류가 있다: <strong>Operation 전이</strong>(이벤트와 컨텍스트에 대한 조건이 참이 되면 일어남)와 <strong>Timeout 전이</strong>(현재 상태에 들어온 후 지정된 시간이 지나면 자동으로 일어남, Event-Clock 기준). Job Session은 더 이상 전이가 일어날 수 없는 상태에 도달했을 때 종료된다.</p>
+
+  <h3 id="s2-4">2.4 Hook</h3>
+  <p><strong>Hook</strong>은 전이가 일어날 때 Job Session 외부의 처리를 호출하는 수단이다. <code>(command, value)</code> 짝을 Hook 인터페이스로 전달하면 구현체가 command를 해석해 처리한다. 주로 컨텍스트 정리·외부 시스템 호출·보상 명령 발행 등에 쓰이며, I/O가 필요한 경우 비동기 처리를 권장한다.</p>
+
+  <h3 id="s2-5">2.5 Event-Clock</h3>
+  <div class="callout"><p><strong>대응:</strong> 적재 지연 <a href="#s1-4" class="xr">(1.4.1)</a></p></div>
+  <p>Event-Clock은 Job Session 내부의 모든 시간 판정의 기준이며, 머신이 본 가장 최근 <code>source=USER</code> 이벤트의 <code>timestamp</code> 값이다. 단조 증가한다(늦게 도착한 이벤트가 시간을 뒤로 돌리지 않는다). 서버 시계(Wall-Clock)는 쓰지 않는다. 시스템 합성 신호(<code>source=SYSTEM</code>)는 자기 신호로 자기 시간을 정의하는 순환을 막기 위해 클럭에 영향을 주지 않는다.</p>
+
+  <h3 id="s2-6">2.6 멱등성 (Deduplication)</h3>
+  <div class="callout"><p><strong>대응:</strong> 전송 보장(At Least Once) <a href="#s1-4" class="xr">(1.4.3)</a></p></div>
+  <p>Job Session은 처리한 이벤트의 <code>id</code>를 보관해 같은 이벤트가 두 번 처리되지 않도록 막는다. 모드는 셋(<code>NAIVE</code> / <code>BEST_EFFORT</code> / <code>STRICT</code>)이며, Job마다 작성자가 정확성과 메모리 사용량 사이의 트레이드오프를 직접 선택한다. 상세 파라미터는 <a href="#s3-6" class="xr">3.6절</a>.</p>
+
+  <h3 id="s2-7">2.7 지연 허용 한도</h3>
+  <p>지연 허용 한도는 엔진 차원의 운영 정책이다. 발생 후 너무 오래 묵힌 이벤트(예: 며칠 전 발생했으나 지금에야 도착한 이벤트)를 처리 자체에서 제외한다. DSL 작성자가 다루는 항목이 아니다.</p>
+  <div class="callout warn"><p><strong>주의:</strong> Ready 상태 패턴(<a href="#s2-8" class="xr">2.8</a>)과 다른 도구다. 지연 허용 한도는 엔진 운영 정책이고, Ready 패턴은 DSL 작성자의 모델링 기법이다.</p></div>
+
+  <h3 id="s2-8">2.8 Ready 상태 패턴</h3>
+  <div class="callout g"><p><strong>대응:</strong> 순서 섞임 <a href="#s1-4" class="xr">(1.4.2)</a></p></div>
+  <p>Ready 상태 패턴은 순서 섞임에 의한 인과 깨짐을 보정하는 DSL 작성자의 모델링 기법이다. 종료(SUCCESS / FAIL)를 즉시 확정하지 않고 <code>*_READY</code> 중간 상태에 잠시 머물면서, Event-Clock 기준 대기 시간 동안 늦게 도착한 fail 이벤트가 결과를 뒤집을 수 있게 한다. 엔진이 자동으로 처리하지 않으므로, 인과 깨짐 위험이 있는 종료 판정마다 작성자가 명시적으로 적용해야 한다.</p>
+
+  <h3 id="s2-9">2.9 실행 절차</h3>
+  <p>이벤트가 Job Session에 도착하면 다음 순서로 처리된다.</p>
+
+  <div class="flow">
+    <div class="flow-step">
+      <div class="flow-num">1</div>
+      <div class="flow-label">지연 허용 한도 검사</div>
+    </div>
+    <div class="flow-sep">→</div>
+    <div class="flow-step">
+      <div class="flow-num">2</div>
+      <div class="flow-label">멱등성 검사</div>
+    </div>
+    <div class="flow-sep">→</div>
+    <div class="flow-step">
+      <div class="flow-num">3</div>
+      <div class="flow-label">Event-Clock 갱신</div>
+    </div>
+    <div class="flow-sep">→</div>
+    <div class="flow-step">
+      <div class="flow-num">4</div>
+      <div class="flow-label">전이 평가</div>
+    </div>
+    <div class="flow-sep">→</div>
+    <div class="flow-step">
+      <div class="flow-num">5</div>
+      <div class="flow-label">전이 실행 · Hook</div>
+    </div>
+    <div class="flow-sep">→</div>
+    <div class="flow-step">
+      <div class="flow-num">6</div>
+      <div class="flow-label">종료 판정</div>
+    </div>
+  </div>
+
+  <p>이 절차는 순서 섞임에 의한 인과 깨짐을 자동으로 풀지 않는다. 인과가 중요한 종료 판정에는 <a href="#s2-8" class="xr">2.8</a>의 Ready 상태 패턴을 작성자가 명시적으로 적용해야 한다.</p>
+</section>
+
+<hr>
+
+<!-- 3. DSL -->
+<section id="s3">
+  <h2>3. 패스트조인 DSL 살펴보기</h2>
+  <p>2절의 각 개념이 DSL에서 어떻게 표현되는지 살펴본다. 시나리오는 하나다: <strong>"상급 등급(마계 또는 신계) 던전에 입장해 보스를 30회 누적 처치하면 성공, 10분 안에 못 끝내면 실패."</strong> 연산자 카탈로그와 조합 패턴은 <a href="#s4" class="xr">4절</a>에서 다룬다.</p>
+
+  <!-- State machine diagram -->
+  <svg viewBox="0 0 620 265" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:620px;display:block;margin:1.25rem 0;overflow:visible">
+    <defs>
+      <marker id="ah1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#2563eb"/></marker>
+      <marker id="ah2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#16a34a"/></marker>
+      <marker id="ah3" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#ea580c"/></marker>
+    </defs>
+    <!-- Initial dot -->
+    <circle cx="14" cy="112" r="5" fill="#374151"/>
+    <line x1="19" y1="112" x2="28" y2="112" stroke="#374151" stroke-width="1.5" marker-end="url(#ah1)"/>
+    <!-- 던전외부 -->
+    <rect x="30" y="88" width="128" height="48" rx="8" fill="white" stroke="#d1d5db" stroke-width="1.5"/>
+    <text x="94" y="108" text-anchor="middle" font-size="12" font-weight="700" fill="#1a1a1a" font-family="'Pretendard Variable',sans-serif">던전외부</text>
+    <text x="94" y="126" text-anchor="middle" font-size="10" fill="#9ca3af" font-family="'Pretendard Variable',sans-serif">initial</text>
+    <!-- 던전내부 -->
+    <rect x="248" y="88" width="132" height="48" rx="8" fill="white" stroke="#d1d5db" stroke-width="1.5"/>
+    <text x="314" y="117" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="700" fill="#1a1a1a" font-family="'Pretendard Variable',sans-serif">던전내부</text>
+    <!-- 성공 (terminal - double border) -->
+    <rect x="468" y="88" width="108" height="48" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+    <rect x="473" y="93" width="98" height="38" rx="5" fill="none" stroke="#16a34a" stroke-width="1" stroke-dasharray="none"/>
+    <text x="522" y="117" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="700" fill="#16a34a" font-family="'Pretendard Variable',sans-serif">성공</text>
+    <!-- 실패 (terminal - double border) -->
+    <rect x="258" y="192" width="108" height="48" rx="8" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+    <rect x="263" y="197" width="98" height="38" rx="5" fill="none" stroke="#ea580c" stroke-width="1"/>
+    <text x="312" y="216" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="700" fill="#ea580c" font-family="'Pretendard Variable',sans-serif">실패</text>
+    <!-- Arrow ①: 던전외부 → 던전내부 -->
+    <line x1="158" y1="112" x2="244" y2="112" stroke="#2563eb" stroke-width="2" marker-end="url(#ah1)"/>
+    <circle cx="197" cy="96" r="10" fill="#2563eb"/>
+    <text x="197" y="96" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="700" fill="white" font-family="'Pretendard Variable',sans-serif">①</text>
+    <text x="197" y="130" text-anchor="middle" font-size="8.5" fill="#2563eb" font-family="'Pretendard Variable',sans-serif">던전_입장</text>
+    <text x="197" y="142" text-anchor="middle" font-size="8" fill="#2563eb" font-family="'Pretendard Variable',sans-serif">filter A&amp;&amp;(B||C)</text>
+    <!-- Arrow ②: 던전내부 → 성공 -->
+    <line x1="380" y1="112" x2="464" y2="112" stroke="#16a34a" stroke-width="2" marker-end="url(#ah2)"/>
+    <circle cx="422" cy="96" r="10" fill="#16a34a"/>
+    <text x="422" y="96" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="700" fill="white" font-family="'Pretendard Variable',sans-serif">②</text>
+    <text x="422" y="130" text-anchor="middle" font-size="8.5" fill="#16a34a" font-family="'Pretendard Variable',sans-serif">보스_처치</text>
+    <text x="422" y="142" text-anchor="middle" font-size="8" fill="#16a34a" font-family="'Pretendard Variable',sans-serif">op A|B (≥30회)</text>
+    <!-- Arrow ③: 던전내부 → 실패 -->
+    <line x1="314" y1="136" x2="312" y2="188" stroke="#ea580c" stroke-width="2" marker-end="url(#ah3)"/>
+    <circle cx="346" cy="162" r="10" fill="#ea580c"/>
+    <text x="346" y="162" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="700" fill="white" font-family="'Pretendard Variable',sans-serif">③</text>
+    <text x="346" y="178" text-anchor="middle" font-size="8.5" fill="#ea580c" font-family="'Pretendard Variable',sans-serif">timeout</text>
+    <text x="346" y="190" text-anchor="middle" font-size="8" fill="#ea580c" font-family="'Pretendard Variable',sans-serif">600,000 ms</text>
+  </svg>
+
+  <p>아래 YAML이 이 시나리오의 전체 DSL이다. <span class="tb tb1">①</span><span class="tb tb2">②</span><span class="tb tb3">③</span>은 위 다이어그램의 전이 번호이며, 각 블록이 색상으로 구분된다.</p>
+
+  <!-- Annotated YAML -->
+  <div class="yaml-ann">
+<div class="ya"><span class="yk">initial_state</span>: <span class="ys">던전외부</span>
+<span class="yk">transitions</span>:</div>
+<div class="ya t1"><span class="yc">  # ① 던전외부 → 던전내부 (Operation 전이, filter 중위식)</span>
+  - <span class="yk">type</span>: <span class="ys">operation</span>
+    <span class="yk">from</span>: <span class="ys">던전외부</span>
+    <span class="yk">to</span>: <span class="ys">던전내부</span>
+    <span class="yk">value</span>:
+      <span class="yk">event_name</span>: <span class="ys">던전_입장</span>
+      <span class="yk">filter</span>:
+        <span class="yk">expression</span>: <span class="ys">"A &amp;&amp; (B || C)"</span>
+        <span class="yk">items</span>:
+          <span class="yk">A</span>:
+            <span class="yk">operator</span>: <span class="yo">EQUAL</span>
+            <span class="yk">operands</span>:
+              - { <span class="yk">source</span>: EVENT,    <span class="yk">type</span>: STRING, <span class="yk">value</span>: <span class="ys">$.등급</span> }
+              - { <span class="yk">source</span>: CONSTANT, <span class="yk">type</span>: STRING, <span class="yk">value</span>: <span class="ys">상급</span> }
+          <span class="yk">B</span>:
+            <span class="yk">operator</span>: <span class="yo">EQUAL</span>
+            <span class="yk">operands</span>:
+              - { <span class="yk">source</span>: EVENT,    <span class="yk">type</span>: STRING, <span class="yk">value</span>: <span class="ys">$.이름</span> }
+              - { <span class="yk">source</span>: CONSTANT, <span class="yk">type</span>: STRING, <span class="yk">value</span>: <span class="ys">마계</span> }
+          <span class="yk">C</span>:
+            <span class="yk">operator</span>: <span class="yo">EQUAL</span>
+            <span class="yk">operands</span>:
+              - { <span class="yk">source</span>: EVENT,    <span class="yk">type</span>: STRING, <span class="yk">value</span>: <span class="ys">$.이름</span> }
+              - { <span class="yk">source</span>: CONSTANT, <span class="yk">type</span>: STRING, <span class="yk">value</span>: <span class="ys">신계</span> }</div>
+<div class="ya t2"><span class="yc">  # ② 던전내부 → 성공 (Operation 전이, operation 파이프)</span>
+  - <span class="yk">type</span>: <span class="ys">operation</span>
+    <span class="yk">from</span>: <span class="ys">던전내부</span>
+    <span class="yk">to</span>: <span class="ys">성공</span>
+    <span class="yk">value</span>:
+      <span class="yk">event_name</span>: <span class="ys">보스_처치</span>
+      <span class="yk">operation</span>:
+        <span class="yk">expression</span>: <span class="ys">"A | B"</span>
+        <span class="yk">items</span>:
+          <span class="yk">A</span>:
+            <span class="yk">operator</span>: <span class="yo">ADD</span>
+            <span class="yk">context_path</span>: <span class="ys">$.aggregation</span>
+            <span class="yk">operands</span>:
+              - { <span class="yk">source</span>: CONTEXT,  <span class="yk">value</span>: <span class="ys">$.aggregation</span>, <span class="yk">default_value</span>: <span class="yn">0</span> }
+              - { <span class="yk">source</span>: CONSTANT, <span class="yk">value</span>: <span class="yn">1</span> }
+          <span class="yk">B</span>:
+            <span class="yk">operator</span>: <span class="yo">GREATER_THAN_OR_EQUAL</span>
+            <span class="yk">operands</span>:
+              - { <span class="yk">source</span>: CONTEXT,  <span class="yk">value</span>: <span class="ys">$.aggregation</span> }
+              - { <span class="yk">source</span>: CONSTANT, <span class="yk">value</span>: <span class="yn">30</span> }
+    <span class="yk">hooks</span>:
+      - <span class="yk">command</span>: <span class="ys">알림_전송</span>
+        <span class="yk">value</span>: { <span class="yk">message</span>: <span class="ys">보스처치성공</span> }</div>
+<div class="ya t3"><span class="yc">  # ③ 던전내부 → 실패 (Timeout 전이)</span>
+  - <span class="yk">type</span>: <span class="ys">timeout</span>
+    <span class="yk">from</span>: <span class="ys">던전내부</span>
+    <span class="yk">to</span>: <span class="ys">실패</span>
+    <span class="yk">value</span>: <span class="yn">600000</span></div>
+<div class="ya">
+<span class="yk">deduplication</span>:
+  <span class="yk">mode</span>: <span class="ys">STRICT</span>
+  <span class="yk">max_size</span>: <span class="yn">10000</span></div>
+  </div>
+
+  <h3 id="s3-1">3.1 상태와 전이</h3>
+  <div class="callout"><p><code>initial_state</code>는 Job Session이 시작될 때의 첫 상태다. <code>transitions</code>는 전이 목록이며, 각 전이는 <code>from</code>(출발 상태)·<code>to</code>(도착 상태)·<code>value</code>(전이 조건)를 갖는다.</p></div>
+  <p>전이는 두 종류다. <strong>Operation 전이</strong>(<code>type: operation</code>)는 이벤트가 도착해 조건이 참이면 일어난다. <strong>Timeout 전이</strong>(<code>type: timeout</code>)는 현재 상태에 들어온 후 지정 시간이 지나면 자동으로 일어난다.</p>
+  <p>Operation 전이의 <code>value</code>는 <code>event_name</code> + <code>filter</code> + <code>operation</code>의 합성이다. <code>event_name</code>은 이벤트 이름으로 1차 매칭하고, <code>filter</code>는 이벤트 내용으로 2차 매칭한다. 한 연산의 공통 구성 요소는 세 가지다.</p>
+  <ul>
+    <li><strong><code>operator</code></strong> — 무엇을 할지. 비교(<code>EQUAL</code>, <code>GREATER_THAN_OR_EQUAL</code>, <code>IN</code>, …), 사칙(<code>ADD</code>, <code>SUBTRACT</code>, …), 컨텍스트 쓰기(<code>PROJECTION</code>, <code>MERGE</code>, …), 일시·타입·컬렉션 변환 등. 전체 카탈로그는 <a href="#s4-1" class="xr">4.1절</a>.</li>
+    <li><strong><code>operands</code></strong> — 무엇을 가지고 할지. 각 피연산자는 <code>source</code>, <code>type</code>(선택), <code>value</code>, <code>default_value</code>(선택)를 가진다. <code>source</code>가 <code>EVENT</code> 또는 <code>CONTEXT</code>이면 <code>value</code>는 해당 객체에 대한 <strong>JSONPath</strong>(<code>$</code>는 루트)이고, <code>CONSTANT</code>이면 <code>value</code>는 경로가 아니라 상수 그 자체다.</li>
+    <li><strong><code>context_path</code></strong> — 결과를 어디에 둘지. 비교나 계산 결과를 컨텍스트의 이 경로에 기록한다. <code>filter</code> 표현식에는 없고 <code>operation</code> 표현식에서 쓰인다(위 YAML의 <span class="tb tb2">②</span> A 항목 참고).</li>
+  </ul>
+
+  <h3 id="s3-2">3.2 표현식 — filter와 operation</h3>
+  <p>filter와 operation은 결합 방식이 다르다.</p>
+  <p><strong>filter는 중위 논리식</strong>으로 묶는다(<code>&amp;&amp;</code> / <code>||</code> / 괄호). <code>expression</code>에 중위식을 적고, <code>items</code>에 각 연산을 알파벳 키로 정의한다. 전체가 참일 때 이벤트를 받아들이는 boolean 게이트다. <span class="tb tb1">①</span>의 filter가 그 예다. <code>A &amp;&amp; (B || C)</code>는 "등급이 상급이고, 이름이 마계 또는 신계인 경우"를 뜻한다.</p>
+  <p><strong>operation은 파이프</strong>로 순차 연결한다(<code>A | B | C</code>). 각 step은 중간 결과의 참/거짓과 무관하게 왼쪽부터 순서대로 실행된다. 파이프의 <strong>마지막 step이 비교 연산이고 그 결과가 참</strong>이면 전이가 일어난다. 마지막 step이 비교가 아니면 이 transition은 전이되지 않는다. <span class="tb tb2">②</span>의 operation이 그 예다. A가 카운트를 1 올리고(컨텍스트 갱신), B가 그 값이 30 이상인지 비교해 전이 여부를 결정한다.</p>
+  <p>단일 항목이면 <code>expression</code>은 <code>"A"</code>다.</p>
+
+  <h3 id="s3-3">3.3 Timeout 전이</h3>
+  <p><span class="tb tb3">③</span>처럼 <code>type: timeout</code>을 쓰면 이벤트 입력과 무관하게 시간만으로 전이가 일어난다. <code>value</code>는 ms 단위이며, Event-Clock 기준 해당 상태에 들어온 후 경과 시간으로 판정한다. <span class="tb tb3">③</span>의 <code>value: 600000</code>은 던전내부 진입 후 600초(10분)가 지나면 자동으로 실패로 전이함을 뜻한다.</p>
+
+  <h3 id="s3-4">3.4 Hook</h3>
+  <p><span class="tb tb2">②</span>처럼 <code>hooks</code> 필드에 <code>(command, value)</code> 짝을 나열하면, 해당 전이가 일어나는 순간 순서대로 실행된다. 어떤 명령을 지원하는지(<code>알림_전송</code> 등)는 운영 시스템이 정의하며, SPEC은 <code>(command, value)</code> 짝의 형태만 정한다. I/O가 필요한 경우 비동기 처리를 권장한다.</p>
+
+  <h3 id="s3-5">3.5 Ready 상태 패턴</h3>
+  <p>(개념 설명은 <a href="#s2-8" class="xr">2.8절</a> 참고.) 동일 시나리오에 Ready 패턴을 적용하면 어떻게 달라지는지 생각해 보자.</p>
+  <p>보스_처치 이벤트가 도착했을 때, 인과적으로 더 이른 사망 이벤트가 아직 오지 않았을 수 있다(순서 섞임). 이 상황에서 바로 <code>성공</code>으로 확정하면 오판이 된다. Ready 패턴을 적용하면 <code>성공_READY</code> 중간 상태를 두고, Event-Clock 기준 일정 시간 동안 사망 이벤트가 오는지 기다린다. 그 안에 사망 이벤트가 도착하면 <code>실패</code>로 뒤집고, 오지 않으면 <code>성공</code>으로 확정한다.</p>
+  <p>이 모델링은 엔진이 자동으로 해 주지 않는다. "보스를 처치하면 바로 성공"과 "성공_READY를 거쳐 성공"은 DSL 작성자가 직접 선택해야 하는 설계 결정이다.</p>
+
+  <h3 id="s3-6">3.6 멱등성 정책 선언</h3>
+  <p>Job마다 한 번 선언한다. <code>mode</code>는 세 가지다.</p>
+  <table style="border-collapse:collapse;width:100%;margin:0.75rem 0 1rem;font-size:0.85rem">
+    <thead>
+      <tr style="background:var(--c-code-bg)">
+        <th style="border:1px solid var(--c-border);padding:0.5rem 0.75rem">mode</th>
+        <th style="border:1px solid var(--c-border);padding:0.5rem 0.75rem">동작</th>
+        <th style="border:1px solid var(--c-border);padding:0.5rem 0.75rem">추가 파라미터</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="border:1px solid var(--c-border);padding:0.5rem 0.75rem"><code>NAIVE</code></td>
+        <td style="border:1px solid var(--c-border);padding:0.5rem 0.75rem">dedup 끔</td>
+        <td style="border:1px solid var(--c-border);padding:0.5rem 0.75rem">없음</td>
+      </tr>
+      <tr>
+        <td style="border:1px solid var(--c-border);padding:0.5rem 0.75rem"><code>STRICT</code></td>
+        <td style="border:1px solid var(--c-border);padding:0.5rem 0.75rem">처리한 이벤트 <code>id</code>를 최대 <code>max_size</code>개까지 보관, 동일 id 무시</td>
+        <td style="border:1px solid var(--c-border);padding:0.5rem 0.75rem"><code>max_size</code></td>
+      </tr>
+      <tr>
+        <td style="border:1px solid var(--c-border);padding:0.5rem 0.75rem"><code>BEST_EFFORT</code></td>
+        <td style="border:1px solid var(--c-border);padding:0.5rem 0.75rem">정확도와 메모리 사이의 균형 조정</td>
+        <td style="border:1px solid var(--c-border);padding:0.5rem 0.75rem"><code>max_size</code> · <code>tolerance</code>(ms) · <code>time_truncate_millis</code></td>
+      </tr>
+    </tbody>
+  </table>
+  <p>위 YAML의 <code>deduplication</code> 블록이 STRICT 예시다.</p>
+</section>
+
+<hr>
+
+<!-- 4. Operators -->
+<section id="s4">
+  <h2>4. 연산자 카탈로그와 조합 패턴</h2>
+  <p>3절의 DSL 골격 안에서 실제로 쓰는 <code>operator</code> 종류와, 그것들을 묶어 만드는 대표 패턴을 정리한다.</p>
+
+  <h3 id="s4-1">4.1 연산자 카탈로그</h3>
+  <p>반환 형태가 <span class="badge bool">Boolean</span> 인지 <span class="badge val">값</span> 인지가 핵심 구분이다. 비교 연산자는 filter의 단위 항목이나 operation 파이프의 마지막 step으로 쓰이고, 변환 연산자의 결과는 <code>context_path</code>로 컨텍스트에 기록된다.</p>
+
+  <div class="op-grid">
+    <div class="op-card bool">
+      <div class="op-card-head">
+        <span class="op-card-title">비교</span>
+        <span class="badge bool">Boolean</span>
+      </div>
+      <div class="op-desc">filter 항목 또는 operation 파이프 마지막 step</div>
+      <div class="chips">
+        <span class="chip">EQUAL</span><span class="chip">NOT_EQUAL</span>
+        <span class="chip">GREATER_THAN</span><span class="chip">GREATER_THAN_OR_EQUAL</span>
+        <span class="chip">LESS_THAN</span><span class="chip">LESS_THAN_OR_EQUAL</span>
+        <span class="chip">IN</span><span class="chip">NOT_IN</span>
+      </div>
+    </div>
+    <div class="op-card val">
+      <div class="op-card-head">
+        <span class="op-card-title">사칙</span>
+        <span class="badge val">값</span>
+      </div>
+      <div class="op-desc">수치 계산, context_path로 저장</div>
+      <div class="chips">
+        <span class="chip">ADD</span><span class="chip">SUBTRACT</span>
+        <span class="chip">MULTIPLY</span><span class="chip">DIVIDE</span>
+        <span class="chip">QUOTIENT</span>
+      </div>
+    </div>
+    <div class="op-card val">
+      <div class="op-card-head">
+        <span class="op-card-title">컨텍스트 쓰기</span>
+        <span class="badge val">값</span>
+      </div>
+      <div class="op-desc">이벤트·컨텍스트 값을 context_path에 기록</div>
+      <div class="chips">
+        <span class="chip">PROJECTION</span><span class="chip">MERGE</span>
+        <span class="chip">APPEND_IF_NOT_EXISTS</span>
+      </div>
+    </div>
+    <div class="op-card val">
+      <div class="op-card-head">
+        <span class="op-card-title">일시</span>
+        <span class="badge val">값</span>
+      </div>
+      <div class="op-desc">날짜·시각 변환 및 계산</div>
+      <div class="chips">
+        <span class="chip">TO_EPOCH_MILLISECOND</span>
+        <span class="chip">EXTRACT_DATETIME</span>
+        <span class="chip">ADD_DATETIME</span>
+        <span class="chip">DIFF_DATETIME</span>
+      </div>
+    </div>
+    <div class="op-card val">
+      <div class="op-card-head">
+        <span class="op-card-title">타입 / 컬렉션</span>
+        <span class="badge val">값</span>
+      </div>
+      <div class="op-desc">타입 캐스팅, 컬렉션 평탄화</div>
+      <div class="chips">
+        <span class="chip">TO_DATA_TYPE</span>
+        <span class="chip">FLATTEN</span>
+        <span class="chip">FLATMAP</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <p><strong>AND / OR / NOT</strong>은 별도 연산자가 아니라 filter <code>expression</code>의 중위 토큰(<code>&amp;&amp;</code> / <code>||</code> / 괄호)이다. operation 결합용 <code>|</code>도 마찬가지다. <strong>COUNT / SUM</strong> 같은 단일 누적 연산자는 없다. 누적은 아래 패턴 A처럼 <code>ADD</code>로 직접 구성한다.</p>
+  </div>
+
+  <h3 id="s4-2">4.2 조합 패턴</h3>
+  <p>operation은 한 transition 안에서 컨텍스트 갱신과 비교를 같은 파이프에 묶을 수 있다. YAML 스니펫은 transition <code>value</code> 안의 <code>operation</code> 또는 <code>filter</code> 블록만 표시한다.</p>
+
+  <!-- Pattern A -->
+  <div class="pat">
+    <h4>패턴 A — 카운트 누적 → 임계값 비교 &nbsp;<span style="font-size:0.78rem;font-weight:400;color:var(--c-muted)">(위 YAML <span class="tb tb2">②</span>와 같은 구조)</span></h4>
+    <p style="font-size:0.88rem;color:var(--c-muted);margin-bottom:0.5rem">이벤트마다 1씩 증가시키고, 누적값이 임계값 이상이면 전이한다.</p>
+    <div class="pat-flow">
+      <span class="pb ev">EVENT 도착</span>
+      <span class="pa">→</span>
+      <span class="pb tr">ADD: count+1 → $.count</span>
+      <span class="pa">|</span>
+      <span class="pb cmp">≥ 30 ?</span>
+      <span class="pa">→</span>
+      <span class="pb ok">✓ 전이</span>
+    </div>
+<pre><code class="language-yaml">operation:
+  expression: "A | B"
+  items:
+    A:
+      operator: ADD
+      context_path: $.count
+      operands:
+        - { source: CONTEXT,  value: $.count, default_value: 0 }
+        - { source: CONSTANT, value: 1 }
+    B:
+      operator: GREATER_THAN_OR_EQUAL
+      operands:
+        - { source: CONTEXT,  value: $.count }
+        - { source: CONSTANT, value: 30 }</code></pre>
+  </div>
+
+  <!-- Pattern B -->
+  <div class="pat">
+    <h4>패턴 B — 값 누적 → 임계값 비교</h4>
+    <p style="font-size:0.88rem;color:var(--c-muted);margin-bottom:0.5rem">이벤트의 수치 필드를 더해 컨텍스트에 쌓고 비교한다 (예: 획득 골드 누적).</p>
+    <div class="pat-flow">
+      <span class="pb ev">EVENT.amount</span>
+      <span class="pa">→</span>
+      <span class="pb tr">ADD: total+amount → $.total_gold</span>
+      <span class="pa">|</span>
+      <span class="pb cmp">≥ 1000 ?</span>
+      <span class="pa">→</span>
+      <span class="pb ok">✓ 전이</span>
+    </div>
+<pre><code class="language-yaml">operation:
+  expression: "A | B"
+  items:
+    A:
+      operator: ADD
+      context_path: $.total_gold
+      operands:
+        - { source: CONTEXT, value: $.total_gold, default_value: 0 }
+        - { source: EVENT,   value: $.amount }
+    B:
+      operator: GREATER_THAN_OR_EQUAL
+      operands:
+        - { source: CONTEXT,  value: $.total_gold }
+        - { source: CONSTANT, value: 1000 }</code></pre>
+  </div>
+
+  <!-- Pattern C -->
+  <div class="pat">
+    <h4>패턴 C — 이벤트 필드 컨텍스트 저장 (PROJECTION)</h4>
+    <p style="font-size:0.88rem;color:var(--c-muted);margin-bottom:0.5rem">다음 단계의 비교나 hook 출력에 쓰기 위해 이벤트 필드를 컨텍스트로 옮긴다. 마지막 step이 비교가 아니므로 이 transition은 전이하지 않는다. 전이는 <code>event_name</code> + <code>filter</code> 조건만으로 일어나고, operation은 부수 효과(컨텍스트 갱신)만 수행한다.</p>
+    <div class="pat-flow">
+      <span class="pb ev">EVENT.이름</span>
+      <span class="pa">→</span>
+      <span class="pb tr">PROJECTION → $.dungeon_name</span>
+      <span class="pa">→</span>
+      <span class="pb no">✗ 전이 안 됨</span>
+    </div>
+<pre><code class="language-yaml">operation:
+  expression: "A"
+  items:
+    A:
+      operator: PROJECTION
+      context_path: $.dungeon_name
+      operands:
+        - { source: EVENT, value: $.이름 }</code></pre>
+  </div>
+
+  <!-- Pattern D -->
+  <div class="pat">
+    <h4>패턴 D — 다중 선택을 IN으로 단순화 (filter용)</h4>
+    <p style="font-size:0.88rem;color:var(--c-muted);margin-bottom:0.5rem"><code>A || B || C</code> 형태 대신 <code>IN</code> 하나로 정리한다.</p>
+    <div class="pat-flow">
+      <span class="pb ev">EVENT.이름</span>
+      <span class="pa">→</span>
+      <span class="pb cmp">IN [마계, 신계, 천계]</span>
+      <span class="pa">→</span>
+      <span class="pb ok">✓ filter 통과</span>
+    </div>
+<pre><code class="language-yaml">filter:
+  expression: "A"
+  items:
+    A:
+      operator: IN
+      operands:
+        - { source: EVENT,    value: $.이름 }
+        - { source: CONSTANT, value: [마계, 신계, 천계] }</code></pre>
+  </div>
+</section>
+
+<hr>
+
+<!-- 5. 범위 밖 -->
+<section id="s5">
+  <h2>5. 범위 밖</h2>
+  <p>본 SPEC은 <strong>상태 머신 엔진 자체의 동작</strong>에 집중한다. 다음은 운영 시스템 결정으로, 별도 문서가 다룬다.</p>
+  <ul>
+    <li><strong>Job 등록·조회·갱신 API</strong> — DSL을 시스템에 어떻게 등록하는지, 누가 접근권을 갖는지.</li>
+    <li><strong>Job Session 라이프사이클</strong> — 누가 Job Session을 시작·종료하는지, 외부 명시 생성과 자동 생성의 구분, 만료 정책.</li>
+    <li><strong>분산 처리 인프라</strong> — 파티셔닝, 캐시, 영속 저장소, 컨슈머 모델, 인스턴스 간 어피니티 보장.</li>
+    <li><strong>외부 서비스 연동</strong> — Hook의 명령 카탈로그, 외부 호출 라우팅, 결과 통지(피드백).</li>
+    <li><strong>운영 도구</strong> — 콘솔, 플레이그라운드, 디버깅, CDC.</li>
+    <li><strong>관측·회복탄력성</strong> — 트레이싱, 메트릭, 서킷 브레이커, DLQ.</li>
+    <li><strong>인증·인가</strong> — 누가 무엇을 등록·실행할 수 있는지.</li>
+  </ul>
+  <p>이 결정들은 SPEC을 만족하는 한 자유롭게 선택할 수 있다.</p>
+</section>
+
+<hr>
+
+<!-- 6. 검증 기준 -->
+<section id="s6">
+  <h2>6. 검증 기준</h2>
+  <p>엔진 구현체가 본 SPEC을 만족한다고 말하려면 다음을 시연할 수 있어야 한다.</p>
+
+  <div class="verif-grid">
+    <div class="vc">
+      <h4>① DSL 텍스트 등록만으로 즉시 동작</h4>
+      <p>임의 패턴의 DSL을 텍스트로 등록하면 엔진 재배포 없이 바로 새 Job이 동작한다.</p>
+      <div class="tags"><span class="badge val">동적 등록</span></div>
+    </div>
+    <div class="vc">
+      <h4>② At Least Once에서도 정확한 카운트</h4>
+      <p>같은 이벤트가 두 번 도착해도 STRICT 또는 BEST_EFFORT 모드의 Job Session에서 카운트가 한 번만 증가한다.</p>
+      <div class="tags"><span class="badge bool">멱등성 <a href="#s2-6" class="xr">2.6</a></span></div>
+    </div>
+    <div class="vc">
+      <h4>③ Event-Clock의 시간 정확성</h4>
+      <p>Timeout이 100초인 Job Session에서, 발생 시각 99초 이벤트는 진행 상태를 유지하고 101초 이벤트는 종료 상태로 전이된다. 도착 시각이 아닌 발생 시각이 판정 기준임을 시연한다.</p>
+      <div class="tags"><span class="badge bool">Event-Clock <a href="#s2-5" class="xr">2.5</a></span></div>
+    </div>
+    <div class="vc">
+      <h4>④ 지연 허용 한도 적격성 판정</h4>
+      <p>운영 정책으로 한도가 10분으로 설정된 환경에서 발생 후 11분 묵은 이벤트가 도착하면 Job Session 상태가 변하지 않는다.</p>
+      <div class="tags"><span class="badge val">지연 허용 한도 <a href="#s2-7" class="xr">2.7</a></span></div>
+    </div>
+    <div class="vc">
+      <h4>⑤ Ready 상태 패턴의 결과 뒤집기</h4>
+      <p>Ready 상태에 진입한 Job Session이 ready 대기시간 안에 인과적으로 더 이른 시각의 결과 뒤집기 이벤트를 받으면 종료 상태가 뒤바뀐다.</p>
+      <div class="tags"><span class="badge val">Ready 패턴 <a href="#s2-8" class="xr">2.8</a></span></div>
+    </div>
+    <div class="vc">
+      <h4>⑥ 다수 Job 독립 실행</h4>
+      <p>서로 다른 두 Job을 같은 엔진 인스턴스에 동시에 등록·실행해도 서로 독립적으로 동작한다. 한 이벤트가 양쪽 Job Session에 영향을 줄 수 있고, 이벤트는 한 번만 컨슘된다.</p>
+      <div class="tags"><span class="badge val">다수 Job</span></div>
+    </div>
+  </div>
+</section>
+
+</main>
+</div><!-- .layout -->
+
+<script>
+hljs.highlightAll();
+
+// TOC 현재 절 하이라이트
+const sections = document.querySelectorAll('section[id], h3[id]');
+const tocLinks = document.querySelectorAll('.toc a');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      tocLinks.forEach(l => l.classList.remove('active'));
+      const active = document.querySelector(`.toc a[href="#${entry.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-10% 0px -80% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
